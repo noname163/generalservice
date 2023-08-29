@@ -21,7 +21,10 @@ import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.RegisterService;
 import com.cepa.generalservice.services.StudentTargetService;
 
+import lombok.Builder;
+
 @Service
+@Builder
 public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private UserInformationRepository userInformationRepository;
