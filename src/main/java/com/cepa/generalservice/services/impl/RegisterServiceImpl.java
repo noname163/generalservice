@@ -6,6 +6,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.dto.request.UserRegister;
@@ -18,7 +19,9 @@ import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.RegisterService;
+import com.cepa.generalservice.services.StudentTargetService;
 
+@Service
 public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private UserInformationRepository userInformationRepository;
@@ -27,19 +30,20 @@ public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private SubjectRepository subjectRepository;
     @Autowired
+    private StudentTargetService studentTargetService;
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserInformationMapper userInformationMapper;
 
-    @Override
-    public void studentRegister(UserInformation userInformation, List<Long> subjectIds) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'studentRegister'");
+    
+    private void studentRegister(UserInformation userInformation, List<Long> subjectIds) {
+        studentTargetService.createStudentTarget(userInformation, subjectIds);
     }
 
-    @Override
+    
     @Transactional
-    public void teacherRegister(UserInformation userInformation, Long subjectIds) {
+    private void teacherRegister(UserInformation userInformation, Long subjectIds) {
         teacherRepository.findByInformationId(userInformation.getId())
                 .ifPresent(teacher -> {
                     throw new BadRequestException("Teacher information exists");
@@ -57,6 +61,9 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     @Transactional
     public void userRegister(UserRegister userRegister) {
+        userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
+            throw new BadRequestException("Email " + userRegister.getEmail()+ " is already exist");
+        });
         if (!userRegister.getPassword().equals(userRegister.getConfirmPassword())) {
             throw new BadRequestException("Password did not match.");
         }
