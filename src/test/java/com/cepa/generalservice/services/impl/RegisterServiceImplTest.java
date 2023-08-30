@@ -3,6 +3,7 @@ package com.cepa.generalservice.services.impl;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cepa.generalservice.data.constants.Role;
+import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
@@ -104,22 +106,22 @@ public class RegisterServiceImplTest {
     @Test
     void userRegisterTeacherRoleWhenSuccessReturnVoid() {
 
-        UserInformation userInformation = new UserInformation();
-        userInformation.setId(1L);
+        UserInformation userInformation = mock(UserInformation.class);
 
         when(userInformationRepository.findByEmail(userRegister.getEmail())).thenReturn(Optional.empty());
         when(userInformationMapper.mapDtoToEntity(userRegister)).thenReturn(userInformation);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(userInformationRepository.save(userInformation)).thenReturn(userInformation);
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(new Subject()));
-        when(teacherRepository.findByInformationId(1L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByInformationId(0L)).thenReturn(Optional.empty());
 
         registerService.userRegister(userRegister);
 
         verify(userInformationRepository).findByEmail(userRegister.getEmail());
         verify(userInformationMapper).mapDtoToEntity(userRegister);
+        verify(userInformation).setStatus(UserStatus.ENABLE);
         verify(passwordEncoder).encode("password");
-        verify(teacherRepository).findByInformationId(1L);
+        verify(teacherRepository).findByInformationId(0L);
         verify(subjectRepository).findById(1L);
         verify(teacherRepository).save(any(Teacher.class));
     }
