@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.RegisterService;
+import com.cepa.generalservice.services.userService.RegisterService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

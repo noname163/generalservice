@@ -18,8 +18,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtTokenUtil {
     @Value("$jwt.secret-key")    
     private String jwtSecret;
-    @Value("$jwt.expires-time")    
-    private long expireTime;
+    // @Value("$jwt.expires-time")    
+    private long expireTime = 1000;
 
 
     private String doGenerateToken(Map<String, Object> claims, String subject, Integer expriesTime) {

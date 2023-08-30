@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services.impl;
+package com.cepa.generalservice.services.authenticationService.impl;
 
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.ForbiddenException;
-import com.cepa.generalservice.services.SecurityContextService;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 
 
 @Service

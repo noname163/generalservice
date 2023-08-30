@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services.impl;
+package com.cepa.generalservice.services.userService.impl;
 
 import java.util.List;
 
@@ -19,8 +19,8 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
-import com.cepa.generalservice.services.RegisterService;
-import com.cepa.generalservice.services.StudentTargetService;
+import com.cepa.generalservice.services.studentService.StudentTargetService;
+import com.cepa.generalservice.services.userService.RegisterService;
 
 import lombok.Builder;
 

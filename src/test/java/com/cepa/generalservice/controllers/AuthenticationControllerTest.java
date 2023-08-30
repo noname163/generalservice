@@ -23,7 +23,7 @@ import com.cepa.generalservice.GeneralserviceApplication;
 import com.cepa.generalservice.configs.SecurityConfig;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.dto.request.UserRegister;
-import com.cepa.generalservice.services.RegisterService;
+import com.cepa.generalservice.services.userService.RegisterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 

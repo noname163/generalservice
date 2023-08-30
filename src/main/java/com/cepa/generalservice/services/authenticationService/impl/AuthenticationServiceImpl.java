@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services.impl;
+package com.cepa.generalservice.services.authenticationService.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,7 +9,7 @@ import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.AuthenticationService;
+import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
 @Service
