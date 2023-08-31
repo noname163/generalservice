@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services;
+package com.cepa.generalservice.services.userService;
 
 import com.cepa.generalservice.data.dto.request.UserRegister;
 
