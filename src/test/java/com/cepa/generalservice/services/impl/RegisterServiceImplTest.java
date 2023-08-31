@@ -1,5 +1,6 @@
 package com.cepa.generalservice.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -94,14 +95,20 @@ public class RegisterServiceImplTest {
 
         when(userInformationRepository.findByEmail("test@example.com")).thenReturn(Optional.of(existUSer));
 
-        assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+        
+        assertEquals("Email test@example.com is already exist", actual.getMessage());
     }
 
     @Test
     void userRegisterWhenPasswordNotMatchReturnBadRequestException(){
+
         when(userInformationRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         userRegister.setConfirmPassword("something");
-        assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+        
+        assertEquals("Password did not match.", actual.getMessage());
     }
 
     @Test
