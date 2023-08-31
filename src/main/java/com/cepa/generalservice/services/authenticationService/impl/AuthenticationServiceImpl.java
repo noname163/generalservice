@@ -12,7 +12,10 @@ import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
+import lombok.Builder;
+
 @Service
+@Builder
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired

@@ -1,7 +1,9 @@
 package com.cepa.generalservice.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -22,17 +24,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.cepa.generalservice.GeneralserviceApplication;
 import com.cepa.generalservice.configs.SecurityConfig;
 import com.cepa.generalservice.data.constants.Role;
+import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
+import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.RegisterService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-
 @WebMvcTest(AuthenticationController.class)
-@ContextConfiguration(classes = {GeneralserviceApplication.class, SecurityConfig.class})
+@ContextConfiguration(classes = { GeneralserviceApplication.class, SecurityConfig.class })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class AuthenticationControllerTest {
@@ -57,7 +60,7 @@ public class AuthenticationControllerTest {
     private UserRegister userRegister;
 
     @BeforeEach
-    void setup(){
+    void setup() {
         userRegister = UserRegister
                 .builder()
                 .email("test@gmail.com")
@@ -68,8 +71,9 @@ public class AuthenticationControllerTest {
                 .subjectId(Collections.singletonList(1L))
                 .build();
     }
+
     @Test
-    void testCreateAccount() throws Exception {
+    void createAccount() throws Exception {
 
         doNothing().when(registerService).userRegister(any(UserRegister.class));
 
@@ -78,5 +82,29 @@ public class AuthenticationControllerTest {
                 .content(objectMapper.writeValueAsString(userRegister)))
                 .andExpect(status().isCreated())
                 .andReturn();
+    }
+
+    @Test
+    void loginSuccessReturnLoginResponse() throws JsonProcessingException, Exception {
+
+        LoginRequest loginRequest = LoginRequest
+                .builder()
+                .email("test@gmail.com")
+                .password("password").build();
+
+        LoginResponse loginResponse = LoginResponse.builder()
+                .accessToken("sampleAccessToken")
+                .refreshToken("sampleRefreshToken").build();
+
+        when(authenticationService.login(any(LoginRequest.class))).thenReturn(loginResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertEquals("{\"accessToken\":\"sampleAccessToken\",\"refreshToken\":\"sampleRefreshToken\"}",
+                mvcResult.getResponse().getContentAsString());
     }
 }
