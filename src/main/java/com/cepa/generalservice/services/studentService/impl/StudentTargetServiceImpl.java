@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services.impl;
+package com.cepa.generalservice.services.studentService.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.StudentTargetRepository;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.StudentTargetService;
+import com.cepa.generalservice.services.studentService.StudentTargetService;
 
 @Service
 public class StudentTargetServiceImpl implements StudentTargetService {

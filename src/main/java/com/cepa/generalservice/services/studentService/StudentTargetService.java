@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services;
+package com.cepa.generalservice.services.studentService;
 
 import java.util.List;
 

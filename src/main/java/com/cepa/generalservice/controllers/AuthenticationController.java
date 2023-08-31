@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
+import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.RegisterService;
+import com.cepa.generalservice.services.authenticationService.AuthenticationService;
+import com.cepa.generalservice.services.userService.RegisterService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,18 +26,36 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @RequestMapping("/api/authentication")
 public class AuthenticationController {
-    @Autowired 
+    @Autowired
     private RegisterService registerService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @Operation(summary = "Create new basic user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created successfull."),
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class))})
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PostMapping("/register")
-    public ResponseEntity<Void> createAccount(@Valid @RequestBody UserRegister userRegister){
+    public ResponseEntity<Void> createAccount(@Valid @RequestBody UserRegister userRegister) {
         registerService.userRegister(userRegister);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @Operation(summary = "User login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successfull.", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authenticationService.login(loginRequest));
+    }
+
 }
