@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -68,7 +69,7 @@ public class AuthenticationServiceImplTest {
         String refreshToken = "sampleRefreshToken";
 
         // Mock repository behavior
-        when(userInformationRepository.findByEmail(email)).thenReturn(Optional.of(userInformation));
+        when(userInformationRepository.findByEmailAndStatus(email,UserStatus.ENABLE)).thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
         when(jwtTokenUtil.generateJwtToken(userInformation, 1000)).thenReturn(accessToken);
         when(jwtTokenUtil.generateJwtToken(userInformation, 10000)).thenReturn(refreshToken);
@@ -81,7 +82,7 @@ public class AuthenticationServiceImplTest {
         assertEquals(accessToken, loginResponse.getAccessToken());
         assertEquals(refreshToken, loginResponse.getRefreshToken());
 
-        verify(userInformationRepository).findByEmail(email);
+        verify(userInformationRepository).findByEmailAndStatus(email, UserStatus.ENABLE);
         verify(passwordEncoder).matches(password, userInformation.getPassword());
         verify(jwtTokenUtil).generateJwtToken(userInformation, 1000);
         verify(jwtTokenUtil).generateJwtToken(userInformation, 10000);
@@ -90,7 +91,7 @@ public class AuthenticationServiceImplTest {
     @Test
     void LoginWhenUserNotExistShouldThrowBadRequestException(){
 
-        when(userInformationRepository.findByEmail("test@gmail.com")).thenReturn(Optional.empty());
+        when(userInformationRepository.findByEmailAndStatus("test@gmail.com",UserStatus.ENABLE)).thenReturn(Optional.empty());
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> loginService.login(loginRequest));
         
@@ -107,7 +108,7 @@ public class AuthenticationServiceImplTest {
         userInformation.setPassword(passwordEncoder.encode(password));
 
 
-        when(userInformationRepository.findByEmail(email)).thenReturn(Optional.of(userInformation));
+        when(userInformationRepository.findByEmailAndStatus(email,UserStatus.ENABLE)).thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> loginService.login(loginRequest));

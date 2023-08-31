@@ -1,17 +1,15 @@
-package com.cepa.generalservice.services.impl;
+package com.cepa.generalservice.services.userService.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,8 +28,6 @@ import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
-import com.cepa.generalservice.services.userService.RegisterService;
-import com.cepa.generalservice.services.userService.impl.RegisterServiceImpl;
 
 public class RegisterServiceImplTest {
     @InjectMocks
