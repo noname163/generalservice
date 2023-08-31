@@ -34,7 +34,7 @@ public class UserRegister {
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")
     private String confirmPassword;
 
-    @NotBlank(message = "Role is require.")
+    @NotNull(message = "Role is require.")
     private Role role;
 
     @NotNull(message = "Subject is require.")

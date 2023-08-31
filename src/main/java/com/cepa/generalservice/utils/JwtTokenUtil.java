@@ -40,7 +40,7 @@ public class JwtTokenUtil {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
     }
 
-    public String getUsernameFromClaims(Claims claims) {
+    public String getEmailFromClaims(Claims claims) {
         return claims.get("email").toString();
     }
 
