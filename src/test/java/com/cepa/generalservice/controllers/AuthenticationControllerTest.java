@@ -23,7 +23,10 @@ import com.cepa.generalservice.GeneralserviceApplication;
 import com.cepa.generalservice.configs.SecurityConfig;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.dto.request.UserRegister;
+import com.cepa.generalservice.services.authenticationService.AuthenticationService;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.RegisterService;
+import com.cepa.generalservice.utils.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -42,23 +45,31 @@ public class AuthenticationControllerTest {
     @MockBean
     private RegisterService registerService;
 
+    @MockBean
+    private AuthenticationService authenticationService;
+
+    @MockBean
+    private JwtTokenUtil jwtTokenUtil;
+
+    @MockBean
+    private SecurityContextService securityContextService;
+
     private UserRegister userRegister;
 
     @BeforeEach
     void setup(){
         userRegister = UserRegister
                 .builder()
-                .email("test@example.com")
+                .email("test@gmail.com")
                 .password("password")
                 .confirmPassword("password")
-                .fullName("test")
+                .fullName("test12345")
                 .role(Role.TEACHER)
                 .subjectId(Collections.singletonList(1L))
                 .build();
     }
     @Test
     void testCreateAccount() throws Exception {
-
 
         doNothing().when(registerService).userRegister(any(UserRegister.class));
 
