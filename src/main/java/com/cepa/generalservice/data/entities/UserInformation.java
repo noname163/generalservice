@@ -68,4 +68,7 @@ public class UserInformation {
 
     @OneToMany(mappedBy = "studentInformation")
     private List<StudentTarget> studentTargets;
+
+    @OneToMany(mappedBy = "userInformation")
+    private List<ConfirmToken> confirmTokens;
 }
