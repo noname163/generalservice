@@ -3,8 +3,6 @@ package com.cepa.generalservice.services.confirmTokenService.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.mail.SendFailedException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +39,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
                 .build());
 
         try {
-            sendEmailService.SendVerificationEmail(userInformation.getEmail(), token);
+            sendEmailService.sendVerificationEmail(userInformation.getEmail(), userInformation.getFullName(), token);
         } catch (Exception e) {
             System.out.println("Send mail fail " + e.getMessage());
         }
@@ -59,11 +57,20 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         LocalDateTime expriedAt = systemToken.getExpriedAt();
         LocalDateTime createdAt = systemToken.getCreateAt();
 
-        if (expriedAt.compareTo(createdAt) > 0) {
+        if (expriedAt.compareTo(createdAt) < 0) {
             throw new BadRequestException("Token has expired.");
         }
 
         return true;
+    }
+
+    @Override
+    public UserInformation getUserByToken(String token) {
+        UUID userToken = UUID.fromString(token);
+        ConfirmToken systemToken = confirmTokenRepository
+                .findByToken(userToken)
+                .orElseThrow(() -> new BadRequestException("Token not valid."));
+        return systemToken.getUserInformation();
     }
 
 }

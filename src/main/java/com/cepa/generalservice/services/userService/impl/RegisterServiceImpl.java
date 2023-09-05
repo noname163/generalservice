@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -78,9 +79,9 @@ public class RegisterServiceImpl implements RegisterService {
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
         UserInformation newUser = userInformationMapper
                 .mapDtoToEntity(userRegister);
-        newUser.setStatus(UserStatus.ENABLE);
+        newUser.setStatus(UserStatus.DISABLE);
         newUser = userInformationRepository.save(newUser);
-        
+
         if (userRegister.getRole().equals(Role.TEACHER)) {
             teacherRegister(newUser, userRegister.getSubjectId().get(0));
         }
@@ -88,6 +89,16 @@ public class RegisterServiceImpl implements RegisterService {
             studentRegister(newUser, userRegister.getSubjectId());
         }
         confirmTokenService.saveConfirmToken(newUser);
+    }
+
+    @Override
+    public void userConfirmEmail(String token) {
+        Boolean confirmStatus = confirmTokenService.verifyToken(token);
+        if (Boolean.TRUE.equals(confirmStatus)) {
+            UserInformation user = confirmTokenService.getUserByToken(token);
+            user.setStatus(UserStatus.ENABLE);
+            userInformationRepository.save(user);
+        }
     }
 
 }

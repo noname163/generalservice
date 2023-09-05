@@ -5,5 +5,5 @@ import java.util.UUID;
 import javax.mail.SendFailedException;
 
 public interface SendEmailService {
-    public void SendVerificationEmail(String to, UUID token) throws SendFailedException;
+    public void sendVerificationEmail(String to, String username, UUID token) throws SendFailedException;
 }

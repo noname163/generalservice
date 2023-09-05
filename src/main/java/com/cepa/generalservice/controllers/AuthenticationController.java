@@ -17,7 +17,6 @@ import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
-import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.userService.RegisterService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +32,6 @@ public class AuthenticationController {
     private RegisterService registerService;
     @Autowired
     private AuthenticationService authenticationService;
-    @Autowired
-    private ConfirmTokenService confirmTokenService;
 
     @Operation(summary = "Create new basic user")
     @ApiResponses(value = {
@@ -71,7 +68,7 @@ public class AuthenticationController {
     })
     @GetMapping("/confirm")
     public ResponseEntity<Void> confirmOtp(@RequestParam(name="token") String token){
-        confirmTokenService.verifyToken(token);
+        registerService.userConfirmEmail(token);
         return ResponseEntity.ok().build();
     }
 
