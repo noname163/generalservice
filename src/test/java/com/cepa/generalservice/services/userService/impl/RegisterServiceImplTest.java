@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.UserRegister;
+import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -27,6 +28,7 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
+import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 
 public class RegisterServiceImplTest {
@@ -51,6 +53,9 @@ public class RegisterServiceImplTest {
     @Mock
     private UserInformationMapper userInformationMapper;
 
+    @Mock
+    private ConfirmTokenService confirmTokenService;
+
     private UserRegister userRegister;
 
     private UserInformation existUSer;
@@ -74,6 +79,7 @@ public class RegisterServiceImplTest {
         userInformationMapper = mock(UserInformationMapper.class);
         passwordEncoder = mock(PasswordEncoder.class);
         existUSer = mock(UserInformation.class);
+        confirmTokenService = mock(ConfirmTokenService.class);
 
         registerService = RegisterServiceImpl
                 .builder()
@@ -83,6 +89,7 @@ public class RegisterServiceImplTest {
                 .teacherRepository(teacherRepository)
                 .userInformationMapper(userInformationMapper)
                 .userInformationRepository(userInformationRepository)
+                .confirmTokenService(confirmTokenService)
                 .build();
     }
 
@@ -123,11 +130,12 @@ public class RegisterServiceImplTest {
 
         verify(userInformationRepository).findByEmail(userRegister.getEmail());
         verify(userInformationMapper).mapDtoToEntity(userRegister);
-        verify(userInformation).setStatus(UserStatus.ENABLE);
+        verify(userInformation).setStatus(UserStatus.DISABLE);
         verify(passwordEncoder).encode("password");
         verify(teacherRepository).findByInformationId(0L);
         verify(subjectRepository).findById(1L);
         verify(teacherRepository).save(any(Teacher.class));
+        verify(confirmTokenService).saveConfirmToken(userInformation);
     }
 
 }
