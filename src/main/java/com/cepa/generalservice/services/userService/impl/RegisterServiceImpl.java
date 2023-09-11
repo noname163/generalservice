@@ -1,7 +1,9 @@
 package com.cepa.generalservice.services.userService.impl;
 
 import java.util.List;
+import java.util.UUID;
 
+import javax.mail.SendFailedException;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.UserRegister;
+import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -20,7 +23,9 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
+import com.cepa.generalservice.services.notificationService.SendEmailService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 import com.cepa.generalservice.services.userService.RegisterService;
 
@@ -39,6 +44,10 @@ public class RegisterServiceImpl implements RegisterService {
     private StudentTargetService studentTargetService;
     @Autowired
     private ConfirmTokenService confirmTokenService;
+    @Autowired
+    private SendEmailService sendEmailService;
+    @Autowired
+    private SecurityContextService securityContextService;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -79,7 +88,7 @@ public class RegisterServiceImpl implements RegisterService {
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
         UserInformation newUser = userInformationMapper
                 .mapDtoToEntity(userRegister);
-        newUser.setStatus(UserStatus.DISABLE);
+        newUser.setStatus(UserStatus.WATTING);
         newUser = userInformationRepository.save(newUser);
 
         if (userRegister.getRole().equals(Role.TEACHER)) {
@@ -88,17 +97,27 @@ public class RegisterServiceImpl implements RegisterService {
         if (userRegister.getRole().equals(Role.STUDENT)) {
             studentRegister(newUser, userRegister.getSubjectId());
         }
-        confirmTokenService.saveConfirmToken(newUser);
+
+        securityContextService.setSecurityContext(newUser.getEmail());
+
     }
 
     @Override
     public void userConfirmEmail(String token) {
-        Boolean confirmStatus = confirmTokenService.verifyToken(token);
-        if (Boolean.TRUE.equals(confirmStatus)) {
-            UserInformation user = confirmTokenService.getUserByToken(token);
-            user.setStatus(UserStatus.ENABLE);
-            userInformationRepository.save(user);
+        UserInformation userInformation = securityContextService.getCurrentUser();
+        ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
+
+        if(!userToken.getToken().toString().equals(token)){
+            throw new BadRequestException("Token not valid");
         }
+
+        Boolean confirmStatus = confirmTokenService.verifyToken(token);
+
+        if (Boolean.TRUE.equals(confirmStatus)) {
+            userInformation.setStatus(UserStatus.ENABLE);
+            userInformationRepository.save(userInformation);
+        }
+        
     }
 
 }

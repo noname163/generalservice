@@ -5,8 +5,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.UserStatus;
+import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
+import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
@@ -25,7 +27,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-
+    
+    
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
         UserInformation userInformation = userInformationRepository
@@ -41,6 +44,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    public void forgotPassword(ForgotPassword forgotPassword) {
+        
     }
 
 }

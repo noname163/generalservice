@@ -9,6 +9,7 @@ import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.services.notificationService.SendEmailService;
@@ -21,12 +22,9 @@ public class SendEmailServiceImpl implements SendEmailService {
     private JavaMailSender javaMailSender;
 
     @Override
-    public void sendVerificationEmail(String to, String userName,UUID token) throws SendFailedException {
+    public void sendVerificationEmail(String to, String userName,String url) throws SendFailedException {
 
         MimeMessage massage = javaMailSender.createMimeMessage();
-
-        //make it reuseable
-        String url = "http://localhost:8080/api/authentication/confirm?token=" + token.toString();
 
         try {
             MimeMessageHelper helper = new MimeMessageHelper(massage);
@@ -39,6 +37,12 @@ public class SendEmailServiceImpl implements SendEmailService {
             System.out.println("Send mail error " + e.getMessage());
         }
 
+    }
+
+    @Override
+    public void sendForgotPasswordEmail(String to, String username, String url) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendForgotPasswordEmail'");
     }
 
 }

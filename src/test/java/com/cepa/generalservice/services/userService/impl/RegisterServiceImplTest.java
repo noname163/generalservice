@@ -2,6 +2,7 @@ package com.cepa.generalservice.services.userService.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Answers.valueOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
+
+import javax.mail.SendFailedException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +33,7 @@ import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
+import com.cepa.generalservice.services.notificationService.SendEmailService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 
 public class RegisterServiceImplTest {
@@ -46,6 +51,9 @@ public class RegisterServiceImplTest {
 
     @Mock
     private StudentTargetService studentTargetService;
+
+    @Mock
+    private SendEmailService sendEmailService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -80,6 +88,7 @@ public class RegisterServiceImplTest {
         passwordEncoder = mock(PasswordEncoder.class);
         existUSer = mock(UserInformation.class);
         confirmTokenService = mock(ConfirmTokenService.class);
+        sendEmailService = mock(SendEmailService.class);
 
         registerService = RegisterServiceImpl
                 .builder()
@@ -90,6 +99,7 @@ public class RegisterServiceImplTest {
                 .userInformationMapper(userInformationMapper)
                 .userInformationRepository(userInformationRepository)
                 .confirmTokenService(confirmTokenService)
+                .sendEmailService(sendEmailService)
                 .build();
     }
 
@@ -118,6 +128,7 @@ public class RegisterServiceImplTest {
     void userRegisterTeacherRoleWhenSuccessReturnVoid() {
 
         UserInformation userInformation = mock(UserInformation.class);
+        UUID uuid = UUID.randomUUID();
 
         when(userInformationRepository.findByEmail(userRegister.getEmail())).thenReturn(Optional.empty());
         when(userInformationMapper.mapDtoToEntity(userRegister)).thenReturn(userInformation);
@@ -125,17 +136,29 @@ public class RegisterServiceImplTest {
         when(userInformationRepository.save(userInformation)).thenReturn(userInformation);
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(new Subject()));
         when(teacherRepository.findByInformationId(0L)).thenReturn(Optional.empty());
+        when(confirmTokenService.saveConfirmToken(userInformation)).thenReturn(uuid);
 
         registerService.userRegister(userRegister);
 
         verify(userInformationRepository).findByEmail(userRegister.getEmail());
         verify(userInformationMapper).mapDtoToEntity(userRegister);
-        verify(userInformation).setStatus(UserStatus.DISABLE);
+        verify(userInformation).setStatus(UserStatus.WATTING);
         verify(passwordEncoder).encode("password");
         verify(teacherRepository).findByInformationId(0L);
         verify(subjectRepository).findById(1L);
         verify(teacherRepository).save(any(Teacher.class));
         verify(confirmTokenService).saveConfirmToken(userInformation);
+
+        String url = "http://localhost:8080/api/authentication/confirm?token=" + uuid.toString();
+        try {
+            verify(sendEmailService)
+                    .sendVerificationEmail(userInformation.getEmail(),
+                            userInformation.getFullName(),
+                            url);
+        } catch (SendFailedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
