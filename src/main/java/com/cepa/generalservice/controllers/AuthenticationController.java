@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
+import com.cepa.generalservice.event.EventPublisher;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.services.userService.RegisterService;
@@ -32,6 +33,8 @@ public class AuthenticationController {
     private RegisterService registerService;
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private EventPublisher eventPublisher;
 
     @Operation(summary = "Create new basic user")
     @ApiResponses(value = {
@@ -42,6 +45,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<Void> createAccount(@Valid @RequestBody UserRegister userRegister) {
         registerService.userRegister(userRegister);
+        eventPublisher.publishEvent(userRegister.getEmail(), userRegister.getFullName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

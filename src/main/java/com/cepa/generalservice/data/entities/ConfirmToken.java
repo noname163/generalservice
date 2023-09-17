@@ -37,6 +37,8 @@ public class ConfirmToken {
 
     private LocalDateTime expriedAt;
 
+    private Integer count;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserInformation userInformation;

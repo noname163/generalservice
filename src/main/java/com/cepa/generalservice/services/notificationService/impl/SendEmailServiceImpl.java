@@ -1,7 +1,5 @@
 package com.cepa.generalservice.services.notificationService.impl;
 
-import java.util.UUID;
-
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.internet.MimeMessage;
@@ -21,12 +19,9 @@ public class SendEmailServiceImpl implements SendEmailService {
     private JavaMailSender javaMailSender;
 
     @Override
-    public void sendVerificationEmail(String to, String userName,UUID token) throws SendFailedException {
+    public void sendVerificationEmail(String to, String userName,String url) throws SendFailedException {
 
         MimeMessage massage = javaMailSender.createMimeMessage();
-
-        //make it reuseable
-        String url = "http://localhost:8080/api/authentication/confirm?token=" + token.toString();
 
         try {
             MimeMessageHelper helper = new MimeMessageHelper(massage);
@@ -39,6 +34,12 @@ public class SendEmailServiceImpl implements SendEmailService {
             System.out.println("Send mail error " + e.getMessage());
         }
 
+    }
+
+    @Override
+    public void sendForgotPasswordEmail(String to, String username, String url) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendForgotPasswordEmail'");
     }
 
 }

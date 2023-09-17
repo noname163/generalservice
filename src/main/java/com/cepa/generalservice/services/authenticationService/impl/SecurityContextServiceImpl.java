@@ -39,6 +39,9 @@ public class SecurityContextServiceImpl implements SecurityContextService {
     @Override
     public UserInformation getCurrentUser() {
         Authentication authentication = securityContext.getAuthentication();
+        if(authentication==null){
+            throw new BadRequestException("Current user is empty");
+        }
         Object principal = authentication.getPrincipal();
         return ((CustomUserDetails) principal).getUser();
     }
