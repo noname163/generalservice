@@ -16,11 +16,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtTokenUtil {
-    @Value("$jwt.secret-key")    
+    @Value("${jwt.secret-key}")
     private String jwtSecret;
-    // @Value("$jwt.expires-time")    
-    private long expireTime = 1000;
 
+    @Value("${jwt.expires-time}")
+    private long expireTime;
 
     private String doGenerateToken(Map<String, Object> claims, String subject, Integer expriesTime) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
