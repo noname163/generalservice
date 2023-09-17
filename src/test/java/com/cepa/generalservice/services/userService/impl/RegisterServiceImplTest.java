@@ -2,7 +2,6 @@ package com.cepa.generalservice.services.userService.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Answers.valueOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -11,8 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.mail.SendFailedException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.UserRegister;
-import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -64,13 +60,13 @@ public class RegisterServiceImplTest {
     @Mock
     private ConfirmTokenService confirmTokenService;
 
-    private UserRegister userRegister;
+    private UserRegister teacherRegiter;
 
     private UserInformation existUSer;
 
     @BeforeEach
     void setup() {
-        userRegister = UserRegister
+        teacherRegiter = UserRegister
                 .builder()
                 .email("test@example.com")
                 .password("password")
@@ -104,61 +100,50 @@ public class RegisterServiceImplTest {
     }
 
     @Test
-    void userRegisterWhenEmailExistReturnBadRequestException(){
+    void teacherRegiterWhenEmailExistReturnBadRequestException(){
 
         when(userInformationRepository.findByEmail("test@example.com")).thenReturn(Optional.of(existUSer));
 
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(teacherRegiter));
         
         assertEquals("Email test@example.com is already exist", actual.getMessage());
     }
 
     @Test
-    void userRegisterWhenPasswordNotMatchReturnBadRequestException(){
+    void teacherRegiterWhenPasswordNotMatchReturnBadRequestException(){
 
         when(userInformationRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
-        userRegister.setConfirmPassword("something");
+        teacherRegiter.setConfirmPassword("something");
 
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(userRegister));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> registerService.userRegister(teacherRegiter));
         
         assertEquals("Password did not match.", actual.getMessage());
     }
 
     @Test
-    void userRegisterTeacherRoleWhenSuccessReturnVoid() {
+    void teacherRegiterTeacherRoleWhenSuccessReturnVoid() {
 
         UserInformation userInformation = mock(UserInformation.class);
         UUID uuid = UUID.randomUUID();
 
-        when(userInformationRepository.findByEmail(userRegister.getEmail())).thenReturn(Optional.empty());
-        when(userInformationMapper.mapDtoToEntity(userRegister)).thenReturn(userInformation);
+        when(userInformationRepository.findByEmail(teacherRegiter.getEmail())).thenReturn(Optional.empty());
+        when(userInformationMapper.mapDtoToEntity(teacherRegiter)).thenReturn(userInformation);
+        when(userInformation.getEmail()).thenReturn("test@gmail.com");
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(userInformationRepository.save(userInformation)).thenReturn(userInformation);
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(new Subject()));
         when(teacherRepository.findByInformationId(0L)).thenReturn(Optional.empty());
-        when(confirmTokenService.saveConfirmToken(userInformation)).thenReturn(uuid);
+        when(confirmTokenService.saveConfirmToken(userInformation.getEmail())).thenReturn(uuid);
 
-        registerService.userRegister(userRegister);
+        registerService.userRegister(teacherRegiter);
 
-        verify(userInformationRepository).findByEmail(userRegister.getEmail());
-        verify(userInformationMapper).mapDtoToEntity(userRegister);
+        verify(userInformationRepository).findByEmail(teacherRegiter.getEmail());
+        verify(userInformationMapper).mapDtoToEntity(teacherRegiter);
         verify(userInformation).setStatus(UserStatus.WATTING);
         verify(passwordEncoder).encode("password");
         verify(teacherRepository).findByInformationId(0L);
         verify(subjectRepository).findById(1L);
-        verify(teacherRepository).save(any(Teacher.class));
-        verify(confirmTokenService).saveConfirmToken(userInformation);
-
-        String url = "http://localhost:8080/api/authentication/confirm?token=" + uuid.toString();
-        try {
-            verify(sendEmailService)
-                    .sendVerificationEmail(userInformation.getEmail(),
-                            userInformation.getFullName(),
-                            url);
-        } catch (SendFailedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        verify(teacherRepository).save(any(Teacher.class));       
     }
 
 }

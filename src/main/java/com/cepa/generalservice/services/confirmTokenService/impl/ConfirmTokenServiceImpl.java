@@ -14,7 +14,6 @@ import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
-import com.cepa.generalservice.services.notificationService.SendEmailService;
 
 import lombok.Builder;
 
@@ -29,8 +28,11 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
     private SecurityContextService securityContextService;
 
     @Override
-    public UUID saveConfirmToken(UserInformation userInformation) {
+    public UUID saveConfirmToken(String email) {
 
+        UserInformation userInformation = userInformationRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Not exist user with email: " + email));
         UUID token = UUID.randomUUID();
         LocalDateTime createAt = LocalDateTime.now();
         LocalDateTime expriedAt = createAt.plusMinutes(15);
@@ -81,7 +83,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         Optional<ConfirmToken> tokenOtp = confirmTokenRepository.findByUserInformation(userInformation);
 
         if (tokenOtp.isEmpty()) {
-            return saveConfirmToken(userInformation);
+            return saveConfirmToken(userInformation.getEmail());
         }
 
         LocalDateTime current = LocalDateTime.now();

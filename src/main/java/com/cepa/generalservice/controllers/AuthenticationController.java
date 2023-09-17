@@ -45,7 +45,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<Void> createAccount(@Valid @RequestBody UserRegister userRegister) {
         registerService.userRegister(userRegister);
-        eventPublisher.publishEvent();
+        eventPublisher.publishEvent(userRegister.getEmail(), userRegister.getFullName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

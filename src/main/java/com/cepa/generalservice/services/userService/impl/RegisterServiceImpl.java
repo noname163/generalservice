@@ -97,14 +97,11 @@ public class RegisterServiceImpl implements RegisterService {
         if (userRegister.getRole().equals(Role.STUDENT)) {
             studentRegister(newUser, userRegister.getSubjectId());
         }
-
-        securityContextService.setSecurityContext(newUser.getEmail());
-
     }
 
     @Override
     public void userConfirmEmail(String token) {
-        UserInformation userInformation = securityContextService.getCurrentUser();
+        UserInformation userInformation = confirmTokenService.getUserByToken(token);
         ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
 
         if(!userToken.getToken().toString().equals(token)){
