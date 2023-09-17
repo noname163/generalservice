@@ -3,6 +3,7 @@ package com.cepa.generalservice.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +28,7 @@ import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
+import com.cepa.generalservice.event.EventPublisher;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.RegisterService;
@@ -39,72 +41,92 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class AuthenticationControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private RegisterService registerService;
+        @MockBean
+        private RegisterService registerService;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+        @MockBean
+        private AuthenticationService authenticationService;
 
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
+        @MockBean
+        private JwtTokenUtil jwtTokenUtil;
 
-    @MockBean
-    private SecurityContextService securityContextService;
+        @MockBean
+        private SecurityContextService securityContextService;
 
-    private UserRegister userRegister;
+        @MockBean
+        private EventPublisher eventPublisher;
 
-    @BeforeEach
-    void setup() {
-        userRegister = UserRegister
-                .builder()
-                .email("test@gmail.com")
-                .password("password")
-                .confirmPassword("password")
-                .fullName("test12345")
-                .role(Role.TEACHER)
-                .subjectId(Collections.singletonList(1L))
-                .build();
-    }
+        private UserRegister userRegister;
 
-    @Test
-    void createAccount() throws Exception {
+        @BeforeEach
+        void setup() {
+                userRegister = UserRegister
+                                .builder()
+                                .email("test@gmail.com")
+                                .password("password")
+                                .confirmPassword("password")
+                                .fullName("test12345")
+                                .role(Role.TEACHER)
+                                .subjectId(Collections.singletonList(1L))
+                                .build();
+        }
 
-        doNothing().when(registerService).userRegister(any(UserRegister.class));
+        @Test
+        void createAccount() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRegister)))
-                .andExpect(status().isCreated())
-                .andReturn();
-    }
+                doNothing().when(registerService).userRegister(any(UserRegister.class));
 
-    @Test
-    void loginSuccessReturnLoginResponse() throws JsonProcessingException, Exception {
+                mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userRegister)))
+                                .andExpect(status().isCreated())
+                                .andReturn();
+        }
 
-        LoginRequest loginRequest = LoginRequest
-                .builder()
-                .email("test@gmail.com")
-                .password("password").build();
+        @Test
+        void loginSuccessReturnLoginResponse() throws JsonProcessingException, Exception {
 
-        LoginResponse loginResponse = LoginResponse.builder()
-                .accessToken("sampleAccessToken")
-                .refreshToken("sampleRefreshToken").build();
+                LoginRequest loginRequest = LoginRequest
+                                .builder()
+                                .email("test@gmail.com")
+                                .password("password").build();
 
-        when(authenticationService.login(any(LoginRequest.class))).thenReturn(loginResponse);
+                LoginResponse loginResponse = LoginResponse.builder()
+                                .accessToken("sampleAccessToken")
+                                .refreshToken("sampleRefreshToken").build();
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
+                when(authenticationService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
-        assertEquals("{\"accessToken\":\"sampleAccessToken\",\"refreshToken\":\"sampleRefreshToken\"}",
-                mvcResult.getResponse().getContentAsString());
-    }
+                MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(loginRequest)))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                assertEquals("{\"accessToken\":\"sampleAccessToken\",\"refreshToken\":\"sampleRefreshToken\"}",
+                                mvcResult.getResponse().getContentAsString());
+        }
+
+        @Test
+        public void testConfirmOtpWhenSuccessReturnOK() throws Exception {
+
+                String token = "sampleToken";
+
+                doNothing().when(registerService).userConfirmEmail(token);
+
+                MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/authentication/confirm")
+                                .param("token", token)
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                verify(registerService).userConfirmEmail(token);
+        }
+
 }
