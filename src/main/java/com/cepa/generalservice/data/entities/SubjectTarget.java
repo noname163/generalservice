@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -17,16 +19,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Target")
+@Table(name = "Subject_Target")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Target {
+public class SubjectTarget {
     @Id
-    @SequenceGenerator(name = "target_sequence", sequenceName = "target_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "target_sequence")
+    @SequenceGenerator(name = "subject_target_sequence", sequenceName = "subject_target_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "subject_target_sequence")
     private long id;
 
     private Integer max;
@@ -35,6 +37,7 @@ public class Target {
 
     private String level;
 
-    @OneToMany(mappedBy = "target")
-    private List<StudentTarget> studentTargets;
+    @ManyToOne()
+    @JoinColumn(name = "target_id")
+    private StudentTarget studentTarget;
 }

@@ -16,22 +16,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Teacher")
+@Table(name = "Payment_information")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Teacher {
+public class PaymentInformation {
     @Id
-    @SequenceGenerator(name = "Teacher_sequence", sequenceName = "Teacher_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "Teacher_sequence")
+    @SequenceGenerator(name = "payment_information_sequence", sequenceName = "payment_information_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "payment_information_sequence")
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+    private String description;
+
+    private String cardNumber;
     
+    private String nameOnCard;
+
     @ManyToOne
     @JoinColumn(name = "information_id")
     private UserInformation information;

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cepa.generalservice.data.dto.request.LoginRequest;
+import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.event.EventPublisher;
@@ -36,16 +37,16 @@ public class AuthenticationController {
     @Autowired
     private EventPublisher eventPublisher;
 
-    @Operation(summary = "Create new basic user")
+    @Operation(summary = "Create new teacher")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created successfull."),
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
-    @PostMapping("/register")
-    public ResponseEntity<Void> createAccount(@Valid @RequestBody UserRegister userRegister) {
-        registerService.userRegister(userRegister);
-        eventPublisher.publishEvent(userRegister.getEmail(), userRegister.getFullName());
+    @PostMapping("/register/teacher")
+    public ResponseEntity<Void> createAccount(@Valid @RequestBody TeacherRegister teacherRegister) {
+        registerService.teacherRegister(teacherRegister);
+        eventPublisher.publishEvent(teacherRegister.getUserRegister().getEmail(), teacherRegister.getUserRegister().getFullName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

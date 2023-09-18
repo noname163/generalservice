@@ -1,7 +1,5 @@
 package com.cepa.generalservice.data.dto.request;
 
-import java.util.List;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -9,6 +7,7 @@ import javax.validation.constraints.Size;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.Validation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -34,9 +33,6 @@ public class UserRegister {
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")
     private String confirmPassword;
 
-    @NotNull(message = "Role is require.")
+    @JsonIgnore
     private Role role;
-
-    @NotNull(message = "Subject is require.")
-    private List<Long> subjectId;
 }

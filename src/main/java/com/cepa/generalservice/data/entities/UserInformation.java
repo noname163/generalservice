@@ -54,6 +54,9 @@ public class UserInformation {
     @OneToMany(mappedBy = "information")
     private List<Teacher> teachers;
 
+    @OneToMany(mappedBy = "information")
+    private List<PaymentInformation> paymentInformation;
+
     @OneToMany(mappedBy = "adminInformation")
     private List<SystemTransaction> adminTransactions;
 

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
+import com.cepa.generalservice.data.dto.request.StudentRegister;
+import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
@@ -53,18 +55,18 @@ public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private UserInformationMapper userInformationMapper;
 
-    private void studentRegister(UserInformation userInformation, List<Long> subjectIds) {
-        studentTargetService.createStudentTarget(userInformation, subjectIds);
-    }
 
+    @Override
     @Transactional
-    private void teacherRegister(UserInformation userInformation, Long subjectIds) {
-        teacherRepository.findByInformationId(userInformation.getId())
-                .ifPresent(teacher -> {
-                    throw new BadRequestException("Teacher information exists");
-                });
-        Subject subject = subjectRepository.findById(subjectIds)
-                .orElseThrow(() -> new BadRequestException("Cannot found subject with ID: " + subjectIds));
+    public void teacherRegister(TeacherRegister teacherRegister) {
+
+        UserRegister newUserInformation = teacherRegister.getUserRegister();
+        newUserInformation.setRole(Role.TEACHER);
+        UserInformation userInformation = userRegister(newUserInformation);
+
+        Subject subject = subjectRepository.findById(teacherRegister.getSubjectId())
+                .orElseThrow(() -> new BadRequestException(
+                        "Cannot found subject with ID: " + teacherRegister.getSubjectId()));
 
         teacherRepository.save(Teacher
                 .builder()
@@ -73,9 +75,17 @@ public class RegisterServiceImpl implements RegisterService {
                 .build());
     }
 
-    @Override
+     @Override
+    public void studentRegister(StudentRegister studentRegister) {
+        UserRegister newUserInformation = studentRegister.getUserRegister();
+        newUserInformation.setRole(Role.STUDENT);
+        UserInformation userInformation = userRegister(newUserInformation);
+        
+        throw new UnsupportedOperationException("Unimplemented method 'studentRegister'");
+    }
+
     @Transactional
-    public void userRegister(UserRegister userRegister) {
+    private UserInformation userRegister(UserRegister userRegister) {
 
         userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
             throw new BadRequestException("Email " + userRegister.getEmail() + " is already exist");
@@ -89,14 +99,8 @@ public class RegisterServiceImpl implements RegisterService {
         UserInformation newUser = userInformationMapper
                 .mapDtoToEntity(userRegister);
         newUser.setStatus(UserStatus.WATTING);
-        newUser = userInformationRepository.save(newUser);
 
-        if (userRegister.getRole().equals(Role.TEACHER)) {
-            teacherRegister(newUser, userRegister.getSubjectId().get(0));
-        }
-        if (userRegister.getRole().equals(Role.STUDENT)) {
-            studentRegister(newUser, userRegister.getSubjectId());
-        }
+        return userInformationRepository.save(newUser);
     }
 
     @Override
@@ -104,7 +108,7 @@ public class RegisterServiceImpl implements RegisterService {
         UserInformation userInformation = confirmTokenService.getUserByToken(token);
         ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
 
-        if(!userToken.getToken().toString().equals(token)){
+        if (!userToken.getToken().toString().equals(token)) {
             throw new BadRequestException("Token not valid");
         }
 
@@ -114,7 +118,9 @@ public class RegisterServiceImpl implements RegisterService {
             userInformation.setStatus(UserStatus.ENABLE);
             userInformationRepository.save(userInformation);
         }
-        
+
     }
+
+   
 
 }
