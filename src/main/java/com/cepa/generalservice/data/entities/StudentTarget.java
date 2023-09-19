@@ -1,11 +1,14 @@
 package com.cepa.generalservice.data.entities;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -28,15 +31,16 @@ public class StudentTarget {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "student_target_sequence")
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "target_id")
-    private Target target;
+    private long grade;
 
     @ManyToOne
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+    @JoinColumn(name = "combination_id")
+    private Combination combination;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
     private UserInformation studentInformation;
+
+    @OneToMany(mappedBy = "studentTarget")
+    private List<SubjectTarget> subjectTargets;
 }
