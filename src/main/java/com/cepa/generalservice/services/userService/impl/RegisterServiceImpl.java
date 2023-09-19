@@ -1,13 +1,8 @@
 package com.cepa.generalservice.services.userService.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.mail.SendFailedException;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +20,7 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
-import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
-import com.cepa.generalservice.services.notificationService.SendEmailService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 import com.cepa.generalservice.services.userService.RegisterService;
 
@@ -47,14 +40,9 @@ public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private ConfirmTokenService confirmTokenService;
     @Autowired
-    private SendEmailService sendEmailService;
-    @Autowired
-    private SecurityContextService securityContextService;
-    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserInformationMapper userInformationMapper;
-
 
     @Override
     @Transactional
@@ -75,16 +63,17 @@ public class RegisterServiceImpl implements RegisterService {
                 .build());
     }
 
-     @Override
+    @Override
+    @Transactional
     public void studentRegister(StudentRegister studentRegister) {
         UserRegister newUserInformation = studentRegister.getUserRegister();
         newUserInformation.setRole(Role.STUDENT);
+
         UserInformation userInformation = userRegister(newUserInformation);
-        
-        throw new UnsupportedOperationException("Unimplemented method 'studentRegister'");
+
+        studentTargetService.createStudentTarget(userInformation, studentRegister.getCombinationIds());
     }
 
-    @Transactional
     private UserInformation userRegister(UserRegister userRegister) {
 
         userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
@@ -96,8 +85,8 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
-        UserInformation newUser = userInformationMapper
-                .mapDtoToEntity(userRegister);
+
+        UserInformation newUser = userInformationMapper.mapDtoToEntity(userRegister);
         newUser.setStatus(UserStatus.WATTING);
 
         return userInformationRepository.save(newUser);
@@ -120,7 +109,5 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
     }
-
-   
 
 }

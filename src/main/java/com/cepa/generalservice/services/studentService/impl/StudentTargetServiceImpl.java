@@ -10,11 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.entities.StudentTarget;
-import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.data.repositories.StudentTargetRepository;
-import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 
@@ -29,9 +27,10 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     @Transactional
     public void createStudentTarget(UserInformation userInformation, List<Long> combinationIds) {
         List<Combination> combinations = combinationRepository
-        .findByIdIn(combinationIds)
-        .orElseThrow(() -> new BadRequestException("Cannot found combination"));
-        List<StudentTarget> existingStudentTargets = studentTargetRepository.findByStudentInformation(userInformation);
+                .findByIdIn(combinationIds)
+                .orElseThrow(() -> new BadRequestException("Cannot found combination"));
+        List<StudentTarget> existingStudentTargets = studentTargetRepository
+                .findByStudentInformation(userInformation);
 
         List<StudentTarget> newStudentTargets = new ArrayList<>();
         for (Combination combination : combinations) {

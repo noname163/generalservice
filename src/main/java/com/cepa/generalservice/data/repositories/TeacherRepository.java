@@ -8,5 +8,4 @@ import com.cepa.generalservice.data.entities.Teacher;
 
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByInformationId(long id);
-    Optional<Teacher> findByEmail(String email);
 }
