@@ -57,7 +57,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
-    @PostMapping("/register/teacher")
+    @PostMapping("/register/student")
     public ResponseEntity<Void> createStudentAccount(@Valid @RequestBody StudentRegister studentRegister) {
         registerService.studentRegister(studentRegister);
         eventPublisher.publishEvent(studentRegister.getUserRegister().getEmail(), studentRegister.getUserRegister().getFullName());
