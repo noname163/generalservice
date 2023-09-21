@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
-import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.event.EventPublisher;
 import com.cepa.generalservice.exceptions.BadRequestException;

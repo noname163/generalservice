@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +26,6 @@ import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
-import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.data.repositories.TeacherRepository;
@@ -66,7 +64,6 @@ public class RegisterServiceImplTest {
     @Mock
     private ConfirmTokenService confirmTokenService;
 
-    private UserRegister userRegister;
 
     @BeforeEach
     void setup() {
@@ -79,7 +76,6 @@ public class RegisterServiceImplTest {
         passwordEncoder = mock(PasswordEncoder.class);
         confirmTokenService = mock(ConfirmTokenService.class);
         sendEmailService = mock(SendEmailService.class);
-        userRegister = mock(UserRegister.class);
 
         registerService = RegisterServiceImpl
                 .builder()
