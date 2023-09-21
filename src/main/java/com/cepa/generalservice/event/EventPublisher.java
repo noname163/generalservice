@@ -22,7 +22,7 @@ public class EventPublisher {
 
     public void publishEvent(String email, String fullname){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        Map<String, String> data = new LinkedHashMap();
+        Map<String, String> data = new LinkedHashMap<String, String>();
 
         data.put("URI", request.getRequestURI());
         data.put("host",request.getHeader("host"));
