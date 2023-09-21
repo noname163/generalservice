@@ -1,7 +1,7 @@
 package com.cepa.generalservice.utils;
 
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +30,7 @@ public class JwtTokenUtil {
     }
 
     public String generateJwtToken(UserInformation user, Integer expiresTime) {
-        Map<String, Object> claims = new Hashtable();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
         return doGenerateToken(claims, user.getEmail(), expiresTime);
