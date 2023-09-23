@@ -96,7 +96,7 @@ public class RegisterServiceImplTest {
 
         UserInformation newUser = createUserInformation();
         when(userInformationRepository.findByEmail(any())).thenReturn(Optional.empty());
-        when(subjectRepository.findById(any())).thenReturn(Optional.of(new Subject()));
+        when(subjectRepository.findByIdIn(any())).thenReturn(Optional.of(List.of(new Subject())));
         when(userInformationMapper.mapDtoToEntity(teacherRegister.getUserRegister())).thenReturn(newUser);
         when(userInformationRepository.save(any())).thenReturn(newUser);
 
@@ -105,7 +105,6 @@ public class RegisterServiceImplTest {
 
         // Assert
         verify(userInformationRepository, times(1)).findByEmail(any());
-        verify(subjectRepository, times(1)).findById(any());
         verify(userInformationRepository, times(1)).save(any());
         verify(userInformationMapper, times(1)).mapDtoToEntity(teacherRegister.getUserRegister());
         verify(teacherRepository, times(1)).save(any());
@@ -237,7 +236,7 @@ public class RegisterServiceImplTest {
         return TeacherRegister
                 .builder()
                 .userRegister(userRegister)
-                .subjectId(1l)
+                .subjectIds(List.of(1l))
                 .build();
     }
 

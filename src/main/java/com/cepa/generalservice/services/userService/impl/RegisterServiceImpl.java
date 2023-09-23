@@ -1,5 +1,7 @@
 package com.cepa.generalservice.services.userService.impl;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,14 +54,14 @@ public class RegisterServiceImpl implements RegisterService {
         newUserInformation.setRole(Role.TEACHER);
         UserInformation userInformation = userRegister(newUserInformation);
 
-        Subject subject = subjectRepository.findById(teacherRegister.getSubjectId())
+        List<Subject> subjects = subjectRepository.findByIdIn(teacherRegister.getSubjectIds())
                 .orElseThrow(() -> new BadRequestException(
-                        "Cannot found subject with ID: " + teacherRegister.getSubjectId()));
+                        "Cannot found subject with ID: " + teacherRegister.getSubjectIds().toString()));
 
         teacherRepository.save(Teacher
                 .builder()
                 .information(userInformation)
-                .subject(subject)
+                .subjects(subjects)
                 .build());
     }
 

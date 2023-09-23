@@ -67,9 +67,6 @@ public class UserInformation {
     private List<SystemTransaction> studentTransactions;
 
     @OneToMany(mappedBy = "studentInformation")
-    private List<StudentSubmission> studentSubmissions;
-
-    @OneToMany(mappedBy = "studentInformation")
     private List<StudentTarget> studentTargets;
 
     @OneToMany(mappedBy = "userInformation")

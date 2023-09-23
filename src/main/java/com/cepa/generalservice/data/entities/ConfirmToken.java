@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ConfirmToken")
+@Table(name = "Confirm_Token")
 @Getter
 @Setter
 @Builder
