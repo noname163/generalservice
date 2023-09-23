@@ -12,6 +12,7 @@ public class UserInformationMapper {
         return UserInformation
                 .builder()
                 .email(userRegister.getEmail())
+                .role(userRegister.getRole())
                 .fullName(userRegister.getFullName())
                 .password(userRegister.getPassword())
                 .build();

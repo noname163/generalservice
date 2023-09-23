@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -33,6 +34,9 @@ public class Subject {
 
     private String desciption;
 
-    @OneToMany(mappedBy = "subject")
+    @ManyToMany
     private List<Teacher> teachers;
+
+    @ManyToMany
+    private List<Combination> combinations;
 }

@@ -6,11 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,8 +34,8 @@ public class Combination {
 
     private String description;
 
-    @JsonProperty
-    private String subjectId;
+    @ManyToMany
+    private List<Subject> subject;
 
     @OneToMany(mappedBy = "combination")
     private List<StudentTarget> studentTargets;

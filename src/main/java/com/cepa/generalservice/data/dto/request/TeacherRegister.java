@@ -1,5 +1,7 @@
 package com.cepa.generalservice.data.dto.request;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import lombok.Builder;
@@ -13,5 +15,5 @@ public class TeacherRegister {
     private UserRegister userRegister;
 
     @NotNull(message = "Subject is require.")
-    private Long subjectId;
+    private List<Long> subjectIds;
 }

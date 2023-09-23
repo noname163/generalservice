@@ -68,7 +68,7 @@ public class AuthenticationControllerTest {
 
         doNothing().when(registerService).teacherRegister(any(TeacherRegister.class));
 
-        String requestBody = "{ \"userRegister\": { \"email\": \"teacher@example.com\", \"fullName\": \"John Doe\" }, \"subjectId\": 1 }";
+        String requestBody = "{ \"userRegister\": { \"email\": \"teacher@example.com\", \"fullName\": \"John Doe\" }, \"subjectIds\": [1,2,3]}";
 
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/authentication/register/teacher")
