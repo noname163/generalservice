@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cepa.generalservice.data.constants.UserStatus;
@@ -68,14 +69,7 @@ public class RegisterServiceImplTest {
     @BeforeEach
     void setup() {
 
-        userInformationRepository = mock(UserInformationRepository.class);
-        subjectRepository = mock(SubjectRepository.class);
-        teacherRepository = mock(TeacherRepository.class);
-        studentTargetService = mock(StudentTargetService.class);
-        userInformationMapper = mock(UserInformationMapper.class);
-        passwordEncoder = mock(PasswordEncoder.class);
-        confirmTokenService = mock(ConfirmTokenService.class);
-        sendEmailService = mock(SendEmailService.class);
+        MockitoAnnotations.openMocks(this);
 
         registerService = RegisterServiceImpl
                 .builder()

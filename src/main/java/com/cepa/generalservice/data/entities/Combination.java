@@ -32,6 +32,8 @@ public class Combination {
 
     private String name;
 
+    private String url;
+
     private String description;
 
     @ManyToMany
