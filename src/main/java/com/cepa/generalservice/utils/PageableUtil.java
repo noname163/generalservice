@@ -30,14 +30,17 @@ public class PageableUtil {
         return PageRequest.of(page, size);
     }
 
-    public Pageable getPageable(int offset, int limit, String fieldName, SortType sortType) throws BadRequestException {
-        if (SortType.ASC.equals(sortType)) {
-            return PageRequest.of(offset, limit, Sort.by(fieldName).ascending());
+    public Pageable getPageable(Integer page, Integer size, String field, SortType sortType) throws BadRequestException {
+        page = page == null ? 0 : page;
+        size = size == null ? 20 : size;
+        sortType = sortType != null ? sortType : SortType.ASC;
+
+        if (field != null && !field.isBlank()) {
+            Sort sort = sortType == SortType.ASC ? Sort.by(field).ascending() : Sort.by(field).descending();
+            return PageRequest.of(page, size, sort);
         }
-        if (SortType.DESC.equals(sortType)) {
-            return PageRequest.of(offset, limit, Sort.by(fieldName).descending());
-        }
-        throw new BadRequestException("Invalid sort type");
+
+        return PageRequest.of(page, size);
     }
 
 }

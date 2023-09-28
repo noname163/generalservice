@@ -1,4 +1,4 @@
-package com.cepa.generalservice.services.subjectService.impl;
+package com.cepa.generalservice.services.combinationService.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,26 +19,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
-import com.cepa.generalservice.data.dto.response.SubjectResponse;
-import com.cepa.generalservice.data.entities.Subject;
-import com.cepa.generalservice.data.repositories.SubjectRepository;
-import com.cepa.generalservice.mappers.SubjectMapper;
+import com.cepa.generalservice.data.entities.Combination;
+import com.cepa.generalservice.data.repositories.CombinationRepository;
+import com.cepa.generalservice.mappers.CombinationMapper;
 import com.cepa.generalservice.utils.PageableUtil;
 
-public class SubjectServiceImplTest {
+
+public class CombinationServiceImplTest {
+
+    @InjectMocks
+    private CombinationServiceImpl combinationService;
 
     @Mock
-    private SubjectRepository subjectRepository;
+    private CombinationRepository combinationRepository;
 
     @Mock
     private PageableUtil pageableUtil;
 
     @Mock
-    private SubjectMapper subjectMapper;
-
-    @InjectMocks
-    private SubjectServiceImpl subjectService;
+    private CombinationMapper combinationMapper;
 
     @BeforeEach
     void setUp() {
@@ -46,8 +47,8 @@ public class SubjectServiceImplTest {
     }
 
     @Test
-    void getSubject_ShouldReturnData() {
-         // Arrange
+    public void getCombination_ShouldReturnData() {
+        // Arrange
         int page = 1;
         int size = 10;
         String field = "fieldName";
@@ -56,25 +57,24 @@ public class SubjectServiceImplTest {
         Pageable pageable = PageRequest.of(page - 1, size);
         when(pageableUtil.getPageable(page, size, field, sortType)).thenReturn(pageable);
 
-        Page<Subject> pageResult = new PageImpl<>(Collections.emptyList());
-        when(subjectRepository.findAll(pageable)).thenReturn(pageResult);
+        Page<Combination> pageResult = new PageImpl<>(Collections.emptyList());
+        when(combinationRepository.findAll(pageable)).thenReturn(pageResult);
 
-        List<SubjectResponse> subjectResponses = Collections.emptyList();
-        when(subjectMapper.mapEntitiesToDtos(pageResult.getContent())).thenReturn(subjectResponses);
+        List<CombinationResponse> combinationResponses = Collections.emptyList();
+        when(combinationMapper.mapEntitiesToDtos(pageResult.getContent())).thenReturn(combinationResponses);
 
         // Act
-        PaginationResponse<List<SubjectResponse>> response = subjectService.getSubjects(page, size, field, sortType);
+        PaginationResponse<List<CombinationResponse>> response = combinationService.getCombination(page, size, field, sortType);
 
         // Assert
         assertNotNull(response);
-        assertEquals(subjectResponses, response.getData());
+        assertEquals(combinationResponses, response.getData());
         assertEquals(pageResult.getTotalPages(), response.getTotalPage());
         assertEquals(pageResult.getTotalElements(), response.getTotalRow());
 
         // Verify that the methods were called with the expected parameters
         verify(pageableUtil).getPageable(page, size, field, sortType);
-        verify(subjectRepository).findAll(pageable);
-        verify(subjectMapper).mapEntitiesToDtos(pageResult.getContent());
+        verify(combinationRepository).findAll(pageable);
+        verify(combinationMapper).mapEntitiesToDtos(pageResult.getContent());
     }
-
 }

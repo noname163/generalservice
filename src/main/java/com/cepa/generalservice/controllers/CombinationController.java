@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cepa.generalservice.data.dto.request.PaginationRequest;
+import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
@@ -35,9 +35,13 @@ public class CombinationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping()
-    public ResponseEntity<PaginationResponse<List<CombinationResponse>>> getSubjects(@RequestBody PaginationRequest paginationRequest) {
+    public ResponseEntity<PaginationResponse<List<CombinationResponse>>> getSubjects(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String field,
+            @RequestParam(required = false) SortType sortType) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(combinationService.getCombination(paginationRequest));
+                .body(combinationService.getCombination(page, size, field, sortType));
     }
 }
