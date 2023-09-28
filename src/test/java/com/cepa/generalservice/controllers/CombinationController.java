@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cepa.generalservice.data.dto.request.PaginationRequest;
+import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
-import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.subjectService.SubjectService;
+import com.cepa.generalservice.services.combinationService.CombinationService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,22 +23,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("/api/subjects")
-public class SubjectController {
-
+@RequestMapping("/api/combinations")
+public class CombinationController {
     @Autowired
-    private SubjectService subjectService;
+    private CombinationService combinationService;
 
-    @Operation(summary = "Get subjects")
+    @Operation(summary = "Get combinations")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Get subjects successfull."),
+            @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
             @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping()
-    public ResponseEntity<PaginationResponse<List<SubjectResponse>>> getSubjects(@RequestBody PaginationRequest paginationRequest) {
+    public ResponseEntity<PaginationResponse<List<CombinationResponse>>> getSubjects(@RequestBody PaginationRequest paginationRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(subjectService.getSubjects(paginationRequest));
+                .body(combinationService.getCombination(paginationRequest));
     }
 }

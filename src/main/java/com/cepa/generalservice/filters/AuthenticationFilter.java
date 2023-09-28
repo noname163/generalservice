@@ -37,6 +37,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 || request.getRequestURI().startsWith("/v3/api-docs")
                 || request.getRequestURI().startsWith("/api/authentication")
                 ||request.getMethod().equals("GET") 
+                    &&request.getRequestURI().startsWith("/api/combinations")
+                ||request.getMethod().equals("GET") 
                     &&request.getRequestURI().startsWith("/api/subjects")) {
             filterChain.doFilter(request, response);
         } else {
