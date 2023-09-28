@@ -32,7 +32,9 @@ public class Subject {
 
     private String name;
 
-    private String desciption;
+    private String url;
+
+    private String description;
 
     @ManyToMany
     private List<Teacher> teachers;
