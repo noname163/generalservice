@@ -31,7 +31,9 @@ public class SubjectController {
 
     @Operation(summary = "Get subjects")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Get subjects successfull."),
+            @ApiResponse(responseCode = "200", description = "Get subjects successfull.", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) 
+            }),
             @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
