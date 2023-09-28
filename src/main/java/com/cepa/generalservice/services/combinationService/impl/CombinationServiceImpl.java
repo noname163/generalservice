@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.dto.request.PaginationRequest;
 import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
@@ -21,28 +22,29 @@ import lombok.Builder;
 
 @Service
 @Builder
-public class CombinationServiceImpl implements CombinationService{
+public class CombinationServiceImpl implements CombinationService {
 
     @Autowired
     private CombinationRepository combinationRepository;
     @Autowired
     private PageableUtil pageableUtil;
-    @Autowired 
+    @Autowired
     private CombinationMapper combinationMapper;
-    
+
     @Override
-    public PaginationResponse<List<CombinationResponse>> getCombination(PaginationRequest paginationRequest) {
-        
-        Pageable pageable = pageableUtil.getPageable(paginationRequest);
+    public PaginationResponse<List<CombinationResponse>> getCombination(Integer page, Integer size, String field,
+            SortType sortType) {
+
+        Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
 
         Page<Combination> listCombinations = combinationRepository.findAll(pageable);
-        
+
         return PaginationResponse.<List<CombinationResponse>>builder()
-        .data(combinationMapper.mapEntitiesToDtos(listCombinations.getContent()))
-        .totalPage(listCombinations.getTotalPages())
-        .totalRow(listCombinations.getTotalElements())
-        .build();
-        
+                .data(combinationMapper.mapEntitiesToDtos(listCombinations.getContent()))
+                .totalPage(listCombinations.getTotalPages())
+                .totalRow(listCombinations.getTotalElements())
+                .build();
+
     }
-    
+
 }
