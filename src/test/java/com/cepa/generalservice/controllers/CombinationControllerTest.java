@@ -18,20 +18,20 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
-import com.cepa.generalservice.data.dto.response.SubjectResponse;
-import com.cepa.generalservice.services.subjectService.SubjectService;
+import com.cepa.generalservice.services.combinationService.CombinationService;
 import com.cepa.generalservice.utils.PageableUtil;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SubjectControllerTest {
+public class CombinationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private SubjectService subjectService;
+    private CombinationService combinationService;
 
     @MockBean
     private PageableUtil pageableUtil;
@@ -40,25 +40,25 @@ public class SubjectControllerTest {
     public void testGetSubjects() throws Exception {
 
         // Mock the behavior of subjectService.getSubjects to return a known response
-        PaginationResponse<List<SubjectResponse>> expectedResponse = PaginationResponse
-                .<List<SubjectResponse>>builder()
+        PaginationResponse<List<CombinationResponse>> expectedResponse = PaginationResponse
+                .<List<CombinationResponse>>builder()
                 .build();
-        expectedResponse.setData(Collections.singletonList(SubjectResponse.builder().build()));
+        expectedResponse.setData(Collections.singletonList(CombinationResponse.builder().build()));
         expectedResponse.setTotalPage(1);
         expectedResponse.setTotalRow(1);
-        when(subjectService.getSubjects(0,10,"field",SortType.ASC)).thenReturn(expectedResponse);
+        when(combinationService.getCombination(0, 10, "field", SortType.ASC)).thenReturn(expectedResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/subjects")
+                .get("/api/combinations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("page", "0")
                 .param("size", "10")
                 .param("field", "field")
                 .param("sortType", "ASC"))
                 .andExpect(status().isOk())
-                .andReturn(); 
-        assertEquals("{\"data\":[{\"id\":0,\"name\":null,\"url\":null,\"description\":null}],\"totalPage\":1,\"totalRow\":1}",
+                .andReturn();
+        assertEquals(
+                "{\"data\":[{\"id\":0,\"name\":null,\"url\":null,\"description\":null}],\"totalPage\":1,\"totalRow\":1}",
                 mvcResult.getResponse().getContentAsString());
     }
-
 }
