@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - fixbug
   pull_request:
     types:
       - closed
@@ -53,8 +54,13 @@ jobs:
         with:
           name: java-app
 
+      - name: Run tests
+        if: ${{ job.status == 'success' }}
+        run: mvn test
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
+        if: ${{ job.status == 'success' }}
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'general-service'
