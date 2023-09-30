@@ -28,8 +28,13 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
+      
+      - name: Run tests
+        if: ${{ job.status == 'success' }}
+        run: mvn test
 
       - name: Upload artifact for deployment job
+        if: ${{ job.status == 'success' }}
         uses: actions/upload-artifact@v2
         with:
           name: java-app
