@@ -54,6 +54,9 @@ jobs:
         with:
           name: java-app
 
+      - name: Build with Maven
+        run: mvn clean install
+        
       - name: Run tests
         if: ${{ job.status == 'success' }}
         run: mvn test
