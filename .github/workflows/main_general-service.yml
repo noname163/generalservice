@@ -56,7 +56,7 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
-        
+
       - name: Run tests
         if: ${{ job.status == 'success' }}
         run: mvn test
@@ -70,3 +70,11 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4D0F881AE8D8426E9BFF0FE0C46C911D }}
           package: '*.jar'
+      
+      - name: Delete branch after deployment
+        if: ${{ job.status == 'success' }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Delete branch after successful deployment'
+          branch: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
