@@ -49,25 +49,6 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v2
-        with:
-          name: java-app
-      
-      - name: Change directory to Maven project
-        if: ${{ job.status == 'success' }}
-        run: cd /home/runner/work/generalservice
-
-      - name: List directory contents
-        if: ${{ job.status == 'success' }}
-        run: ls
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        if: ${{ job.status == 'success' }}
-        run: mvn test
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
