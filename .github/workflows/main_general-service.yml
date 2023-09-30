@@ -56,7 +56,11 @@ jobs:
       
       - name: Change directory to Maven project
         if: ${{ job.status == 'success' }}
-        run: cd ${{ github.workspace }}
+        run: cd /home/runner/work/generalservice
+
+      - name: List directory contents
+        if: ${{ job.status == 'success' }}
+        run: ls
 
       - name: Build with Maven
         run: mvn clean install
