@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -31,7 +32,11 @@ public class StudentTarget {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "student_target_sequence")
     private long id;
 
-    private long grade;
+    private double grade;
+
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
 
     @ManyToOne
     @JoinColumn(name = "combination_id")

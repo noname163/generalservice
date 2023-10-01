@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,10 @@ public class UserInformation {
     private Date dateOfBirth;
 
     private String imageURL;
+
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
 
     @Enumerated(EnumType.STRING)
     private Role role;

@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -35,6 +36,10 @@ public class Combination {
     private String url;
 
     private String description;
+
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
 
     @ManyToMany
     private List<Subject> subject;

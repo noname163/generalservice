@@ -1,5 +1,7 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -33,6 +35,10 @@ public class SubjectTarget {
     private Integer min;
 
     private String level;
+
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
 
     @ManyToOne()
     @JoinColumn(name = "target_id")
