@@ -7,9 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -21,35 +18,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Subject")
+@Table(name = "Topic")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Subject {
+public class Topic {
     @Id
-    @SequenceGenerator(name = "subject_sequence", sequenceName = "subject_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "subject_sequence")
+    @SequenceGenerator(name = "topic_sequence", sequenceName = "topic_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "topic_sequence")
     private long id;
 
     private String name;
-
-    private String url;
-
-    private String description;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
-
-    @ManyToMany
-    private List<Teacher> teachers;
-
-    @ManyToMany
-    private List<Combination> combinations;
+    @OneToMany
+    private List<Subject> subjects;
 }

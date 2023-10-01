@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -31,6 +32,10 @@ public class Teacher {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "Teacher_sequence")
     private long id;
 
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
+    
     @ManyToMany
     private List<Subject> subjects;
     
