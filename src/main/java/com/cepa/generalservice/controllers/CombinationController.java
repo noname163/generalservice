@@ -36,10 +36,10 @@ public class CombinationController {
     })
     @GetMapping()
     public ResponseEntity<PaginationResponse<List<CombinationResponse>>> getSubjects(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) String field,
-            @RequestParam(required = false) SortType sortType) {
+            @RequestParam(required = false, defaultValue = "ASC") SortType sortType) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(combinationService.getCombination(page, size, field, sortType));
