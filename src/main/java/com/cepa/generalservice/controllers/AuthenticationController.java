@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +18,12 @@ import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
+import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.event.EventPublisher;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.services.userService.RegisterService;
+import com.cepa.generalservice.services.userService.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +38,8 @@ public class AuthenticationController {
     private RegisterService registerService;
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private UserService userService;
     @Autowired
     private EventPublisher eventPublisher;
 
@@ -78,6 +84,13 @@ public class AuthenticationController {
                 .body(authenticationService.login(loginRequest));
     }
 
+    @PatchMapping("/forgot-password/{email}")
+    public ResponseEntity<Void> forgotPassword(@PathVariable String email){
+        UserInformation userInformation = userService.getUserByEmail(email);
+        eventPublisher.publishEvent(userInformation.getEmail(), userInformation.getFullName());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @Operation(summary = "Verify token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Verify successfull."),
@@ -85,8 +98,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping("/confirm")
-    public ResponseEntity<Void> confirmOtp(@RequestParam(name="token") String token){
-        registerService.userConfirmEmail(token);
+    public ResponseEntity<Void> confirmOtp(@RequestParam(name="token") String token, @RequestParam(name="from") String from){
+        userService.userConfirmEmail(token, from);
         return ResponseEntity.ok().build();
     }
 
