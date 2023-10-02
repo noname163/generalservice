@@ -42,13 +42,18 @@ public class EventHandler implements ApplicationListener<Event>{
 
         if(api.equals("register")){
             try {
+                url = url+"&from=register";
                 sendEmailService.sendVerificationEmail(email, fullName, url);
                 log.info("Send success for email " + email);
             } catch (SendFailedException e) {
-                log.error("----Errors Log Send Matil----");
+                log.error("----Errors Log Send Verification Mail----");
                 log.error(e.getMessage());
                 e.printStackTrace();
             }
+        }
+        if(api.equals("forgot-password")){
+            url = url+"&from=forgot-password";
+            sendEmailService.sendForgotPasswordEmail(email, fullName, url);
         }
     }
 }

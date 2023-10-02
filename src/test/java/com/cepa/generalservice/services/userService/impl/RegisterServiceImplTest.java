@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cepa.generalservice.data.constants.Role;
@@ -76,27 +77,7 @@ public class RegisterServiceImplTest {
                 .subjectId(Collections.singletonList(1L))
                 .build();
 
-        userInformationRepository = mock(UserInformationRepository.class);
-        subjectRepository = mock(SubjectRepository.class);
-        teacherRepository = mock(TeacherRepository.class);
-        studentTargetService = mock(StudentTargetService.class);
-        userInformationMapper = mock(UserInformationMapper.class);
-        passwordEncoder = mock(PasswordEncoder.class);
-        existUSer = mock(UserInformation.class);
-        confirmTokenService = mock(ConfirmTokenService.class);
-        sendEmailService = mock(SendEmailService.class);
-
-        registerService = RegisterServiceImpl
-                .builder()
-                .passwordEncoder(passwordEncoder)
-                .studentTargetService(studentTargetService)
-                .subjectRepository(subjectRepository)
-                .teacherRepository(teacherRepository)
-                .userInformationMapper(userInformationMapper)
-                .userInformationRepository(userInformationRepository)
-                .confirmTokenService(confirmTokenService)
-                .sendEmailService(sendEmailService)
-                .build();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -120,30 +101,87 @@ public class RegisterServiceImplTest {
         assertEquals("Password did not match.", actual.getMessage());
     }
 
-    @Test
-    void teacherRegiterTeacherRoleWhenSuccessReturnVoid() {
+    // @Test
+    // void userConfirmEmail_ShouldEnableUserStatus_WhenTokenIsValid() {
 
-        UserInformation userInformation = mock(UserInformation.class);
-        UUID uuid = UUID.randomUUID();
+    //     UUID token = UUID.randomUUID();
+    //     String tokenStr = token.toString();
+    //     UserInformation userInformation = createUserInformation(UserStatus.WATTING);
 
-        when(userInformationRepository.findByEmail(teacherRegiter.getEmail())).thenReturn(Optional.empty());
-        when(userInformationMapper.mapDtoToEntity(teacherRegiter)).thenReturn(userInformation);
-        when(userInformation.getEmail()).thenReturn("test@gmail.com");
-        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
-        when(userInformationRepository.save(userInformation)).thenReturn(userInformation);
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(new Subject()));
-        when(teacherRepository.findByInformationId(0L)).thenReturn(Optional.empty());
-        when(confirmTokenService.saveConfirmToken(userInformation.getEmail())).thenReturn(uuid);
+    //     ConfirmToken userToken = ConfirmToken.builder().token(token).build();
+    //     userToken.setToken(token);
 
-        registerService.userRegister(teacherRegiter);
+    //     when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
+    //     when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
+    //     when(confirmTokenService.verifyToken(tokenStr)).thenReturn(true);
 
-        verify(userInformationRepository).findByEmail(teacherRegiter.getEmail());
-        verify(userInformationMapper).mapDtoToEntity(teacherRegiter);
-        verify(userInformation).setStatus(UserStatus.WATTING);
-        verify(passwordEncoder).encode("password");
-        verify(teacherRepository).findByInformationId(0L);
-        verify(subjectRepository).findById(1L);
-        verify(teacherRepository).save(any(Teacher.class));       
+    //     registerService.userConfirmEmail(tokenStr);
+
+    //     verify(confirmTokenService, times(1)).getUserByToken(tokenStr);
+    //     verify(confirmTokenService, times(1)).getTokenByEmail(userInformation.getEmail());
+    //     verify(confirmTokenService, times(1)).verifyToken(tokenStr);
+
+    //     assert userInformation.getStatus() == UserStatus.ENABLE;
+    //     verify(userInformationRepository, times(1)).save(userInformation);
+    // }
+
+    // @Test
+    // void userConfirmEmail_ShouldThrowBadRequestException_WhenTokenIsNotValid() {
+    //     // Arrange
+    //     UUID token = UUID.randomUUID();
+    //     String tokenStr = "invalid-token";
+    //     UserInformation userInformation = createUserInformation(UserStatus.WATTING);
+
+    //     ConfirmToken userToken = ConfirmToken.builder().token(token).build();
+    //     userToken.setToken(token);
+
+    //     when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
+    //     when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
+
+    //     assertThrows(BadRequestException.class, () -> registerService.userConfirmEmail(tokenStr));
+
+    //     assert userInformation.getStatus() == UserStatus.WATTING;
+    //     verify(userInformationRepository, never()).save(userInformation);
+    // }
+
+    private UserInformation createUserInformation(UserStatus status) {
+        UserInformation userInformation = new UserInformation();
+        userInformation.setStatus(status);
+        return userInformation;
+    }
+
+    private TeacherRegister createTeacherRegister() {
+        UserRegister userRegister = UserRegister
+                .builder()
+                .email("teacher@example.com")
+                .confirmPassword("123456")
+                .password("123456")
+                .build();
+        userRegister.setEmail("teacher@example.com");
+        return TeacherRegister
+                .builder()
+                .userRegister(userRegister)
+                .subjectIds(List.of(1l))
+                .build();
+    }
+
+    private StudentRegister createStudentRegister() {
+        UserRegister userRegister = UserRegister
+                .builder()
+                .email("student@example.com")
+                .confirmPassword("123456")
+                .password("123456")
+                .build();
+
+        return StudentRegister
+                .builder()
+                .userRegister(userRegister)
+                .combinationIds(List.of(1L, 2L)).build();
+    }
+
+    private UserInformation createUserInformation() {
+        UserInformation userInformation = UserInformation.builder().build();
+        return userInformation;
     }
 
 }

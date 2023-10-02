@@ -45,10 +45,6 @@ public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private ConfirmTokenService confirmTokenService;
     @Autowired
-    private SendEmailService sendEmailService;
-    @Autowired
-    private SecurityContextService securityContextService;
-    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserInformationMapper userInformationMapper;
@@ -104,7 +100,7 @@ public class RegisterServiceImpl implements RegisterService {
         UserInformation userInformation = confirmTokenService.getUserByToken(token);
         ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
 
-        if(!userToken.getToken().toString().equals(token)){
+        if (!userToken.getToken().toString().equals(token)) {
             throw new BadRequestException("Token not valid");
         }
 
@@ -114,7 +110,7 @@ public class RegisterServiceImpl implements RegisterService {
             userInformation.setStatus(UserStatus.ENABLE);
             userInformationRepository.save(userInformation);
         }
-        
+
     }
 
 }
