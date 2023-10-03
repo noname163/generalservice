@@ -1,11 +1,15 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -39,12 +43,13 @@ public class Subject {
 
     private LocalDateTime updateDate;
 
-    @OneToMany(mappedBy = "subject")
-    private List<Topic> topics;
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    private Topic topic;
 
     @ManyToMany
     private List<Teacher> teachers;
 
-    @OneToMany(mappedBy = "subject")
-    private List<StudentTarget> studentTargets;
+    @ManyToMany
+    private List<Combination> combinations;
 }

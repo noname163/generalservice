@@ -1,7 +1,7 @@
 package com.cepa.generalservice.utils;
 
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,23 +16,26 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtTokenUtil {
-    @Value("$jwt.secret-key")    
+    @Value("${jwt.secret-key}")
     private String jwtSecret;
-    // @Value("$jwt.expires-time")    
-    private long expireTime = 1000;
 
+    @Value("${jwt.expires-time}")
+    private long expireTime;
 
     private String doGenerateToken(Map<String, Object> claims, String subject, Integer expriesTime) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(
                         new Date(System.currentTimeMillis() + expireTime * expriesTime))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
     }
 
     public String generateJwtToken(UserInformation user, Integer expiresTime) {
-        Map<String, Object> claims = new Hashtable();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
+        claims.put("avatar", user.getImageURL());
         return doGenerateToken(claims, user.getEmail(), expiresTime);
     }
 

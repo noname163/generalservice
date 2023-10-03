@@ -13,8 +13,8 @@ public class UserInformationMapper {
         return UserInformation
                 .builder()
                 .email(userRegister.getEmail())
-                .fullName(userRegister.getFullName())
                 .role(userRegister.getRole())
+                .fullName(userRegister.getFullName())
                 .password(userRegister.getPassword())
                 .build();
     }

@@ -13,6 +13,7 @@ public class CombinationMapper {
     public CombinationResponse mapEntityToDto(Combination combination) {
         return CombinationResponse.builder()
                 .id(combination.getId())
+                .url(combination.getUrl())
                 .name(combination.getName())
                 .description(combination.getDescription())
                 .build();

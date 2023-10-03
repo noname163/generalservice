@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "SystemTransaction")
+@Table(name = "System_Transaction")
 @Getter
 @Setter
 @Builder
@@ -33,7 +34,7 @@ public class SystemTransaction {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "system_transaction_sequence")
     private long id;
 
-    private Date createDate;
+    private LocalDateTime createDate;
 
     private TransactionStatus status;
 

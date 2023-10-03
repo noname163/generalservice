@@ -1,6 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,25 +18,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "StudentSubmission")
+@Table(name = "Subject_Target")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentSubmission {
+public class SubjectTarget {
     @Id
-    @SequenceGenerator(name = "student_submission_sequence", sequenceName = "student_submission_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "student_submission_sequence")
+    @SequenceGenerator(name = "subject_target_sequence", sequenceName = "subject_target_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "subject_target_sequence")
     private long id;
 
-    private Double score;
+    private Integer max;
 
-    private Long testId;
+    private Integer min;
 
-    private Date submitDate;
+    private String level;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
-    private UserInformation studentInformation;
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
+
+    @ManyToOne()
+    @JoinColumn(name = "target_id")
+    private StudentTarget studentTarget;
 }

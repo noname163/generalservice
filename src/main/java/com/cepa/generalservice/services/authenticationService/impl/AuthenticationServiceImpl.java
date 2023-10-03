@@ -8,7 +8,6 @@ import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
-import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;

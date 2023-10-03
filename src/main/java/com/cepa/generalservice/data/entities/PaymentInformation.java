@@ -1,6 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -19,25 +18,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Target")
+@Table(name = "Payment_Information")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Target {
+public class PaymentInformation {
     @Id
-    @SequenceGenerator(name = "target_sequence", sequenceName = "target_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "target_sequence")
+    @SequenceGenerator(name = "payment_information_sequence", sequenceName = "payment_information_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "payment_information_sequence")
     private long id;
 
-    private Integer max;
+    private String description;
 
-    private Integer min;
+    private String cardNumber;
+    
+    private String nameOnCard;
 
-    private String level;
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "subjetc_id")
-    private Subject subject;
+    @JoinColumn(name = "information_id")
+    private UserInformation information;
 }

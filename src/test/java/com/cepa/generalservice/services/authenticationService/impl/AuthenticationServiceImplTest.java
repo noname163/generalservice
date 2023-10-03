@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cepa.generalservice.data.constants.UserStatus;
@@ -40,16 +41,14 @@ public class AuthenticationServiceImplTest {
 
     @BeforeEach
     void setup() {
-        userInformationRepository = mock(UserInformationRepository.class);
-        passwordEncoder = mock(PasswordEncoder.class);
-        jwtTokenUtil = mock(JwtTokenUtil.class);
-        loginService = loginService
+        MockitoAnnotations.openMocks(this);
+        loginService = AuthenticationServiceImpl
                 .builder()
                 .jwtTokenUtil(jwtTokenUtil)
                 .passwordEncoder(passwordEncoder)
                 .userInformationRepository(userInformationRepository)
                 .build();
-        loginRequest = loginRequest.builder()
+        loginRequest = LoginRequest.builder()
                 .email("test@gmail.com")
                 .password("password")
                 .build();
@@ -69,7 +68,8 @@ public class AuthenticationServiceImplTest {
         String refreshToken = "sampleRefreshToken";
 
         // Mock repository behavior
-        when(userInformationRepository.findByEmailAndStatus(email,UserStatus.ENABLE)).thenReturn(Optional.of(userInformation));
+        when(userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE))
+                .thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
         when(jwtTokenUtil.generateJwtToken(userInformation, 1000)).thenReturn(accessToken);
         when(jwtTokenUtil.generateJwtToken(userInformation, 10000)).thenReturn(refreshToken);
@@ -107,8 +107,8 @@ public class AuthenticationServiceImplTest {
         userInformation.setEmail(email);
         userInformation.setPassword(passwordEncoder.encode(password));
 
-
-        when(userInformationRepository.findByEmailAndStatus(email,UserStatus.ENABLE)).thenReturn(Optional.of(userInformation));
+        when(userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE))
+                .thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> loginService.login(loginRequest));

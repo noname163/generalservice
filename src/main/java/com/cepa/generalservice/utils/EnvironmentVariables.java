@@ -18,14 +18,5 @@ public class EnvironmentVariables {
     @Value("${system.request.method}")    
     private String systemMethod;
 
-    
-    // @Value("${ui.register.success}")
-    // private String registerUI;
-
-    // @Value("${ui.forgot.password}")
-    // private String forgotUI;
-
-
-
 }
 

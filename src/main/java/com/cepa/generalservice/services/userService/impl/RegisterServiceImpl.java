@@ -1,18 +1,17 @@
 package com.cepa.generalservice.services.userService.impl;
 
 import java.util.List;
-import java.util.UUID;
 
-import javax.mail.SendFailedException;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
+import com.cepa.generalservice.data.dto.request.StudentRegister;
+import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
@@ -23,9 +22,7 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
-import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
-import com.cepa.generalservice.services.notificationService.SendEmailService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 import com.cepa.generalservice.services.userService.RegisterService;
 
@@ -49,29 +46,37 @@ public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private UserInformationMapper userInformationMapper;
 
-    private void studentRegister(UserInformation userInformation, List<Long> subjectIds) {
-        studentTargetService.createStudentTarget(userInformation, subjectIds);
-    }
-
+    @Override
     @Transactional
-    private void teacherRegister(UserInformation userInformation, Long subjectIds) {
-        teacherRepository.findByInformationId(userInformation.getId())
-                .ifPresent(teacher -> {
-                    throw new BadRequestException("Teacher information exists");
-                });
-        Subject subject = subjectRepository.findById(subjectIds)
-                .orElseThrow(() -> new BadRequestException("Cannot found subject with ID: " + subjectIds));
+    public void teacherRegister(TeacherRegister teacherRegister) {
+
+        UserRegister newUserInformation = teacherRegister.getUserRegister();
+        newUserInformation.setRole(Role.TEACHER);
+        UserInformation userInformation = userRegister(newUserInformation);
+
+        List<Subject> subjects = subjectRepository.findByIdIn(teacherRegister.getSubjectIds())
+                .orElseThrow(() -> new BadRequestException(
+                        "Cannot found subject with ID: " + teacherRegister.getSubjectIds().toString()));
 
         teacherRepository.save(Teacher
                 .builder()
                 .information(userInformation)
-                .subject(subject)
+                .subjects(subjects)
                 .build());
     }
 
     @Override
     @Transactional
-    public void userRegister(UserRegister userRegister) {
+    public void studentRegister(StudentRegister studentRegister) {
+        UserRegister newUserInformation = studentRegister.getUserRegister();
+        newUserInformation.setRole(Role.STUDENT);
+
+        UserInformation userInformation = userRegister(newUserInformation);
+
+        studentTargetService.createStudentTarget(userInformation, studentRegister.getCombinationIds());
+    }
+
+    private UserInformation userRegister(UserRegister userRegister) {
 
         userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
             throw new BadRequestException("Email " + userRegister.getEmail() + " is already exist");
@@ -82,17 +87,11 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
-        UserInformation newUser = userInformationMapper
-                .mapDtoToEntity(userRegister);
-        newUser.setStatus(UserStatus.WATTING);
-        newUser = userInformationRepository.save(newUser);
 
-        if (userRegister.getRole().equals(Role.TEACHER)) {
-            teacherRegister(newUser, userRegister.getSubjectId().get(0));
-        }
-        if (userRegister.getRole().equals(Role.STUDENT)) {
-            studentRegister(newUser, userRegister.getSubjectId());
-        }
+        UserInformation newUser = userInformationMapper.mapDtoToEntity(userRegister);
+        newUser.setStatus(UserStatus.WATTING);
+
+        return userInformationRepository.save(newUser);
     }
 
     @Override

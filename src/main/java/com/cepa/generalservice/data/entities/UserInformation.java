@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.entities;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -45,6 +46,10 @@ public class UserInformation {
 
     private String imageURL;
 
+    private LocalDateTime createDate;
+
+    private LocalDateTime updateDate;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -54,6 +59,9 @@ public class UserInformation {
     @OneToMany(mappedBy = "information")
     private List<Teacher> teachers;
 
+    @OneToMany(mappedBy = "information")
+    private List<PaymentInformation> paymentInformation;
+
     @OneToMany(mappedBy = "adminInformation")
     private List<SystemTransaction> adminTransactions;
 
@@ -62,9 +70,6 @@ public class UserInformation {
 
     @OneToMany(mappedBy = "studentInformation")
     private List<SystemTransaction> studentTransactions;
-
-    @OneToMany(mappedBy = "studentInformation")
-    private List<StudentSubmission> studentSubmissions;
 
     @OneToMany(mappedBy = "studentInformation")
     private List<StudentTarget> studentTargets;
