@@ -10,5 +10,5 @@ public interface ConfirmTokenService {
     public Boolean verifyToken(String provideToken);
     public UserInformation getUserByToken(String token);
     public ConfirmToken getTokenByEmail(String email);
-    public UUID resendToken(String email);
+    public UUID reCreateToken(ConfirmToken confirmToken);
 }
