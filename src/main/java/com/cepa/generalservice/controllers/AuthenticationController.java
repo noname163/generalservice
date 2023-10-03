@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
@@ -52,10 +53,11 @@ public class AuthenticationController {
     @PostMapping("/register/teacher")
     public ResponseEntity<Void> createTeacherAccount(@Valid @RequestBody TeacherRegister teacherRegister) {
         registerService.teacherRegister(teacherRegister);
-        eventPublisher.publishEvent(teacherRegister.getUserRegister().getEmail(), teacherRegister.getUserRegister().getFullName());
+        eventPublisher.publishEvent(teacherRegister.getUserRegister().getEmail(),
+                teacherRegister.getUserRegister().getFullName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    
+
     @Operation(summary = "Create new student")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created successfull."),
@@ -65,14 +67,15 @@ public class AuthenticationController {
     @PostMapping("/register/student")
     public ResponseEntity<Void> createStudentAccount(@Valid @RequestBody StudentRegister studentRegister) {
         registerService.studentRegister(studentRegister);
-        eventPublisher.publishEvent(studentRegister.getUserRegister().getEmail(), studentRegister.getUserRegister().getFullName());
+        eventPublisher.publishEvent(studentRegister.getUserRegister().getEmail(),
+                studentRegister.getUserRegister().getFullName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "User login")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successfull.", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
             }),
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
@@ -84,10 +87,28 @@ public class AuthenticationController {
                 .body(authenticationService.login(loginRequest));
     }
 
+    @Operation(summary = "Forgot password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
     @PatchMapping("/forgot-password/{email}")
-    public ResponseEntity<Void> forgotPassword(@PathVariable String email){
+    public ResponseEntity<Void> forgotPassword(@PathVariable String email) {
         UserInformation userInformation = userService.getUserByEmail(email);
         eventPublisher.publishEvent(userInformation.getEmail(), userInformation.getFullName());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Reset password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Reset password successfull."),
+            @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PatchMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ForgotPassword forgotPassword) {
+        userService.forgotPassword(forgotPassword);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -98,7 +119,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping("/confirm")
-    public ResponseEntity<Void> confirmOtp(@RequestParam(name="token") String token, @RequestParam(name="from") String from){
+    public ResponseEntity<Void> confirmOtp(@RequestParam(name = "token") String token,
+            @RequestParam(name = "from") String from) {
         userService.userConfirmEmail(token, from);
         return ResponseEntity.ok().build();
     }

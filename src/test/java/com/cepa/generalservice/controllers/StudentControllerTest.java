@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
+import com.cepa.generalservice.services.userService.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -34,12 +35,9 @@ public class StudentControllerTest {
     @MockBean
     private StudentInformationService studentInformationService;
 
-<<<<<<< HEAD
     @MockBean
     private UserService userService;
 
-=======
->>>>>>> fc86c36d34e788d6325f7bbdf3c4784da51007af
     @Test
     @WithMockUser(authorities = "STUDENT") 
     public void testGetStudentInformation() throws Exception {

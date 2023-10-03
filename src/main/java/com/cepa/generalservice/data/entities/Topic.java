@@ -38,6 +38,7 @@ public class Topic {
 
     private LocalDateTime updateDate;
 
-    @OneToMany
-    private List<Subject> subjects;
+    @ManyToOne
+    @JoinColumn(name = "subjetc_id")
+    private Subject subject;
 }

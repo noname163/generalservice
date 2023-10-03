@@ -5,17 +5,25 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import lombok.extern.log4j.Log4j2;
 
 @Controller
+@Log4j2
 public class RedirectController {
-    @GetMapping("/redirect")
-    public void redirectToValidateSuccess(HttpServletResponse response) {
+    public void redirectToValidateSuccess(HttpServletResponse response){
         try {
             response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/123");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
-    } 
+    }
+
+    public void rediectToResetPassword(HttpServletResponse response, String uuid){
+        try {
+            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/123/"+uuid);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
 }

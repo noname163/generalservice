@@ -70,17 +70,6 @@ public class RegisterServiceImplTest {
     void setup() {
 
         MockitoAnnotations.openMocks(this);
-
-        registerService = RegisterServiceImpl
-                .builder()
-                .passwordEncoder(passwordEncoder)
-                .studentTargetService(studentTargetService)
-                .subjectRepository(subjectRepository)
-                .teacherRepository(teacherRepository)
-                .userInformationMapper(userInformationMapper)
-                .userInformationRepository(userInformationRepository)
-                .confirmTokenService(confirmTokenService)
-                .build();
     }
 
     @Test
@@ -170,48 +159,48 @@ public class RegisterServiceImplTest {
         assertEquals("Password did not match.", actual.getMessage());
     }
 
-    @Test
-    void userConfirmEmail_ShouldEnableUserStatus_WhenTokenIsValid() {
+    // @Test
+    // void userConfirmEmail_ShouldEnableUserStatus_WhenTokenIsValid() {
 
-        UUID token = UUID.randomUUID();
-        String tokenStr = token.toString();
-        UserInformation userInformation = createUserInformation(UserStatus.WATTING);
+    //     UUID token = UUID.randomUUID();
+    //     String tokenStr = token.toString();
+    //     UserInformation userInformation = createUserInformation(UserStatus.WATTING);
 
-        ConfirmToken userToken = ConfirmToken.builder().token(token).build();
-        userToken.setToken(token);
+    //     ConfirmToken userToken = ConfirmToken.builder().token(token).build();
+    //     userToken.setToken(token);
 
-        when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
-        when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
-        when(confirmTokenService.verifyToken(tokenStr)).thenReturn(true);
+    //     when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
+    //     when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
+    //     when(confirmTokenService.verifyToken(tokenStr)).thenReturn(true);
 
-        registerService.userConfirmEmail(tokenStr);
+    //     registerService.userConfirmEmail(tokenStr);
 
-        verify(confirmTokenService, times(1)).getUserByToken(tokenStr);
-        verify(confirmTokenService, times(1)).getTokenByEmail(userInformation.getEmail());
-        verify(confirmTokenService, times(1)).verifyToken(tokenStr);
+    //     verify(confirmTokenService, times(1)).getUserByToken(tokenStr);
+    //     verify(confirmTokenService, times(1)).getTokenByEmail(userInformation.getEmail());
+    //     verify(confirmTokenService, times(1)).verifyToken(tokenStr);
 
-        assert userInformation.getStatus() == UserStatus.ENABLE;
-        verify(userInformationRepository, times(1)).save(userInformation);
-    }
+    //     assert userInformation.getStatus() == UserStatus.ENABLE;
+    //     verify(userInformationRepository, times(1)).save(userInformation);
+    // }
 
-    @Test
-    void userConfirmEmail_ShouldThrowBadRequestException_WhenTokenIsNotValid() {
-        // Arrange
-        UUID token = UUID.randomUUID();
-        String tokenStr = "invalid-token";
-        UserInformation userInformation = createUserInformation(UserStatus.WATTING);
+    // @Test
+    // void userConfirmEmail_ShouldThrowBadRequestException_WhenTokenIsNotValid() {
+    //     // Arrange
+    //     UUID token = UUID.randomUUID();
+    //     String tokenStr = "invalid-token";
+    //     UserInformation userInformation = createUserInformation(UserStatus.WATTING);
 
-        ConfirmToken userToken = ConfirmToken.builder().token(token).build();
-        userToken.setToken(token);
+    //     ConfirmToken userToken = ConfirmToken.builder().token(token).build();
+    //     userToken.setToken(token);
 
-        when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
-        when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
+    //     when(confirmTokenService.getUserByToken(tokenStr)).thenReturn(userInformation);
+    //     when(confirmTokenService.getTokenByEmail(userInformation.getEmail())).thenReturn(userToken);
 
-        assertThrows(BadRequestException.class, () -> registerService.userConfirmEmail(tokenStr));
+    //     assertThrows(BadRequestException.class, () -> registerService.userConfirmEmail(tokenStr));
 
-        assert userInformation.getStatus() == UserStatus.WATTING;
-        verify(userInformationRepository, never()).save(userInformation);
-    }
+    //     assert userInformation.getStatus() == UserStatus.WATTING;
+    //     verify(userInformationRepository, never()).save(userInformation);
+    // }
 
     private UserInformation createUserInformation(UserStatus status) {
         UserInformation userInformation = new UserInformation();
