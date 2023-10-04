@@ -21,7 +21,7 @@ public class RedirectController {
 
     public void rediectToResetPassword(HttpServletResponse response, String uuid){
         try {
-            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/"+uuid);
+            response.sendRedirect("https://capstone-cvn31x8t0-dat-nguyen-304.vercel.app/forgot-password/"+uuid);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
