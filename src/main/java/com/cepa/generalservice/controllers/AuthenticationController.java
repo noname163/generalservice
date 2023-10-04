@@ -119,8 +119,9 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping("/confirm")
-    public ResponseEntity<Void> confirmOtp(@RequestParam(name = "token") String token,
-            @RequestParam(name = "from") String from) {
+    public ResponseEntity<Void> confirmOtp(
+            @RequestParam(name = "token") String token,
+            @RequestParam(name = "from", required = false,defaultValue = "") String from) {
         userService.userConfirmEmail(token, from);
         return ResponseEntity.ok().build();
     }

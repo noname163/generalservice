@@ -41,6 +41,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
             ConfirmToken newToken = ConfirmToken.builder()
                     .createAt(createAt)
                     .expriedAt(expiredAt)
+                    .isValidation(false)
                     .token(token)
                     .userInformation(userInformation)
                     .build();
@@ -55,7 +56,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
 
         UUID uuidToken = UUID.fromString(provideToken);
         ConfirmToken systemToken = confirmTokenRepository
-                .findByToken(uuidToken)
+                .findByTokenAndIsValidationFalse(uuidToken)
                 .orElseThrow(() -> new BadRequestException("Token not valid."));
 
         LocalDateTime expriedAt = systemToken.getExpriedAt();
@@ -65,6 +66,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
             throw new BadRequestException("Token has expired.");
         }
 
+        systemToken.setIsValidation(true);
         systemToken.setCount(0);
         confirmTokenRepository.save(systemToken);
 
@@ -75,7 +77,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
     public UserInformation getUserByToken(String token) {
         UUID userToken = UUID.fromString(token);
         ConfirmToken systemToken = confirmTokenRepository
-                .findByToken(userToken)
+                .findByTokenAndIsValidationFalse(userToken)
                 .orElseThrow(() -> new BadRequestException("Token not valid."));
         return systemToken.getUserInformation();
     }
@@ -85,7 +87,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         LocalDateTime current = LocalDateTime.now();
 
         if (confirmToken.getCount() > 5
-                && current.minusSeconds(confirmToken.getCreateAt().getSecond()).getSecond() < 30) {
+                && current.getSecond() - confirmToken.getCreateAt().getSecond() < 30) {
             throw new BadRequestException("Please try again after 2 minus");
         }
         UUID newToken = UUID.randomUUID();
@@ -96,6 +98,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         confirmToken.setToken(newToken);
         confirmToken.setCreateAt(createAt);
         confirmToken.setExpriedAt(expiredAt);
+        confirmToken.setIsValidation(false);
         confirmToken.setCount(confirmToken.getCount() + 1);
         confirmTokenRepository.save(confirmToken);
 

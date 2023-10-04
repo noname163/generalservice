@@ -15,7 +15,6 @@ import lombok.Setter;
 @Setter
 public class ForgotPassword {
     @NotBlank(message = "UUID is require")
-    @Pattern(regexp = Validation.EMAIL_REGEX, message = "Email must in format abc@domain.com")
     public String uuid;
     @NotBlank(message = "Password is require.")
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")

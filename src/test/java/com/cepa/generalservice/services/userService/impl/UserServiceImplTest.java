@@ -162,7 +162,7 @@ public class UserServiceImplTest {
 
     @Test
     void testUserConfirmEmailSuccessForgotPassword() {
-        // Arrange
+
         String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
         String from = "forgot-password";
 
@@ -195,7 +195,7 @@ public class UserServiceImplTest {
         when(confirmTokenService.verifyToken(token)).thenReturn(false);
 
         // Act and Assert
-        assertThrows(BadRequestException.class, () -> {
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> {
             userService.userConfirmEmail(token, from);
         });
 
@@ -205,5 +205,7 @@ public class UserServiceImplTest {
         // Verify that the redirectController methods were not called
         verify(redirectController, never()).redirectToValidateSuccess(any(),any());
         verify(redirectController, never()).rediectToResetPassword(any(), any());
+
+        assertEquals("Token not valid",actual.getMessage());
     }
 }
