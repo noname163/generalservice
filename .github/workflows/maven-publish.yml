@@ -23,6 +23,8 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+    - name: Clean package
+      run: mvn clean install
     - name: Build with Maven
       if: ${{ job.status == 'success' }}
       run: mvn -B package --file pom.xml
