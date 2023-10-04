@@ -8,6 +8,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.UUID;
+
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
+import javax.xml.bind.Validator;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -153,15 +158,14 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testForgotPasswordSuccess() throws Exception {
-        // Arrange
+
         String userEmail = "test@example.com";
         UserInformation userInformation = UserInformation.builder().build();
-        // Mock userService behavior
+
         when(userService.getUserByEmail(userEmail)).thenReturn(userInformation);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        // Act and Assert
         mockMvc.perform(MockMvcRequestBuilders
                 .patch("/api/authentication/forgot-password/{email}", userEmail)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -171,15 +175,13 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testForgotPasswordUserNotFound() throws Exception {
-        // Arrange
+
         String userEmail = "nonexistent@example.com";
 
-        // Mock userService behavior to throw BadRequestException (User not found)
         when(userService.getUserByEmail(userEmail)).thenThrow(new BadRequestException("User not valid."));
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        // Act and Assert
         mockMvc.perform(MockMvcRequestBuilders
                 .patch("/api/authentication/forgot-password/{email}", userEmail)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -190,18 +192,16 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testResetPasswordSuccess() throws Exception {
-        // Arrange
+
         ForgotPassword forgotPassword = ForgotPassword.builder().build();
         forgotPassword.setPassword("newPassword");
         forgotPassword.setConfirmPassword("newPassword");
         forgotPassword.setUuid("token123");
 
-        // Mock userService behavior
         doNothing().when(userService).forgotPassword(any(ForgotPassword.class));
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        // Act and Assert
         mockMvc.perform(MockMvcRequestBuilders
                 .patch("/api/authentication/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -209,6 +209,7 @@ public class AuthenticationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
     }
+
     @Test
     public void testResetPasswordUserNotValid() throws Exception {
         ForgotPassword forgotPassword = ForgotPassword.builder().build();
@@ -216,17 +217,69 @@ public class AuthenticationControllerTest {
         forgotPassword.setConfirmPassword("newPassword");
         forgotPassword.setUuid("token123");
 
-        // Mock userService behavior to throw BadRequestException (User not valid)
-        Mockito.doThrow(new BadRequestException("User not valid.")).when(userService).forgotPassword(any(ForgotPassword.class));
+        Mockito.doThrow(new BadRequestException("User not valid.")).when(userService)
+                .forgotPassword(any(ForgotPassword.class));
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-         mockMvc.perform(MockMvcRequestBuilders
+        mockMvc.perform(MockMvcRequestBuilders
                 .patch("/api/authentication/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(forgotPassword)))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
+                .andReturn();
+    }
+
+    @Test
+    public void testConfirmOtpSuccess() throws Exception {
+
+        String token = UUID.randomUUID().toString();
+
+        doNothing().when(userService).userConfirmEmail(Mockito.anyString(), Mockito.anyString());
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/authentication/confirm")
+                .param("token", token))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void testConfirmOtpWithFrom() throws Exception {
+
+        String token = UUID.randomUUID().toString();
+        String from = "register";
+
+        doNothing().when(userService).userConfirmEmail(Mockito.anyString(), Mockito.anyString());
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/authentication/confirm")
+                .param("token", token)
+                .param("from", from))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void testConfirmOtpInvalidToken() throws Exception {
+
+        String invalidToken = "invalid_token";
+
+        Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
+                .userConfirmEmail(Mockito.anyString(), Mockito.anyString());
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/authentication/confirm")
+                .param("token", invalidToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
                 .andReturn();
     }
 
