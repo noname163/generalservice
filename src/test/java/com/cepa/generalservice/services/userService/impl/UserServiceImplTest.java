@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.cepa.generalservice.controllers.RedirectController;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
+import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
@@ -33,6 +39,11 @@ public class UserServiceImplTest {
 
     @Mock
     private ConfirmTokenService confirmTokenService;
+
+    @Mock
+    private RedirectController redirectController;
+    @Mock
+    private HttpServletResponse response;
 
     @BeforeEach
     public void setUp() {
@@ -72,7 +83,7 @@ public class UserServiceImplTest {
 
     @Test
     void testForgotPassword() {
-    
+
         String uuid = "valid_uuid";
         String password = "new_password";
         String confirmPassword = "new_password";
@@ -120,5 +131,79 @@ public class UserServiceImplTest {
         verify(userInformationRepository, never()).save(any());
 
         assertEquals("Password did not match", actual.getMessage());
+    }
+
+    @Test
+    void testUserConfirmEmailSuccessRegister() {
+        // Arrange
+        String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
+        String from = "register";
+
+        UserInformation mockUserInformation = new UserInformation();
+        mockUserInformation.setEmail("test@example.com");
+
+        ConfirmToken mockUserToken = new ConfirmToken();
+        
+        mockUserToken.setToken(UUID.fromString(token));
+        when(confirmTokenService.getUserByToken(token)).thenReturn(mockUserInformation);
+        when(confirmTokenService.getTokenByEmail(mockUserInformation.getEmail())).thenReturn(mockUserToken);
+        when(confirmTokenService.verifyToken(token)).thenReturn(true);
+
+       
+        userService.userConfirmEmail(token, from);
+
+        verify(userInformationRepository, times(1)).save(mockUserInformation);
+
+        verify(redirectController, times(1)).redirectToValidateSuccess(response,token); // Replace any() with the actual response
+
+
+        assertEquals(mockUserInformation.getStatus(),UserStatus.ENABLE);
+    }
+
+    @Test
+    void testUserConfirmEmailSuccessForgotPassword() {
+        // Arrange
+        String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
+        String from = "forgot-password";
+
+       UserInformation mockUserInformation = new UserInformation();
+        mockUserInformation.setEmail("test@example.com");
+
+        ConfirmToken mockUserToken = new ConfirmToken();
+        
+        mockUserToken.setToken(UUID.fromString(token));
+        when(confirmTokenService.getUserByToken(token)).thenReturn(mockUserInformation);
+        when(confirmTokenService.getTokenByEmail(mockUserInformation.getEmail())).thenReturn(mockUserToken);
+        when(confirmTokenService.verifyToken(token)).thenReturn(true);
+        // Act
+        userService.userConfirmEmail(token, from);
+
+        verify(redirectController, times(1)).rediectToResetPassword(response, token); // Replace any() with the actual response
+    }
+
+    @Test
+    void testUserConfirmEmailTokenNotValid() {
+        // Arrange
+        String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
+        String from = "register";
+
+        ConfirmToken mockUserToken = new ConfirmToken();
+        mockUserToken.setToken(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef09d"));
+        // Mock the behavior of your dependencies
+        when(confirmTokenService.getUserByToken(token)).thenReturn(new UserInformation());
+        when(confirmTokenService.getTokenByEmail(any())).thenReturn(mockUserToken);
+        when(confirmTokenService.verifyToken(token)).thenReturn(false);
+
+        // Act and Assert
+        assertThrows(BadRequestException.class, () -> {
+            userService.userConfirmEmail(token, from);
+        });
+
+        // Verify that userInformationRepository.save was not called
+        verify(userInformationRepository, never()).save(any());
+
+        // Verify that the redirectController methods were not called
+        verify(redirectController, never()).redirectToValidateSuccess(any(),any());
+        verify(redirectController, never()).rediectToResetPassword(any(), any());
     }
 }

@@ -11,9 +11,9 @@ import lombok.extern.log4j.Log4j2;
 @Controller
 @Log4j2
 public class RedirectController {
-    public void redirectToValidateSuccess(HttpServletResponse response){
+    public void redirectToValidateSuccess(HttpServletResponse response, String token){
         try {
-            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/123");
+            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/"+token);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -21,7 +21,7 @@ public class RedirectController {
 
     public void rediectToResetPassword(HttpServletResponse response, String uuid){
         try {
-            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/123/"+uuid);
+            response.sendRedirect("https://capstone-ibc2bij0w-dat-nguyen-304.vercel.app/auth/"+uuid);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
