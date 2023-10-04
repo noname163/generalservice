@@ -39,8 +39,7 @@ public class RegisterServiceImpl implements RegisterService {
     private SubjectRepository subjectRepository;
     @Autowired
     private StudentTargetService studentTargetService;
-    @Autowired
-    private ConfirmTokenService confirmTokenService;
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -94,22 +93,6 @@ public class RegisterServiceImpl implements RegisterService {
         return userInformationRepository.save(newUser);
     }
 
-    @Override
-    public void userConfirmEmail(String token) {
-        UserInformation userInformation = confirmTokenService.getUserByToken(token);
-        ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
-
-        if (!userToken.getToken().toString().equals(token)) {
-            throw new BadRequestException("Token not valid");
-        }
-
-        Boolean confirmStatus = confirmTokenService.verifyToken(token);
-
-        if (Boolean.TRUE.equals(confirmStatus)) {
-            userInformation.setStatus(UserStatus.ENABLE);
-            userInformationRepository.save(userInformation);
-        }
-
-    }
+   
 
 }

@@ -1,7 +1,6 @@
 package com.cepa.generalservice.services.confirmTokenService.impl;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.ConfirmTokenRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 
 import lombok.Builder;
@@ -24,26 +22,32 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
     private ConfirmTokenRepository confirmTokenRepository;
     @Autowired
     private UserInformationRepository userInformationRepository;
-    @Autowired
-    private SecurityContextService securityContextService;
 
     @Override
     public UUID saveConfirmToken(String email) {
-
         UserInformation userInformation = userInformationRepository
                 .findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Not exist user with email: " + email));
+                .orElseThrow(() -> new BadRequestException("User with email not found: " + email));
+
+        ConfirmToken existingToken = confirmTokenRepository.findByUserInformation(userInformation).orElse(null);
+
         UUID token = UUID.randomUUID();
         LocalDateTime createAt = LocalDateTime.now();
-        LocalDateTime expriedAt = createAt.plusMinutes(15);
+        LocalDateTime expiredAt = createAt.plusMinutes(15);
 
-        confirmTokenRepository.save(ConfirmToken
-                .builder()
-                .createAt(createAt)
-                .expriedAt(expriedAt)
-                .token(token)
-                .userInformation(userInformation)
-                .build());
+        if (existingToken != null) {
+            reCreateToken(existingToken);
+        } else {
+            ConfirmToken newToken = ConfirmToken.builder()
+                    .createAt(createAt)
+                    .expriedAt(expiredAt)
+                    .isValidation(false)
+                    .token(token)
+                    .userInformation(userInformation)
+                    .build();
+            confirmTokenRepository.save(newToken);
+        }
+
         return token;
     }
 
@@ -52,7 +56,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
 
         UUID uuidToken = UUID.fromString(provideToken);
         ConfirmToken systemToken = confirmTokenRepository
-                .findByToken(uuidToken)
+                .findByTokenAndIsValidationFalse(uuidToken)
                 .orElseThrow(() -> new BadRequestException("Token not valid."));
 
         LocalDateTime expriedAt = systemToken.getExpriedAt();
@@ -62,6 +66,10 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
             throw new BadRequestException("Token has expired.");
         }
 
+        systemToken.setIsValidation(true);
+        systemToken.setCount(0);
+        confirmTokenRepository.save(systemToken);
+
         return true;
     }
 
@@ -69,28 +77,17 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
     public UserInformation getUserByToken(String token) {
         UUID userToken = UUID.fromString(token);
         ConfirmToken systemToken = confirmTokenRepository
-                .findByToken(userToken)
+                .findByTokenAndIsValidationFalse(userToken)
                 .orElseThrow(() -> new BadRequestException("Token not valid."));
         return systemToken.getUserInformation();
     }
 
     @Override
-    public UUID resendToken(String email) {
-        UserInformation userInformation = userInformationRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Not exist user with email " + email));
-
-        Optional<ConfirmToken> tokenOtp = confirmTokenRepository.findByUserInformation(userInformation);
-
-        if (tokenOtp.isEmpty()) {
-            return saveConfirmToken(userInformation.getEmail());
-        }
-
+    public UUID reCreateToken(ConfirmToken confirmToken) {
         LocalDateTime current = LocalDateTime.now();
 
-        ConfirmToken token = tokenOtp.get();
-
-        if (token.getCount() > 5 && current.minusMinutes(token.getCreateAt().getMinute()).getMinute() < 2) {
+        if (confirmToken.getCount() > 5
+                && current.getSecond() - confirmToken.getCreateAt().getSecond() < 30) {
             throw new BadRequestException("Please try again after 2 minus");
         }
         UUID newToken = UUID.randomUUID();
@@ -98,13 +95,12 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         LocalDateTime createAt = LocalDateTime.now();
         LocalDateTime expiredAt = createAt.plusMinutes(15);
 
-        token.setToken(newToken);
-        token.setCreateAt(createAt);
-        token.setExpriedAt(expiredAt);
-        token.setCount(token.getCount() + 1);
-        confirmTokenRepository.save(token);
-
-        securityContextService.setSecurityContext(email);
+        confirmToken.setToken(newToken);
+        confirmToken.setCreateAt(createAt);
+        confirmToken.setExpriedAt(expiredAt);
+        confirmToken.setIsValidation(false);
+        confirmToken.setCount(confirmToken.getCount() + 1);
+        confirmTokenRepository.save(confirmToken);
 
         return newToken;
     }

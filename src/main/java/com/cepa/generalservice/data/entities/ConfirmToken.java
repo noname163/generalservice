@@ -39,6 +39,8 @@ public class ConfirmToken {
 
     private Integer count;
 
+    private Boolean isValidation;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserInformation userInformation;

@@ -10,6 +10,7 @@ import com.cepa.generalservice.data.entities.UserInformation;
 
 
 public interface ConfirmTokenRepository extends JpaRepository<ConfirmToken, Long> {
-    public Optional<ConfirmToken> findByToken(UUID token);
+    public Optional<ConfirmToken> findByTokenAndIsValidationFalse(UUID token);
     public Optional<ConfirmToken> findByUserInformation(UserInformation userInformation);
+    public Boolean existsConfirmTokenByUserInformation(UserInformation userInformation);
 }
