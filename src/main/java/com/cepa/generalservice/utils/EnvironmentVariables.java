@@ -22,8 +22,8 @@ public class EnvironmentVariables {
     @Value("${ui.register.success}")
     private String registerUI;
 
-    // @Value("${ui.forgot.password}")
-    // private String forgotUI;
+    @Value("${ui.forgot.password}")
+    private String forgotUI;
 
 
 
