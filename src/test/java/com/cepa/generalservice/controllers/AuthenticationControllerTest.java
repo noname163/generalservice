@@ -282,5 +282,4 @@ public class AuthenticationControllerTest {
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
                 .andReturn();
     }
-
 }
