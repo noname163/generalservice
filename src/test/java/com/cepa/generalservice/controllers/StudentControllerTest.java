@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
+import com.cepa.generalservice.services.userService.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -33,6 +34,9 @@ public class StudentControllerTest {
 
     @MockBean
     private StudentInformationService studentInformationService;
+
+    @MockBean
+    private UserService userService;
 
     @Test
     @WithMockUser(authorities = "STUDENT") 

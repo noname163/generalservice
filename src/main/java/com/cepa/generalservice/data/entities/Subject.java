@@ -43,9 +43,8 @@ public class Subject {
 
     private LocalDateTime updateDate;
 
-    @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
+    @OneToMany(mappedBy = "subject")
+    private List<Topic> topics;
 
     @ManyToMany
     private List<Teacher> teachers;

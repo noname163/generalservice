@@ -8,5 +8,5 @@ public interface RegisterService {
 
     public void studentRegister(StudentRegister studentRegister);
 
-    public void userConfirmEmail(String token);
+    
 }
