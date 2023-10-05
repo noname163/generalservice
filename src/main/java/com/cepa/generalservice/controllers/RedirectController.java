@@ -32,5 +32,6 @@ public class RedirectController {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+        
     }
 }
