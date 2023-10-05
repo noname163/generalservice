@@ -90,7 +90,7 @@ public class ConfirmTokenServiceImplTest {
         when(userInformationRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act and Assert
-        BadRequestException actual= assertThrows(BadRequestException.class, () -> {
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> {
             confirmTokenService.saveConfirmToken(email);
         });
 
@@ -109,7 +109,8 @@ public class ConfirmTokenServiceImplTest {
         mockConfirmToken.setCreateAt(now.minusMinutes(10)); // Token is not expired
         mockConfirmToken.setExpriedAt(mockConfirmToken.getCreateAt().plusMinutes(5));
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken)).thenReturn(Optional.of(mockConfirmToken));
+        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+                .thenReturn(Optional.of(mockConfirmToken));
 
         // Act
         boolean result = confirmTokenService.verifyToken(providedToken.toString());
@@ -132,7 +133,8 @@ public class ConfirmTokenServiceImplTest {
         mockConfirmToken.setCreateAt(now); // Token is not expired
         mockConfirmToken.setExpriedAt(mockConfirmToken.getCreateAt().minusMinutes(5));
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken)).thenReturn(Optional.of(mockConfirmToken));
+        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+                .thenReturn(Optional.of(mockConfirmToken));
 
         // Act and Assert
         BadRequestException actual = assertThrows(BadRequestException.class, () -> {
@@ -140,7 +142,7 @@ public class ConfirmTokenServiceImplTest {
         });
 
         assertFalse(mockConfirmToken.getIsValidation());
-        assertEquals("Token has expired.",actual.getMessage());
+        assertEquals("Token has expired.", actual.getMessage());
         verify(confirmTokenRepository, never()).save(mockConfirmToken);
     }
 
@@ -154,7 +156,8 @@ public class ConfirmTokenServiceImplTest {
         mockConfirmToken.setIsValidation(false);
         mockConfirmToken.setUserInformation(mockUserInformation);
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken)).thenReturn(Optional.of(mockConfirmToken));
+        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+                .thenReturn(Optional.of(mockConfirmToken));
 
         // Act
         UserInformation result = confirmTokenService.getUserByToken(providedToken.toString());
@@ -171,27 +174,27 @@ public class ConfirmTokenServiceImplTest {
         when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken)).thenReturn(Optional.empty());
 
         // Act and Assert
-        BadRequestException actual =assertThrows(BadRequestException.class, () -> {
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> {
             confirmTokenService.getUserByToken(providedToken.toString());
         });
-        assertEquals("Token not valid.",actual.getMessage());
+        assertEquals("Token not valid.", actual.getMessage());
     }
 
     @Test
     void testReCreateTokenSuccess() {
         // Arrange
         ConfirmToken mockConfirmToken = new ConfirmToken();
-        mockConfirmToken.setCount(4);  // Less than 5
+        mockConfirmToken.setCount(4); // Less than 5
         LocalDateTime now = LocalDateTime.now();
-        mockConfirmToken.setCreateAt(now.minusSeconds(31));  // More than 30 seconds ago
-        UUID newToken = UUID.randomUUID();
+        mockConfirmToken.setCreateAt(now.minusSeconds(31));
+        mockConfirmToken.setExpriedAt(now.plusMinutes(1));
         when(confirmTokenRepository.save(any())).thenReturn(mockConfirmToken);
 
         // Act
         UUID result = confirmTokenService.reCreateToken(mockConfirmToken);
 
         // Assert
-        assertNotEquals(newToken, result);
+        assertNotNull(result);
         verify(confirmTokenRepository, times(1)).save(mockConfirmToken);
     }
 
@@ -201,7 +204,8 @@ public class ConfirmTokenServiceImplTest {
         ConfirmToken mockConfirmToken = new ConfirmToken();
         mockConfirmToken.setCount(6);
         LocalDateTime now = LocalDateTime.now();
-        mockConfirmToken.setCreateAt(now.plusNanos(10));  
+        mockConfirmToken.setCreateAt(now.plusNanos(10));
+        mockConfirmToken.setExpriedAt(now.plusMinutes(1));
 
         // Act and Assert
         BadRequestException actual = assertThrows(BadRequestException.class, () -> {
@@ -209,9 +213,8 @@ public class ConfirmTokenServiceImplTest {
         });
 
         verify(confirmTokenRepository, never()).save(mockConfirmToken);
-        assertEquals("Please try again after 2 minus",actual.getMessage());
+        assertEquals("Please try again after 2 minus", actual.getMessage());
     }
-
 
     @Test
     void testGetTokenByEmailSuccess() {
@@ -220,7 +223,8 @@ public class ConfirmTokenServiceImplTest {
         UserInformation mockUserInformation = new UserInformation();
         when(userInformationRepository.findByEmail(userEmail)).thenReturn(Optional.of(mockUserInformation));
         ConfirmToken mockConfirmToken = new ConfirmToken();
-        when(confirmTokenRepository.findByUserInformation(mockUserInformation)).thenReturn(Optional.of(mockConfirmToken));
+        when(confirmTokenRepository.findByUserInformation(mockUserInformation))
+                .thenReturn(Optional.of(mockConfirmToken));
 
         // Act
         ConfirmToken result = confirmTokenService.getTokenByEmail(userEmail);
@@ -239,7 +243,7 @@ public class ConfirmTokenServiceImplTest {
         BadRequestException actual = assertThrows(BadRequestException.class, () -> {
             confirmTokenService.getTokenByEmail(userEmail);
         });
-        assertEquals("Not exist user with email test@example.com",actual.getMessage());
+        assertEquals("Not exist user with email test@example.com", actual.getMessage());
     }
 
     @Test
@@ -257,6 +261,5 @@ public class ConfirmTokenServiceImplTest {
 
         assertEquals("This user not have token.", actual.getMessage());
     }
-
 
 }
