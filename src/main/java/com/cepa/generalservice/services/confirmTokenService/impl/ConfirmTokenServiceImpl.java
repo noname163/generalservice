@@ -31,22 +31,22 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
 
         ConfirmToken existingToken = confirmTokenRepository.findByUserInformation(userInformation).orElse(null);
 
-        UUID token = UUID.randomUUID();
         LocalDateTime createAt = LocalDateTime.now();
         LocalDateTime expiredAt = createAt.plusMinutes(15);
 
         if (existingToken != null) {
-            reCreateToken(existingToken);
-        } else {
-            ConfirmToken newToken = ConfirmToken.builder()
-                    .createAt(createAt)
-                    .expriedAt(expiredAt)
-                    .isValidation(false)
-                    .token(token)
-                    .userInformation(userInformation)
-                    .build();
-            confirmTokenRepository.save(newToken);
+            return reCreateToken(existingToken);
         }
+
+        UUID token = UUID.randomUUID();
+        ConfirmToken newToken = ConfirmToken.builder()
+                .createAt(createAt)
+                .expriedAt(expiredAt)
+                .isValidation(false)
+                .token(token)
+                .userInformation(userInformation)
+                .build();
+        confirmTokenRepository.save(newToken);
 
         return token;
     }
@@ -87,6 +87,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         LocalDateTime current = LocalDateTime.now();
 
         if (confirmToken.getCount() > 5
+                && current.compareTo(confirmToken.getExpriedAt())<0
                 && current.getSecond() - confirmToken.getCreateAt().getSecond() < 30) {
             throw new BadRequestException("Please try again after 2 minus");
         }
