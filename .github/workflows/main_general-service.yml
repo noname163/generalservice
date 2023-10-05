@@ -26,7 +26,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      
+      - name: Clean package
+        run: mvn clean install
+      - name: Build with Maven
+        if: ${{ job.status == 'success' }}
+        run: mvn -B package --file pom.xml
       - name: Run tests
         if: ${{ job.status == 'success' }}
         run: mvn test
