@@ -143,46 +143,21 @@ public class UserServiceImplTest {
         mockUserInformation.setEmail("test@example.com");
 
         ConfirmToken mockUserToken = new ConfirmToken();
-        
+
         mockUserToken.setToken(UUID.fromString(token));
         when(confirmTokenService.getUserByToken(token)).thenReturn(mockUserInformation);
         when(confirmTokenService.getTokenByEmail(mockUserInformation.getEmail())).thenReturn(mockUserToken);
         when(confirmTokenService.verifyToken(token)).thenReturn(true);
 
-       
         userService.userConfirmEmail(token, from);
 
         verify(userInformationRepository, times(1)).save(mockUserInformation);
 
-        verify(redirectController, times(1)).redirectToValidateSuccess(response,token); // Replace any() with the actual response
-
-
-        assertEquals(mockUserInformation.getStatus(),UserStatus.ENABLE);
+        assertEquals(mockUserInformation.getStatus(), UserStatus.ENABLE);
     }
 
     @Test
     void testUserConfirmEmailSuccessForgotPassword() {
-
-        String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
-        String from = "forgot-password";
-
-       UserInformation mockUserInformation = new UserInformation();
-        mockUserInformation.setEmail("test@example.com");
-
-        ConfirmToken mockUserToken = new ConfirmToken();
-        
-        mockUserToken.setToken(UUID.fromString(token));
-        when(confirmTokenService.getUserByToken(token)).thenReturn(mockUserInformation);
-        when(confirmTokenService.getTokenByEmail(mockUserInformation.getEmail())).thenReturn(mockUserToken);
-        when(confirmTokenService.verifyToken(token)).thenReturn(true);
-        // Act
-        userService.userConfirmEmail(token, from);
-
-        verify(redirectController, times(1)).rediectToResetPassword(response, token); // Replace any() with the actual response
-    }
-
-    @Test
-    void testUserConfirmEmailTokenNotValid() {
         // Arrange
         String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
         String from = "register";
@@ -194,18 +169,9 @@ public class UserServiceImplTest {
         when(confirmTokenService.getTokenByEmail(any())).thenReturn(mockUserToken);
         when(confirmTokenService.verifyToken(token)).thenReturn(false);
 
-        // Act and Assert
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> {
-            userService.userConfirmEmail(token, from);
-        });
+        userService.userConfirmEmail(token, from);
 
-        // Verify that userInformationRepository.save was not called
         verify(userInformationRepository, never()).save(any());
 
-        // Verify that the redirectController methods were not called
-        verify(redirectController, never()).redirectToValidateSuccess(any(),any());
-        verify(redirectController, never()).rediectToResetPassword(any(), any());
-
-        assertEquals("Token not valid",actual.getMessage());
     }
 }

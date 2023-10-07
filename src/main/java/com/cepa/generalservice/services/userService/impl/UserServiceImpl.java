@@ -51,24 +51,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void userConfirmEmail(String token, String from) {
-        UserInformation userInformation = confirmTokenService.getUserByToken(token);
-        ConfirmToken userToken = confirmTokenService.getTokenByEmail(userInformation.getEmail());
-
-        if (!userToken.getToken().toString().equals(token)) {
-            throw new BadRequestException("Token not valid");
-        }
 
         Boolean confirmStatus = confirmTokenService.verifyToken(token);
 
-        if (Boolean.TRUE.equals(confirmStatus)) {
-            if (from.equals("register")) {
-                userInformation.setStatus(UserStatus.ENABLE);
-                userInformationRepository.save(userInformation);
-                redirect.redirectToValidateSuccess(response, token);
-            }
-            if (from.equals("forgot-password")) {
-                redirect.rediectToResetPassword(response, userToken.getToken().toString());
-            }
+        if (Boolean.TRUE.equals(confirmStatus) && from.equals("register")) {
+            UserInformation userInformation = confirmTokenService.getUserByToken(token);
+            userInformation.setStatus(UserStatus.ENABLE);
+            userInformationRepository.save(userInformation);
         }
 
     }

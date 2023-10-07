@@ -24,7 +24,7 @@ public class UserRegister {
 
     @NotBlank(message = "Full name is require.")
     @NotNull(message = "Full name is require.")
-    @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Full name must more than 6 digit")
+    @Size(min = Validation.MIN_LENGTH_FULLNAME, message = "Full name must more than 6 digit")
     private String fullName;
 
     @NotBlank(message = "Password is require.")
