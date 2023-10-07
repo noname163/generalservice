@@ -37,15 +37,13 @@ public class EventHandler implements ApplicationListener<Event> {
         Map<String, String> data = (Map<String, String>) event.getData();
         String email = data.get("email");
         String fullName = data.get("fullname");
-        String host = data.get("host");
         String api = stringUtil.getSubfixApi(data.get("URI"));
         UUID token = confirmTokenService.saveConfirmToken(email);
-        String url = environmentVariables.getSystemMethod() + host + "/api/authentication" + "/" + "confirm" + "?"
-                + "token=" + token.toString();
+        
 
         if (api.equals("register")) {
             try {
-                url = url+"&from=register";
+                String url = environmentVariables.getRegisterUI()+ token.toString();
                 sendEmailService.sendVerificationEmail(email, fullName, url);
                 log.info("Send success for email " + email);
             } catch (SendFailedException e) {
@@ -55,7 +53,7 @@ public class EventHandler implements ApplicationListener<Event> {
             }
         }
         if(api.equals("forgot-password")){
-            url = url+"&from=forgot-password";
+            String url = environmentVariables.getForgotUI()+ token.toString();
             sendEmailService.sendForgotPasswordEmail(email, fullName, url);
         }
     }
