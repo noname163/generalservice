@@ -5,7 +5,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.UserStatus;
-import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -43,11 +42,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
-    }
-
-    @Override
-    public void forgotPassword(ForgotPassword forgotPassword) {
-        
     }
 
 }
