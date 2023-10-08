@@ -43,6 +43,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         ConfirmToken newToken = ConfirmToken.builder()
                 .createAt(createAt)
                 .expriedAt(expiredAt)
+                .count(0)
                 .status(TokenStatus.CREATED)
                 .token(token)
                 .userInformation(userInformation)
