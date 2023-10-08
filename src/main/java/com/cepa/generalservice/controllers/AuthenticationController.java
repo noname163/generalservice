@@ -120,9 +120,23 @@ public class AuthenticationController {
     })
     @GetMapping("/confirm")
     public ResponseEntity<Void> confirmOtp(
-            @RequestParam(name = "token") String token,
-            @RequestParam(name = "from", required = false,defaultValue = "") String from) {
-        userService.userConfirmEmail(token, from);
+            @RequestParam(name = "token") String token) {
+        userService.userConfirmEmail(token);
+        eventPublisher.publishEvent(token);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Resend token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resend successfull."),
+            @ApiResponse(responseCode = "400", description = "Email not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PatchMapping("/resend-token")
+    public ResponseEntity<Void> resendToken(
+            @RequestParam(name = "email") String email) {
+        UserInformation userInformation = userService.getUserByEmail(email);
+        eventPublisher.publishEvent(userInformation);
         return ResponseEntity.ok().build();
     }
 

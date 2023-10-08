@@ -20,8 +20,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.cepa.generalservice.data.constants.TokenStatus;
+import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.ConfirmTokenRepository;
@@ -104,12 +107,12 @@ public class ConfirmTokenServiceImplTest {
         UUID providedToken = UUID.randomUUID();
         ConfirmToken mockConfirmToken = new ConfirmToken();
         mockConfirmToken.setToken(providedToken);
-        mockConfirmToken.setIsValidation(false);
+        mockConfirmToken.setStatus(TokenStatus.CREATED);
         LocalDateTime now = LocalDateTime.now();
         mockConfirmToken.setCreateAt(now.minusMinutes(10)); // Token is not expired
         mockConfirmToken.setExpriedAt(mockConfirmToken.getCreateAt().plusMinutes(5));
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+        when(confirmTokenRepository.findByTokenAndStatusNot(providedToken,TokenStatus.CHANGED))
                 .thenReturn(Optional.of(mockConfirmToken));
 
         // Act
@@ -117,7 +120,7 @@ public class ConfirmTokenServiceImplTest {
 
         // Assert
         assertTrue(result);
-        assertTrue(mockConfirmToken.getIsValidation());
+        assertEquals(TokenStatus.CONFIRMED, mockConfirmToken.getStatus());
         assertEquals(0, mockConfirmToken.getCount());
         verify(confirmTokenRepository, times(1)).save(mockConfirmToken);
     }
@@ -128,12 +131,12 @@ public class ConfirmTokenServiceImplTest {
         UUID providedToken = UUID.randomUUID();
         ConfirmToken mockConfirmToken = new ConfirmToken();
         mockConfirmToken.setToken(providedToken);
-        mockConfirmToken.setIsValidation(false);
+        mockConfirmToken.setStatus(TokenStatus.CONFIRMED);;
         LocalDateTime now = LocalDateTime.now();
         mockConfirmToken.setCreateAt(now); // Token is not expired
         mockConfirmToken.setExpriedAt(mockConfirmToken.getCreateAt().minusMinutes(5));
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+        when(confirmTokenRepository.findByTokenAndStatusNot(providedToken,TokenStatus.CHANGED))
                 .thenReturn(Optional.of(mockConfirmToken));
 
         // Act and Assert
@@ -141,7 +144,6 @@ public class ConfirmTokenServiceImplTest {
             confirmTokenService.verifyToken(providedToken.toString());
         });
 
-        assertFalse(mockConfirmToken.getIsValidation());
         assertEquals("Token has expired.", actual.getMessage());
         verify(confirmTokenRepository, never()).save(mockConfirmToken);
     }
@@ -153,10 +155,10 @@ public class ConfirmTokenServiceImplTest {
         UserInformation mockUserInformation = new UserInformation();
         ConfirmToken mockConfirmToken = new ConfirmToken();
         mockConfirmToken.setToken(providedToken);
-        mockConfirmToken.setIsValidation(false);
+        mockConfirmToken.setStatus(TokenStatus.CREATED);
         mockConfirmToken.setUserInformation(mockUserInformation);
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken))
+        when(confirmTokenRepository.findByToken(providedToken))
                 .thenReturn(Optional.of(mockConfirmToken));
 
         // Act
@@ -171,7 +173,7 @@ public class ConfirmTokenServiceImplTest {
         // Arrange
         UUID providedToken = UUID.randomUUID();
 
-        when(confirmTokenRepository.findByTokenAndIsValidationFalse(providedToken)).thenReturn(Optional.empty());
+        when(confirmTokenRepository.findByTokenAndStatusNot(providedToken,TokenStatus.CHANGED)).thenReturn(Optional.empty());
 
         // Act and Assert
         BadRequestException actual = assertThrows(BadRequestException.class, () -> {

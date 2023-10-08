@@ -3,8 +3,6 @@ package com.cepa.generalservice.event;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.mail.SendFailedException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.notificationService.SendEmailService;
+import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.EnvironmentVariables;
 import com.cepa.generalservice.utils.StringUtil;
 
@@ -27,6 +26,8 @@ public class EventHandler implements ApplicationListener<Event> {
     @Autowired
     private ConfirmTokenService confirmTokenService;
     @Autowired
+    private UserService userService;
+    @Autowired
     private StringUtil stringUtil;
     @Autowired
     private EnvironmentVariables environmentVariables;
@@ -37,24 +38,26 @@ public class EventHandler implements ApplicationListener<Event> {
         Map<String, String> data = (Map<String, String>) event.getData();
         String email = data.get("email");
         String fullName = data.get("fullname");
+        String usertoken = data.get("token");
         String api = stringUtil.getSubfixApi(data.get("URI"));
-        UUID token = confirmTokenService.saveConfirmToken(email);
         
-
-        if (api.equals("register")) {
-            try {
+        
+        if (api.equals("register")||api.equals("resend-token")) {
+                UUID token = confirmTokenService.saveConfirmToken(email);
                 String url = environmentVariables.getRegisterUI()+ token.toString();
                 sendEmailService.sendVerificationEmail(email, fullName, url);
                 log.info("Send success for email " + email);
-            } catch (SendFailedException e) {
-                log.error("----Errors Log Send Verification Mail----");
-                log.error(e.getMessage());
-                e.printStackTrace();
-            }
+           
         }
         if(api.equals("forgot-password")){
+            UUID token = confirmTokenService.saveConfirmToken(email);
             String url = environmentVariables.getForgotUI()+ token.toString();
             sendEmailService.sendForgotPasswordEmail(email, fullName, url);
+            log.info("Send success for email " + email);
+        }
+        if(api.equals("confirm")){
+            userService.userActivateAccount(usertoken);
+            log.info("Actived success for token" + usertoken);
         }
     }
 }

@@ -5,8 +5,5 @@ import com.cepa.generalservice.data.dto.request.TeacherRegister;
 
 public interface RegisterService {
     public void teacherRegister(TeacherRegister teacherRegister);
-
     public void studentRegister(StudentRegister studentRegister);
-
-    
 }

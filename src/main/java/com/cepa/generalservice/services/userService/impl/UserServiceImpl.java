@@ -1,14 +1,11 @@
 package com.cepa.generalservice.services.userService.impl;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.cepa.generalservice.controllers.RedirectController;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
-import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
@@ -25,9 +22,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ConfirmTokenService confirmTokenService;
     @Autowired
-    private RedirectController redirect;
-    @Autowired
-    private HttpServletResponse response;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UserInformation getUserByEmail(String email) {
@@ -45,21 +40,23 @@ public class UserServiceImpl implements UserService {
         confirmTokenService.verifyToken(forgotPassword.getUuid());
         UserInformation userInformation = confirmTokenService.getUserByToken(forgotPassword.getUuid());
 
-        userInformation.setPassword(forgotPassword.getPassword());
+        userInformation.setPassword(passwordEncoder.encode(forgotPassword.getPassword()));
         userInformationRepository.save(userInformation);
     }
 
     @Override
-    public void userConfirmEmail(String token, String from) {
+    public Boolean userConfirmEmail(String token) {
+        return confirmTokenService.verifyToken(token);
+    }
 
+    @Override
+    public void userActivateAccount(String token) {
         Boolean confirmStatus = confirmTokenService.verifyToken(token);
-
-        if (Boolean.TRUE.equals(confirmStatus) && from.equals("register")) {
+        if (Boolean.TRUE.equals(confirmStatus)) {
             UserInformation userInformation = confirmTokenService.getUserByToken(token);
             userInformation.setStatus(UserStatus.ENABLE);
             userInformationRepository.save(userInformation);
         }
-
     }
 
 }

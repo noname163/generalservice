@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,7 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cepa.generalservice.controllers.RedirectController;
 import com.cepa.generalservice.data.constants.UserStatus;
@@ -42,6 +43,10 @@ public class UserServiceImplTest {
 
     @Mock
     private RedirectController redirectController;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @Mock
     private HttpServletResponse response;
 
@@ -87,12 +92,10 @@ public class UserServiceImplTest {
         String uuid = "valid_uuid";
         String password = "new_password";
         String confirmPassword = "new_password";
+        String encodePassword = "password_encode";
 
         UserInformation mockUserInformation = new UserInformation();
         mockUserInformation.setPassword("old_password");
-
-        when(confirmTokenService.verifyToken(uuid)).thenReturn(true);
-        when(confirmTokenService.getUserByToken(uuid)).thenReturn(mockUserInformation);
 
         ForgotPassword forgotPassword = ForgotPassword
                 .builder()
@@ -101,11 +104,16 @@ public class UserServiceImplTest {
                 .confirmPassword(confirmPassword)
                 .build();
 
+        when(confirmTokenService.verifyToken(uuid)).thenReturn(true);
+        when(confirmTokenService.getUserByToken(uuid)).thenReturn(mockUserInformation);
+        when(passwordEncoder.encode(forgotPassword.getPassword())).thenReturn(encodePassword);
+
         userService.forgotPassword(forgotPassword);
 
         verify(userInformationRepository, times(1)).save(mockUserInformation);
+        verify(passwordEncoder, times(1)).encode(forgotPassword.getPassword());
 
-        assertEquals(mockUserInformation.getPassword(), password);
+        assertEquals(mockUserInformation.getPassword(), encodePassword);
     }
 
     @Test
@@ -134,10 +142,9 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void testUserConfirmEmailSuccessRegister() {
+    void testUserConfirmEmailSuccess() {
         // Arrange
         String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
-        String from = "register";
 
         UserInformation mockUserInformation = new UserInformation();
         mockUserInformation.setEmail("test@example.com");
@@ -149,29 +156,27 @@ public class UserServiceImplTest {
         when(confirmTokenService.getTokenByEmail(mockUserInformation.getEmail())).thenReturn(mockUserToken);
         when(confirmTokenService.verifyToken(token)).thenReturn(true);
 
-        userService.userConfirmEmail(token, from);
-
-        verify(userInformationRepository, times(1)).save(mockUserInformation);
-
-        assertEquals(mockUserInformation.getStatus(), UserStatus.ENABLE);
+        Boolean result = userService.userConfirmEmail(token);
+        assertEquals(Boolean.TRUE, result);
     }
 
     @Test
-    void testUserConfirmEmailSuccessForgotPassword() {
+    public void testUserActivateAccount() {
         // Arrange
-        String token = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
-        String from = "register";
+        String token = UUID.randomUUID().toString();
 
-        ConfirmToken mockUserToken = new ConfirmToken();
-        mockUserToken.setToken(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef09d"));
-        // Mock the behavior of your dependencies
-        when(confirmTokenService.getUserByToken(token)).thenReturn(new UserInformation());
-        when(confirmTokenService.getTokenByEmail(any())).thenReturn(mockUserToken);
-        when(confirmTokenService.verifyToken(token)).thenReturn(false);
+        // Mock the behavior of confirmTokenService
+        Mockito.when(confirmTokenService.verifyToken(token)).thenReturn(true);
+        UserInformation userInformation = new UserInformation();
+        Mockito.when(confirmTokenService.getUserByToken(token)).thenReturn(userInformation);
 
-        userService.userConfirmEmail(token, from);
+        // Act
+        userService.userActivateAccount(token);
 
-        verify(userInformationRepository, never()).save(any());
-
+        // Assert
+        verify(confirmTokenService, times(1)).verifyToken(token);
+        verify(confirmTokenService, times(1)).getUserByToken(token);
+        verify(userInformationRepository, times(1)).save(userInformation);
     }
+
 }

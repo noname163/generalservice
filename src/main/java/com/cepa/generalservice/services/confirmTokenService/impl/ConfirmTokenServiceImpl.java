@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cepa.generalservice.data.constants.TokenStatus;
 import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.ConfirmTokenRepository;
@@ -42,7 +43,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         ConfirmToken newToken = ConfirmToken.builder()
                 .createAt(createAt)
                 .expriedAt(expiredAt)
-                .isValidation(false)
+                .status(TokenStatus.CREATED)
                 .token(token)
                 .userInformation(userInformation)
                 .build();
@@ -56,7 +57,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
 
         UUID uuidToken = UUID.fromString(provideToken);
         ConfirmToken systemToken = confirmTokenRepository
-                .findByTokenAndIsValidationFalse(uuidToken)
+                .findByTokenAndStatusNot(uuidToken, TokenStatus.CHANGED)
                 .orElseThrow(() -> new BadRequestException("Token not valid."));
 
         LocalDateTime expriedAt = systemToken.getExpriedAt();
@@ -66,7 +67,8 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
             throw new BadRequestException("Token has expired.");
         }
 
-        systemToken.setIsValidation(true);
+        systemToken.setStatus(systemToken.getStatus()
+                .equals(TokenStatus.CREATED) ? TokenStatus.CONFIRMED : TokenStatus.CHANGED);
         systemToken.setCount(0);
         confirmTokenRepository.save(systemToken);
 
@@ -76,10 +78,10 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
     @Override
     public UserInformation getUserByToken(String token) {
         UUID userToken = UUID.fromString(token);
-        ConfirmToken systemToken = confirmTokenRepository
-                .findByTokenAndIsValidationFalse(userToken)
-                .orElseThrow(() -> new BadRequestException("Token not valid."));
-        return systemToken.getUserInformation();
+        return confirmTokenRepository
+                .findByToken(userToken)
+                .orElseThrow(() -> new BadRequestException("Token not valid."))
+                .getUserInformation();
     }
 
     @Override
@@ -87,7 +89,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         LocalDateTime current = LocalDateTime.now();
 
         if (confirmToken.getCount() > 5
-                && current.compareTo(confirmToken.getExpriedAt())<0
+                && current.compareTo(confirmToken.getExpriedAt()) < 0
                 && current.getSecond() - confirmToken.getCreateAt().getSecond() < 30) {
             throw new BadRequestException("Please try again after 2 minus");
         }
@@ -99,7 +101,7 @@ public class ConfirmTokenServiceImpl implements ConfirmTokenService {
         confirmToken.setToken(newToken);
         confirmToken.setCreateAt(createAt);
         confirmToken.setExpriedAt(expiredAt);
-        confirmToken.setIsValidation(false);
+        confirmToken.setStatus(TokenStatus.CREATED);
         confirmToken.setCount(confirmToken.getCount() + 1);
         confirmTokenRepository.save(confirmToken);
 
