@@ -4,15 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,17 +18,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
-import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
-import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.notificationService.SendEmailService;
@@ -100,7 +95,7 @@ public class RegisterServiceImplTest {
         when(userInformationRepository.findByEmail(any())).thenReturn(Optional.of(new UserInformation()));
 
         // Act & Assert
-        BadRequestException actual = assertThrows(BadRequestException.class,
+        SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.teacherRegister(teacherRegister));
 
         assertEquals("Email teacher@example.com is already exist", actual.getMessage());
@@ -132,7 +127,7 @@ public class RegisterServiceImplTest {
         StudentRegister studentRegister = createStudentRegister();
         when(userInformationRepository.findByEmail(any())).thenReturn(Optional.of(new UserInformation()));
 
-        BadRequestException actual = assertThrows(BadRequestException.class,
+        SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.studentRegister(studentRegister));
 
         assertEquals("Email student@example.com is already exist", actual.getMessage());
@@ -153,7 +148,7 @@ public class RegisterServiceImplTest {
         when(userInformationMapper.mapDtoToEntity(studentRegister.getUserRegister())).thenReturn(newUser);
         when(userInformationRepository.save(any())).thenReturn(newUser);
 
-        BadRequestException actual = assertThrows(BadRequestException.class,
+        SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.studentRegister(studentRegister));
 
         assertEquals("Password did not match.", actual.getMessage());

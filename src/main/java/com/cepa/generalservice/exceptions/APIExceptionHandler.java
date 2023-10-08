@@ -33,6 +33,11 @@ public class APIExceptionHandler {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).build();
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(SuccessHandler.class)
+    public ResponseEntity<ExceptionResponse> handleSuccessResponse(SuccessHandler ex) {
+        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).build();
+        return new ResponseEntity<>(errors, HttpStatus.OK);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
