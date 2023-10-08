@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.cepa.generalservice.data.constants.TokenStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +41,7 @@ public class ConfirmToken {
 
     private Integer count;
 
-    private Boolean isValidation;
+    private TokenStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
