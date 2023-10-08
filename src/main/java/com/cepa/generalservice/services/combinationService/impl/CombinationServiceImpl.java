@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.SortType;
-import com.cepa.generalservice.data.dto.request.PaginationRequest;
 import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.entities.Combination;
