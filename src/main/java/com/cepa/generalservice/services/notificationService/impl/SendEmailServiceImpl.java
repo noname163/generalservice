@@ -22,7 +22,7 @@ public class SendEmailServiceImpl implements SendEmailService {
     private JavaMailSender javaMailSender;
 
     @Override
-    public void sendVerificationEmail(String to, String userName,String url) throws SendFailedException {
+    public void sendVerificationEmail(String to, String userName,String url) {
 
         MimeMessage massage = javaMailSender.createMimeMessage();
 

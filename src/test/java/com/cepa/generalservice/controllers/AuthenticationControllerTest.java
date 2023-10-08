@@ -230,7 +230,7 @@ public class AuthenticationControllerTest {
 
         String token = UUID.randomUUID().toString();
 
-        doNothing().when(userService).userConfirmEmail(Mockito.anyString(), Mockito.anyString());
+        when(userService.userConfirmEmail(Mockito.anyString())).thenReturn(true);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
@@ -242,30 +242,12 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testConfirmOtpWithFrom() throws Exception {
-
-        String token = UUID.randomUUID().toString();
-        String from = "register";
-
-        doNothing().when(userService).userConfirmEmail(Mockito.anyString(), Mockito.anyString());
-
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/authentication/confirm")
-                .param("token", token)
-                .param("from", from))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
-
-    @Test
     public void testConfirmOtpInvalidToken() throws Exception {
 
         String invalidToken = "invalid_token";
 
         Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
-                .userConfirmEmail(Mockito.anyString(), Mockito.anyString());
+                .userConfirmEmail(Mockito.anyString());
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
@@ -275,5 +257,29 @@ public class AuthenticationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
                 .andReturn();
+    }
+
+    @Test
+    public void testResendToken() throws Exception {
+        String email = "test@example.com";
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/authentication/resend-token")
+                .param("email", email)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testResendTokenWithInvalidEmail() throws Exception {
+        String email = "invalid-email";
+
+        Mockito.doThrow(new BadRequestException("Email not valid.")).when(userService)
+                .getUserByEmail(email);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/authentication/resend-token")
+                .param("email", email)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Email not valid."));
     }
 }
