@@ -98,7 +98,7 @@ public class RegisterServiceImplTest {
         SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.teacherRegister(teacherRegister));
 
-        assertEquals("Email teacher@example.com is already exist", actual.getMessage());
+        assertEquals("1", actual.getMessage());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class RegisterServiceImplTest {
         SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.studentRegister(studentRegister));
 
-        assertEquals("Email student@example.com is already exist", actual.getMessage());
+        assertEquals("1", actual.getMessage());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class RegisterServiceImplTest {
         SuccessHandler actual = assertThrows(SuccessHandler.class,
                 () -> registerService.studentRegister(studentRegister));
 
-        assertEquals("Password did not match.", actual.getMessage());
+        assertEquals("2", actual.getMessage());
     }
 
 
