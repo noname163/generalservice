@@ -79,11 +79,11 @@ public class RegisterServiceImpl implements RegisterService {
     private UserInformation userRegister(UserRegister userRegister) {
 
         userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
-            throw new SuccessHandler("Email " + userRegister.getEmail() + " is already exist");
+            throw new SuccessHandler("1");
         });
 
         if (!userRegister.getPassword().equals(userRegister.getConfirmPassword())) {
-            throw new SuccessHandler("Password did not match.");
+            throw new SuccessHandler("2");
         }
 
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
