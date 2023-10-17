@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse login(LoginRequest loginRequest) {
         UserInformation userInformation = userInformationRepository
                 .findByEmailAndStatus(loginRequest.getEmail(), UserStatus.ENABLE)
-                .orElseThrow(() -> new BadRequestException("User not exist."));
+                .orElseThrow(() -> new SuccessHandler("2"));
         if (!passwordEncoder.matches(loginRequest.getPassword(), userInformation.getPassword())) {
             throw new SuccessHandler("1");
         }
