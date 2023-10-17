@@ -10,6 +10,7 @@ import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
@@ -33,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .findByEmailAndStatus(loginRequest.getEmail(), UserStatus.ENABLE)
                 .orElseThrow(() -> new BadRequestException("User not exist."));
         if (!passwordEncoder.matches(loginRequest.getPassword(), userInformation.getPassword())) {
-            throw new BadRequestException("Username or password is incorrect. Please try again");
+            throw new SuccessHandler("1");
         }
         String accessToken = jwtTokenUtil.generateJwtToken(userInformation, 1000);
         String refreshToken = jwtTokenUtil.generateJwtToken(userInformation, 10000);
