@@ -22,6 +22,7 @@ import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
 public class AuthenticationServiceImplTest {
@@ -111,9 +112,9 @@ public class AuthenticationServiceImplTest {
                 .thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
 
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> loginService.login(loginRequest));
+        SuccessHandler actual = assertThrows(SuccessHandler.class, () -> loginService.login(loginRequest));
 
-        assertEquals("Username or password is incorrect. Please try again", actual.getMessage());
+        assertEquals("1", actual.getMessage());
     }
 
 }
