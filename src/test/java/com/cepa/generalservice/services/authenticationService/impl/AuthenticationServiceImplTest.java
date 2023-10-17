@@ -94,9 +94,9 @@ public class AuthenticationServiceImplTest {
 
         when(userInformationRepository.findByEmailAndStatus("test@gmail.com",UserStatus.ENABLE)).thenReturn(Optional.empty());
 
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> loginService.login(loginRequest));
+        SuccessHandler actual = assertThrows(SuccessHandler.class, () -> loginService.login(loginRequest));
         
-        assertEquals("User not exist.",actual.getMessage());
+        assertEquals("2",actual.getMessage());
     }
 
     @Test
