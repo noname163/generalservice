@@ -9,4 +9,5 @@ import lombok.Setter;
 @Builder
 public class ExceptionResponse {
     private String message;
+    private Integer code;
 }
