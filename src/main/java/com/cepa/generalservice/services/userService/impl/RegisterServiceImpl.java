@@ -21,6 +21,8 @@ import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.DataConfilictException;
+import com.cepa.generalservice.exceptions.InValidInformation;
 import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
@@ -79,11 +81,11 @@ public class RegisterServiceImpl implements RegisterService {
     private UserInformation userRegister(UserRegister userRegister) {
 
         userInformationRepository.findByEmail(userRegister.getEmail()).ifPresent(userInformation -> {
-            throw new SuccessHandler("1");
+            throw new DataConfilictException("Email already exist.");
         });
 
         if (!userRegister.getPassword().equals(userRegister.getConfirmPassword())) {
-            throw new SuccessHandler("2");
+            throw new InValidInformation("Password did not match.");
         }
 
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
