@@ -39,17 +39,17 @@ public class APIExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
     @ExceptionHandler(InValidInformation.class)
-    public ResponseEntity<ExceptionResponse> inValidInformation(SuccessHandler ex) {
+    public ResponseEntity<ExceptionResponse> inValidInformation(InValidInformation ex) {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(2).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
     @ExceptionHandler(DataConfilictException.class)
-    public ResponseEntity<ExceptionResponse> dataConfilictException(SuccessHandler ex) {
+    public ResponseEntity<ExceptionResponse> dataConfilictException(DataConfilictException ex) {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(3).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
     @ExceptionHandler(UserNotExistException.class)
-    public ResponseEntity<ExceptionResponse> userNotExistException(SuccessHandler ex) {
+    public ResponseEntity<ExceptionResponse> userNotExistException(UserNotExistException ex) {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(4).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }

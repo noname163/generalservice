@@ -8,4 +8,5 @@ public interface UserService {
     public void forgotPassword(ForgotPassword forgotPassword);
     public Boolean userConfirmEmail(String token);
     public void userActivateAccount(String token);
+    
 }

@@ -16,6 +16,7 @@ import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
+import io.jsonwebtoken.Claims;
 import lombok.Builder;
 
 @Service
@@ -28,8 +29,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    
-    
+
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
         UserInformation userInformation = userInformationRepository
@@ -40,11 +40,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         String accessToken = jwtTokenUtil.generateJwtToken(userInformation, 1000);
         String refreshToken = jwtTokenUtil.generateJwtToken(userInformation, 10000);
+
+        userInformation.setAccessToken(accessToken);
+        userInformationRepository.save(userInformation);
+
         return LoginResponse
                 .builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    public String reFreshToken(String refreshToken) {
+        Claims claims = jwtTokenUtil.verifyRefreshToken(refreshToken);
+        String email = jwtTokenUtil.getEmailFromClaims(claims);
+        UserInformation userInformation = userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE)
+                .orElseThrow(() -> new UserNotExistException("User not exist."));
+        String newToken = jwtTokenUtil.generateJwtToken(userInformation, 1000);
+        userInformation.setAccessToken(newToken);
+        userInformationRepository.save(userInformation);
+        return newToken;
     }
 
 }

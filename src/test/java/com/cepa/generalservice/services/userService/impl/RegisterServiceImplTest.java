@@ -28,7 +28,6 @@ import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.InValidInformation;
-import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.notificationService.SendEmailService;
@@ -129,10 +128,10 @@ public class RegisterServiceImplTest {
         StudentRegister studentRegister = createStudentRegister();
         when(userInformationRepository.findByEmail(any())).thenReturn(Optional.of(new UserInformation()));
 
-        SuccessHandler actual = assertThrows(SuccessHandler.class,
+        DataConfilictException actual = assertThrows(DataConfilictException.class,
                 () -> registerService.studentRegister(studentRegister));
 
-        assertEquals("1", actual.getMessage());
+        assertEquals("Email already exist.", actual.getMessage());
     }
 
     @Test

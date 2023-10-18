@@ -140,4 +140,15 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verify successfull."),
+            @ApiResponse(responseCode = "400", description = "Token not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @GetMapping("/refresh-token")
+    public ResponseEntity<String> reFreshToken(@RequestParam(name = "token") String token) {
+        return ResponseEntity.ok().body(authenticationService.reFreshToken(token));
+    }
+
 }
