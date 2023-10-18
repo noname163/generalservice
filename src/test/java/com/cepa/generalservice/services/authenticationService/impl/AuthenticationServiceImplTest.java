@@ -22,7 +22,9 @@ import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.InValidInformation;
 import com.cepa.generalservice.exceptions.SuccessHandler;
+import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
 public class AuthenticationServiceImplTest {
@@ -94,9 +96,9 @@ public class AuthenticationServiceImplTest {
 
         when(userInformationRepository.findByEmailAndStatus("test@gmail.com",UserStatus.ENABLE)).thenReturn(Optional.empty());
 
-        SuccessHandler actual = assertThrows(SuccessHandler.class, () -> loginService.login(loginRequest));
+        UserNotExistException actual = assertThrows(UserNotExistException.class, () -> loginService.login(loginRequest));
         
-        assertEquals("2",actual.getMessage());
+        assertEquals("User not exist.",actual.getMessage());
     }
 
     @Test
@@ -112,9 +114,9 @@ public class AuthenticationServiceImplTest {
                 .thenReturn(Optional.of(userInformation));
         when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
 
-        SuccessHandler actual = assertThrows(SuccessHandler.class, () -> loginService.login(loginRequest));
+        InValidInformation actual = assertThrows(InValidInformation.class, () -> loginService.login(loginRequest));
 
-        assertEquals("1", actual.getMessage());
+        assertEquals("Username or password is incorrect. Please try again", actual.getMessage());
     }
 
 }

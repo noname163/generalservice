@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -44,7 +45,11 @@ public class UserInformation {
 
     private Date dateOfBirth;
 
+    @Column(columnDefinition = "TEXT")
     private String imageURL;
+
+    @Column(columnDefinition = "TEXT")
+    private String accessToken;
 
     private LocalDateTime createDate;
 
