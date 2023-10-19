@@ -5,5 +5,6 @@ import com.cepa.generalservice.data.dto.response.LoginResponse;
 
 public interface AuthenticationService {
     public LoginResponse login(LoginRequest loginRequest);
-    public String reFreshToken(String refreshToken);
+    public LoginResponse reFreshToken(String refreshToken);
+    public void logout(String email);
 }

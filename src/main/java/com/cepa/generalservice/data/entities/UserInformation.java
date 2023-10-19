@@ -50,6 +50,9 @@ public class UserInformation {
 
     @Column(columnDefinition = "TEXT")
     private String accessToken;
+    
+    @Column(columnDefinition = "TEXT")
+    private String refreshToken;
 
     private LocalDateTime createDate;
 

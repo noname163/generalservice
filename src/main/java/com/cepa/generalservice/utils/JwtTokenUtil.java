@@ -42,7 +42,7 @@ public class JwtTokenUtil {
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
         claims.put("avatar", user.getImageURL());
-        claims.put("fullname", user.getFullName());
+        claims.put("fullName", user.getFullName());
         return doGenerateToken(claims, user.getEmail(), expiresTime);
     }
 
@@ -61,7 +61,7 @@ public class JwtTokenUtil {
         String email = claims.get("email").toString();
         UserInformation userInformation = userService.getUserByEmail(email);
 
-        if (!token.equals(userInformation.getAccessToken())) {
+        if (!token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 

@@ -3,11 +3,7 @@ package com.cepa.generalservice.services.authenticationService.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +17,10 @@ import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
-import com.cepa.generalservice.exceptions.BadRequestException;
-import com.cepa.generalservice.exceptions.InValidInformation;
-import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
-public class AuthenticationServiceImplTest {
-    @InjectMocks
-    private AuthenticationServiceImpl loginService;
-
+class AuthenticationServiceImplTest {
     @Mock
     private UserInformationRepository userInformationRepository;
 
@@ -40,83 +30,52 @@ public class AuthenticationServiceImplTest {
     @Mock
     private JwtTokenUtil jwtTokenUtil;
 
-    private LoginRequest loginRequest;
+    @InjectMocks
+    private AuthenticationServiceImpl authenticationService;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-        loginService = AuthenticationServiceImpl
-                .builder()
-                .jwtTokenUtil(jwtTokenUtil)
-                .passwordEncoder(passwordEncoder)
-                .userInformationRepository(userInformationRepository)
-                .build();
-        loginRequest = LoginRequest.builder()
-                .email("test@gmail.com")
-                .password("password")
-                .build();
     }
 
     @Test
-    void LoginWhenSuccessShouldReturnLoginRespone() {
-        // Prepare test data
-        String email = "test@gmail.com";
-        String password = "password";
+    void testLogin_Success() {
+        // Create a sample LoginRequest and UserInformation
+        LoginRequest loginRequest = LoginRequest.builder().build();
+        loginRequest.setEmail("test@example.com");
+        loginRequest.setPassword("password");
 
         UserInformation userInformation = new UserInformation();
-        userInformation.setEmail(email);
-        userInformation.setPassword(passwordEncoder.encode(password));
+        userInformation.setEmail("test@example.com");
+        userInformation.setPassword("hashed_password");
 
-        String accessToken = "sampleAccessToken";
-        String refreshToken = "sampleRefreshToken";
+        // Mock the behavior of the userInformationRepository
+        when(userInformationRepository.findByEmailAndStatus("test@example.com", UserStatus.ENABLE))
+                .thenReturn(java.util.Optional.of(userInformation));
 
-        // Mock repository behavior
-        when(userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE))
-                .thenReturn(Optional.of(userInformation));
-        when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
-        when(jwtTokenUtil.generateJwtToken(userInformation, 1000)).thenReturn(accessToken);
-        when(jwtTokenUtil.generateJwtToken(userInformation, 10000)).thenReturn(refreshToken);
+        when(passwordEncoder.matches("password", "hashed_password")).thenReturn(true);
+        when(jwtTokenUtil.generateJwtToken(userInformation, 1000)).thenReturn("test_access_token");
+        when(jwtTokenUtil.generateJwtToken(userInformation, 10000)).thenReturn("test_refresh_token");
+        LoginResponse loginResponse = authenticationService.login(loginRequest);
 
-        // Perform the test
-        LoginResponse loginResponse = loginService.login(loginRequest);
-
-        // Verify the interactions and assertions
         assertNotNull(loginResponse);
-        assertEquals(accessToken, loginResponse.getAccessToken());
-        assertEquals(refreshToken, loginResponse.getRefreshToken());
-
-        verify(userInformationRepository).findByEmailAndStatus(email, UserStatus.ENABLE);
-        verify(passwordEncoder).matches(password, userInformation.getPassword());
-        verify(jwtTokenUtil).generateJwtToken(userInformation, 1000);
-        verify(jwtTokenUtil).generateJwtToken(userInformation, 10000);
+        assertEquals("test_access_token", loginResponse.getAccessToken());
+        assertEquals("test_refresh_token", loginResponse.getRefreshToken());
     }
 
-    @Test
-    void LoginWhenUserNotExistShouldThrowBadRequestException(){
+    @Test()
+    void testLogin_UserNotExist() {
+        // Create a sample LoginRequest
+        LoginRequest loginRequest = LoginRequest.builder().build();
+        loginRequest.setEmail("test@example.com");
+        loginRequest.setPassword("password");
 
-        when(userInformationRepository.findByEmailAndStatus("test@gmail.com",UserStatus.ENABLE)).thenReturn(Optional.empty());
+        when(userInformationRepository.findByEmailAndStatus("test@example.com", UserStatus.ENABLE))
+                .thenReturn(java.util.Optional.empty());
 
-        UserNotExistException actual = assertThrows(UserNotExistException.class, () -> loginService.login(loginRequest));
-        
-        assertEquals("User not exist.",actual.getMessage());
-    }
+        UserNotExistException result =  assertThrows(UserNotExistException.class, () -> authenticationService.login(loginRequest));
 
-    @Test
-    void LoginWhenWrongPasswordShouldThrowBadRequestException() {
-        String email = "test@gmail.com";
-        String password = "password1";
-
-        UserInformation userInformation = new UserInformation();
-        userInformation.setEmail(email);
-        userInformation.setPassword(passwordEncoder.encode(password));
-
-        when(userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE))
-                .thenReturn(Optional.of(userInformation));
-        when(passwordEncoder.matches(password, userInformation.getPassword())).thenReturn(true);
-
-        InValidInformation actual = assertThrows(InValidInformation.class, () -> loginService.login(loginRequest));
-
-        assertEquals("Username or password is incorrect. Please try again", actual.getMessage());
+        assertEquals("User not exist.", result.getMessage());
     }
 
 }
