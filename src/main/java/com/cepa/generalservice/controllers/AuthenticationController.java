@@ -147,8 +147,19 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @GetMapping("/refresh-token")
-    public ResponseEntity<String> reFreshToken(@RequestParam(name = "token") String token) {
+    public ResponseEntity<LoginResponse> reFreshToken(@RequestParam(name = "token") String token) {
         return ResponseEntity.ok().body(authenticationService.reFreshToken(token));
+    }
+    @Operation(summary = "Logout ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Logout successfull."),
+            @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestParam(name = "email") String email) {
+        authenticationService.logout(email);
+        return ResponseEntity.ok().build();
     }
 
 }

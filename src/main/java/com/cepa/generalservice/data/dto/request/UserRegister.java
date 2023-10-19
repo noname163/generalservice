@@ -24,6 +24,7 @@ public class UserRegister {
 
     @NotBlank(message = "Full name is require.")
     @NotNull(message = "Full name is require.")
+    @Pattern(regexp = Validation.ONLY_ALPHABET_REGEX, message = "Full name containt alphabet only.")
     @Size(min = Validation.MIN_LENGTH_FULLNAME, message = "Full name must more than 6 digit")
     private String fullName;
 

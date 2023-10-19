@@ -9,11 +9,10 @@ import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
-import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.InValidInformation;
-import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
+import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 
 import io.jsonwebtoken.Claims;
@@ -29,6 +28,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private UserService userService;
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
@@ -38,10 +39,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), userInformation.getPassword())) {
             throw new InValidInformation("Username or password is incorrect. Please try again");
         }
+
+        return generateLoginResponseByUser(userInformation);
+    }
+
+    @Override
+    public LoginResponse reFreshToken(String refreshToken) {
+        Claims claims = jwtTokenUtil.verifyRefreshToken(refreshToken);
+        String email = jwtTokenUtil.getEmailFromClaims(claims);
+        UserInformation userInformation = userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE)
+                .orElseThrow(() -> new UserNotExistException("User not exist."));
+
+        return generateLoginResponseByUser(userInformation);
+    }
+
+    private LoginResponse generateLoginResponseByUser(UserInformation userInformation) {
+
         String accessToken = jwtTokenUtil.generateJwtToken(userInformation, 1000);
         String refreshToken = jwtTokenUtil.generateJwtToken(userInformation, 10000);
-
         userInformation.setAccessToken(accessToken);
+        userInformation.setRefreshToken(refreshToken);
         userInformationRepository.save(userInformation);
 
         return LoginResponse
@@ -52,15 +69,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String reFreshToken(String refreshToken) {
-        Claims claims = jwtTokenUtil.verifyRefreshToken(refreshToken);
-        String email = jwtTokenUtil.getEmailFromClaims(claims);
-        UserInformation userInformation = userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE)
-                .orElseThrow(() -> new UserNotExistException("User not exist."));
-        String newToken = jwtTokenUtil.generateJwtToken(userInformation, 1000);
-        userInformation.setAccessToken(newToken);
-        userInformationRepository.save(userInformation);
-        return newToken;
-    }
+    public void logout(String email) {
+        UserInformation userInformation = userService.getUserByEmail(email);
 
+        userInformation.setAccessToken("");
+        userInformation.setRefreshToken("");
+        userInformationRepository.save(userInformation);
+    }
 }
