@@ -27,10 +27,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.cepa.generalservice.GeneralserviceApplication;
 import com.cepa.generalservice.configs.SecurityConfig;
+import com.cepa.generalservice.data.dto.request.EmailRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
+import com.cepa.generalservice.data.dto.request.TokenRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -153,16 +155,17 @@ public class AuthenticationControllerTest {
     @Test
     public void testForgotPasswordSuccess() throws Exception {
 
-        String userEmail = "test@example.com";
+        String userEmail = "test@gmail.com";
         UserInformation userInformation = UserInformation.builder().build();
-
+        EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
         when(userService.getUserByEmail(userEmail)).thenReturn(userInformation);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/forgot-password/{email}", userEmail)
-                .contentType(MediaType.APPLICATION_JSON))
+                .patch("/api/authentication/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -170,15 +173,16 @@ public class AuthenticationControllerTest {
     @Test
     public void testForgotPasswordUserNotFound() throws Exception {
 
-        String userEmail = "nonexistent@example.com";
-
-        when(userService.getUserByEmail(userEmail)).thenThrow(new BadRequestException("User not valid."));
+        String userEmail = "nonexistent@gmail.com";
+        EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
+        when(userService.getUserByEmail(emailRequest.getEmail())).thenThrow(new BadRequestException("User not valid."));
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/forgot-password/{email}", userEmail)
-                .contentType(MediaType.APPLICATION_JSON))
+                .patch("/api/authentication/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
                 .andReturn();
@@ -228,16 +232,14 @@ public class AuthenticationControllerTest {
     @Test
     public void testConfirmOtpSuccess() throws Exception {
 
-        String token = UUID.randomUUID().toString();
-
         when(userService.userConfirmEmail(Mockito.anyString())).thenReturn(true);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/api/authentication/confirm")
-                .content(token)
-                .contentType(MediaType.APPLICATION_JSON))
+                .patch("/api/authentication/confirm")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"ehfg112fs\"}"))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -245,16 +247,14 @@ public class AuthenticationControllerTest {
     @Test
     public void testConfirmOtpInvalidToken() throws Exception {
 
-        String invalidToken = "invalid_token";
-
         Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
                 .userConfirmEmail(Mockito.anyString());
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/api/authentication/confirm")
-                .content(invalidToken)
+                .patch("/api/authentication/confirm")
+                .content("{\"token\":\"ehfg112fs\"}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
@@ -263,24 +263,25 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testResendToken() throws Exception {
-        String email = "test@example.com";
-
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/authentication/resend-token")
-                .param("email", email)
+        mockMvc.perform(MockMvcRequestBuilders
+                .patch("/api/authentication/resend-token")
+                .content("{\"email\":\"test@gmail.com\"}")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
     }
 
     @Test
     public void testResendTokenWithInvalidEmail() throws Exception {
-        String email = "invalid-email";
+        String email = "invalidemail@gmail.com";
 
         Mockito.doThrow(new BadRequestException("Email not valid.")).when(userService)
-                .getUserByEmail(email);
+                .getUserByEmailIgnorStatus(email);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/authentication/resend-token")
-                .param("email", email)
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders
+                .patch("/api/authentication/resend-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"invalidemail@gmail.com\"}"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Email not valid."));
     }

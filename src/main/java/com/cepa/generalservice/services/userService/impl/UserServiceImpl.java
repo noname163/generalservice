@@ -59,4 +59,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UserInformation getUserByEmailIgnorStatus(String email) {
+        return userInformationRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Email " + email + " is not exist"));
+    }
+
 }

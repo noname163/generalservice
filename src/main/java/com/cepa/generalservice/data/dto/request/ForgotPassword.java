@@ -14,11 +14,11 @@ import lombok.Setter;
 @Setter
 public class ForgotPassword {
     @NotBlank(message = "UUID is require")
-    public String uuid;
+    private String uuid;
     @NotBlank(message = "Password is require.")
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")
-    public String password;
+    private String password;
     @NotBlank(message = "Password is require.")
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")
-    public String confirmPassword;
+    private String confirmPassword;
 }
