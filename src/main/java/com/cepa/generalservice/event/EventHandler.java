@@ -53,7 +53,6 @@ public class EventHandler implements ApplicationListener<Event> {
                 .mailTemplate(VerificationTokenTemplate.generateVerificationEmail(fullName, url))
                 .build();
                 sendEmailService.sendMailService(sendMailRequest);
-                log.info("Send success for email " + email);
            
         }
         if(api.equals("forgot-password")){
@@ -65,7 +64,6 @@ public class EventHandler implements ApplicationListener<Event> {
                 .mailTemplate(VerificationTokenTemplate.generateForgotPasswordEmail(fullName, url))
                 .build();
             sendEmailService.sendMailService(sendMailRequest);
-            log.info("Send success for email " + email);
         }
         if(api.equals("confirm")){
             userService.userActivateAccount(usertoken);

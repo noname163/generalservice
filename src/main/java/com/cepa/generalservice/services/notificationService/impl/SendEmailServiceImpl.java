@@ -1,18 +1,15 @@
 package com.cepa.generalservice.services.notificationService.impl;
 
 import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.SendMailRequest;
-import com.cepa.generalservice.data.entities.UserInformation;
-import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.services.notificationService.SendEmailService;
 import com.cepa.generalservice.services.notificationService.notificationTemplate.VerificationTokenTemplate;
 import com.cepa.generalservice.services.userService.UserService;
@@ -63,6 +60,7 @@ public class SendEmailServiceImpl implements SendEmailService {
     }
 
     @Override
+    @Async
     public void sendMailService(SendMailRequest sendMailRequest) {
         MimeMessage massage = javaMailSender.createMimeMessage();
         try {
@@ -72,6 +70,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             helper.setTo(sendMailRequest.getUserEmail());
             helper.setText(sendMailRequest.getMailTemplate(), true);
             javaMailSender.send(massage);
+            log.info("Send mail success for email {} ", sendMailRequest.getUserEmail());
         } catch (MessagingException e) {
              log.error(e.getMessage());
         }

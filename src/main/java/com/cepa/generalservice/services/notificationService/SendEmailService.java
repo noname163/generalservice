@@ -1,7 +1,5 @@
 package com.cepa.generalservice.services.notificationService;
 
-import javax.mail.SendFailedException;
-
 import com.cepa.generalservice.data.dto.request.SendMailRequest;
 
 public interface SendEmailService {
