@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cepa.generalservice.data.constants.Validation;
+import com.cepa.generalservice.data.dto.request.EmailRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
+import com.cepa.generalservice.data.dto.request.TokenRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.event.EventPublisher;
@@ -95,9 +97,9 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
-    @PatchMapping("/forgot-password/{email}")
-    public ResponseEntity<Void> forgotPassword(@PathVariable String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
+    @PatchMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody EmailRequest email) {
+        UserInformation userInformation = userService.getUserByEmail(email.getEmail());
         eventPublisher.publishEvent(userInformation.getEmail(), userInformation.getFullName());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -109,7 +111,7 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PatchMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ForgotPassword forgotPassword) {
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ForgotPassword forgotPassword) {
         userService.forgotPassword(forgotPassword);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -120,11 +122,10 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "Token not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
-    @PostMapping("/confirm")
-    public ResponseEntity<Void> confirmOtp(
-        @Valid @Pattern(regexp = Validation.TOKEN_FORMAT) @RequestBody String token) {
-        userService.userConfirmEmail(token);
-        eventPublisher.publishEvent(token);
+    @PatchMapping("/confirm")
+    public ResponseEntity<Void> confirmOtp(@Valid  @RequestBody TokenRequest token) {
+        userService.userConfirmEmail(token.getToken());
+        eventPublisher.publishEvent(token.getToken());
         return ResponseEntity.ok().build();
     }
 
@@ -135,9 +136,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PatchMapping("/resend-token")
-    public ResponseEntity<Void> resendToken(
-            @Valid @Pattern(regexp = Validation.EMAIL_REGEX) @RequestParam(name = "email") String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
+    public ResponseEntity<Void> resendToken(@Valid @RequestBody EmailRequest email) {
+        UserInformation userInformation = userService.getUserByEmailIgnorStatus(email.getEmail());
         eventPublisher.publishEvent(userInformation);
         return ResponseEntity.ok().build();
     }
@@ -149,8 +149,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponse> reFreshToken(@Valid @Pattern(regexp = Validation.TOKEN_FORMAT) @RequestBody String token) {
-        return ResponseEntity.ok().body(authenticationService.reFreshToken(token));
+    public ResponseEntity<LoginResponse> reFreshToken(@Valid @RequestBody TokenRequest token) {
+        return ResponseEntity.ok().body(authenticationService.reFreshToken(token.getToken()));
     }
 
     @Operation(summary = "Logout ")
@@ -160,8 +160,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @Pattern(regexp = Validation.EMAIL_REGEX) @RequestBody String email) {
-        authenticationService.logout(email);
+    public ResponseEntity<Void> logout(@Valid @RequestBody EmailRequest email) {
+        authenticationService.logout(email.getEmail());
         return ResponseEntity.ok().build();
     }
 

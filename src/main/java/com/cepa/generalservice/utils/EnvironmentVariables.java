@@ -12,6 +12,9 @@ public class EnvironmentVariables {
     @Value("${jwt.secret-key}")
     private String jwtSecret;
 
+    @Value("${jwt.secret-key-service}")
+    private String jwtSecretService;
+
     @Value("${jwt.expires-time}")
     private long expireTime;
 

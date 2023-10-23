@@ -47,7 +47,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             if (requestTokenHeaderOpt.isPresent()) {
                 try {
                     String accessToken = requestTokenHeaderOpt.get();
-                    Jws<Claims> listClaims = jwtTokenUtil.getJwsClaims(accessToken);
+                    Jws<Claims> listClaims = jwtTokenUtil.getJwsClaims(accessToken, getJwtPrefix(request));
                     String email = jwtTokenUtil.getEmailFromClaims(listClaims.getBody());
                     securityContextService.setSecurityContext(email);
                     filterChain.doFilter(request, response);
@@ -62,12 +62,21 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     private Optional<String> getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER)) {
-            return Optional.of(bearerToken.substring(7));
-        }
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SERVICE)) {
+        if (StringUtils.hasText(bearerToken) && (bearerToken.startsWith(BEARER) || bearerToken.startsWith(SERVICE))) {
             return Optional.of(bearerToken.substring(7));
         }
         return Optional.empty();
+    }
+    private String getJwtPrefix(HttpServletRequest request){
+        String bearerToken = request.getHeader(AUTHORIZATION);
+        if (StringUtils.hasText(bearerToken)) {
+            if(bearerToken.startsWith(BEARER)){
+                return BEARER;
+            }
+            if (bearerToken.startsWith(SERVICE)) {
+                return SERVICE;
+            }
+        }
+        return null;
     }
 }
