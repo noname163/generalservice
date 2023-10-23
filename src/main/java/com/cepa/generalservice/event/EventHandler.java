@@ -9,8 +9,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
+import com.cepa.generalservice.data.dto.request.SendMailRequest;
+import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.notificationService.SendEmailService;
+import com.cepa.generalservice.services.notificationService.notificationTemplate.VerificationTokenTemplate;
 import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.EnvironmentVariables;
 import com.cepa.generalservice.utils.StringUtil;
@@ -41,18 +44,27 @@ public class EventHandler implements ApplicationListener<Event> {
         String usertoken = data.get("token");
         String api = stringUtil.getSubfixApi(data.get("URI"));
         
-        
         if (api.equals("register")||api.equals("resend-token")) {
                 UUID token = confirmTokenService.saveConfirmToken(email);
                 String url = environmentVariables.getRegisterUI()+ token.toString();
-                sendEmailService.sendVerificationEmail(email, fullName, url);
+                SendMailRequest sendMailRequest = SendMailRequest.builder()
+                .userEmail(email)
+                .subject("Verification email")
+                .mailTemplate(VerificationTokenTemplate.generateVerificationEmail(fullName, url))
+                .build();
+                sendEmailService.sendMailService(sendMailRequest);
                 log.info("Send success for email " + email);
            
         }
         if(api.equals("forgot-password")){
             UUID token = confirmTokenService.saveConfirmToken(email);
             String url = environmentVariables.getForgotUI()+ token.toString();
-            sendEmailService.sendForgotPasswordEmail(email, fullName, url);
+            SendMailRequest sendMailRequest = SendMailRequest.builder()
+                .userEmail(email)
+                .subject("Verification email")
+                .mailTemplate(VerificationTokenTemplate.generateForgotPasswordEmail(fullName, url))
+                .build();
+            sendEmailService.sendMailService(sendMailRequest);
             log.info("Send success for email " + email);
         }
         if(api.equals("confirm")){
