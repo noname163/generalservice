@@ -15,6 +15,7 @@ public class Validation {
     public static final String ONLY_ALPHABET_AND_SPACE_REGEX = "^.*[A-Za-z].*[\\s]?+.*$";
     public static final String ONLY_ALPHABET_AND_NUMBER_REGEX = "^[a-zA-Z0-9]*$";
     public static final String ONLY_ALPHABET_AND_NUMBER_AND_SPACE_REGEX = "^[a-zA-Z0-9 ]*$";
+    public static final String TOKEN_FORMAT = "^[A-Za-z0-9-_]+\\\\.[A-Za-z0-9-_]+\\\\.[A-Za-z0-9-_]+$";
     public static final int MIN_LENGTH_PASSWORD = 6;
     public static final int MIN_LENGTH_FULLNAME = 4;
     public static final int MIN_AGE = 16;

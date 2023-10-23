@@ -73,6 +73,13 @@ public class JwtTokenUtil {
         if (refreshTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
+        
+        UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(refreshTokenClaims.getBody()));
+
+        if(!refreshToken.equals(userInformation.getRefreshToken())){
+            throw new InValidAuthorizationException("Token not valid");
+        }
+
         return refreshTokenClaims.getBody();
     }
 

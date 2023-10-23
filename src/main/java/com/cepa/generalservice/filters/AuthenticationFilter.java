@@ -24,6 +24,7 @@ import java.util.Optional;
 public class AuthenticationFilter extends OncePerRequestFilter {
     public static final String AUTHORIZATION = "Authorization";
     public static final String BEARER = "Bearer ";
+    public static final String SERVICE = "Service ";
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -62,6 +63,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private Optional<String> getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER)) {
+            return Optional.of(bearerToken.substring(7));
+        }
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SERVICE)) {
             return Optional.of(bearerToken.substring(7));
         }
         return Optional.empty();
