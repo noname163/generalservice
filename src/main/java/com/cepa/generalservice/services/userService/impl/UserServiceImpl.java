@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
+import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.userService.UserService;
 
@@ -21,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private UserInformationRepository userInformationRepository;
     @Autowired
     private ConfirmTokenService confirmTokenService;
+    @Autowired
+    private UserInformationMapper userInformationMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -64,6 +68,12 @@ public class UserServiceImpl implements UserService {
         return userInformationRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Email " + email + " is not exist"));
+    }
+
+    @Override
+    public UserResponse getUserResponseByEmail(String email) {
+        UserInformation userInformation = getUserByEmail(email);
+        return userInformationMapper.mapEntityToDto(userInformation);
     }
 
 }

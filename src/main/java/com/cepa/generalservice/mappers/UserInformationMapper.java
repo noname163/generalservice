@@ -18,5 +18,14 @@ public class UserInformationMapper {
                 .password(userRegister.getPassword())
                 .build();
     }
-    
+
+    public UserResponse mapEntityToDto(UserInformation userInformation) {
+        return UserResponse
+                .builder()
+                .id(userInformation.getId())
+                .fullName(userInformation.getFullName())
+                .email(userInformation.getEmail())
+                .build();
+    }
+
 }
