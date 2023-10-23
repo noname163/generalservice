@@ -235,8 +235,9 @@ public class AuthenticationControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/authentication/confirm")
-                .param("token", token))
+                .post("/api/authentication/confirm")
+                .content(token)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -252,8 +253,9 @@ public class AuthenticationControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/authentication/confirm")
-                .param("token", invalidToken))
+                .post("/api/authentication/confirm")
+                .content(invalidToken)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
                 .andReturn();
