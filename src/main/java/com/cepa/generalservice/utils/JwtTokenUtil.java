@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cepa.generalservice.data.constants.Common;
@@ -107,6 +106,20 @@ public class JwtTokenUtil {
         }
 
         return refreshTokenClaims.getBody();
+    }
+    public Boolean verifyAccessToken(String accessToken) {
+        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(accessToken);
+        if (refreshTokenClaims.getBody().getExpiration().before(new Date())) {
+            throw new InValidAuthorizationException("Refresh token has expired");
+        }
+
+        UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(refreshTokenClaims.getBody()));
+
+        if(!accessToken.equals(userInformation.getAccessToken())){
+            throw new InValidAuthorizationException("Token not valid");
+        }
+
+        return true;
     }
 
     public String getEmailFromClaims(Claims claims) {

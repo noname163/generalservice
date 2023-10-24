@@ -1,5 +1,7 @@
 package com.cepa.generalservice.utils;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,9 @@ public class EnvironmentVariables {
 
     @Value("${ui.forgot.password}")
     private String forgotUI;
+    
+    @Value("${authentication.whitelistedUris}")
+    private List<String> whiteListUrls;
 
 
 
