@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -32,7 +31,6 @@ import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
-import com.cepa.generalservice.data.dto.request.TokenRequest;
 import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -42,6 +40,7 @@ import com.cepa.generalservice.services.authenticationService.AuthenticationServ
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.RegisterService;
 import com.cepa.generalservice.services.userService.UserService;
+import com.cepa.generalservice.utils.EnvironmentVariables;
 import com.cepa.generalservice.utils.JwtTokenUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ContextConfiguration(classes = { GeneralserviceApplication.class, SecurityConfig.class })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-public class AuthenticationControllerTest {
+class AuthenticationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -75,11 +74,14 @@ public class AuthenticationControllerTest {
     @MockBean
     private EventPublisher eventPublisher;
 
+    @MockBean
+    private EnvironmentVariables environmentVariables;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Test
-    public void testCreateTeacherAccount() throws Exception {
+    void testCreateTeacherAccount() throws Exception {
 
         doNothing().when(registerService).teacherRegister(any(TeacherRegister.class));
 
@@ -104,7 +106,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testCreateStudentAccount() throws Exception {
+    void testCreateStudentAccount() throws Exception {
 
         doNothing().when(registerService).studentRegister(any(StudentRegister.class));
 
@@ -153,7 +155,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testForgotPasswordSuccess() throws Exception {
+    void testForgotPasswordSuccess() throws Exception {
 
         String userEmail = "test@gmail.com";
         UserInformation userInformation = UserInformation.builder().build();
@@ -171,11 +173,12 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testForgotPasswordUserNotFound() throws Exception {
+    void testForgotPasswordUserNotFound() throws Exception {
 
         String userEmail = "nonexistent@gmail.com";
         EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
-        when(userService.getUserByEmail(emailRequest.getEmail())).thenThrow(new BadRequestException("User not valid."));
+        when(userService.getUserByEmail(emailRequest.getEmail()))
+                .thenThrow(new BadRequestException("User not valid."));
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
@@ -189,7 +192,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testResetPasswordSuccess() throws Exception {
+    void testResetPasswordSuccess() throws Exception {
 
         ForgotPassword forgotPassword = ForgotPassword.builder().build();
         forgotPassword.setPassword("newPassword");
@@ -209,7 +212,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testResetPasswordUserNotValid() throws Exception {
+    void testResetPasswordUserNotValid() throws Exception {
         ForgotPassword forgotPassword = ForgotPassword.builder().build();
         forgotPassword.setPassword("newPassword");
         forgotPassword.setConfirmPassword("newPassword");
@@ -230,7 +233,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testConfirmOtpSuccess() throws Exception {
+    void testConfirmOtpSuccess() throws Exception {
 
         when(userService.userConfirmEmail(Mockito.anyString())).thenReturn(true);
 
@@ -245,7 +248,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testConfirmOtpInvalidToken() throws Exception {
+    void testConfirmOtpInvalidToken() throws Exception {
 
         Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
                 .userConfirmEmail(Mockito.anyString());
@@ -262,7 +265,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testResendToken() throws Exception {
+    void testResendToken() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                 .patch("/api/authentication/resend-token")
                 .content("{\"email\":\"test@gmail.com\"}")
@@ -272,7 +275,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testResendTokenWithInvalidEmail() throws Exception {
+    void testResendTokenWithInvalidEmail() throws Exception {
         String email = "invalidemail@gmail.com";
 
         Mockito.doThrow(new BadRequestException("Email not valid.")).when(userService)
