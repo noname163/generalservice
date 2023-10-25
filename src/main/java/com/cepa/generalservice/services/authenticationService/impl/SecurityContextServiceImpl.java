@@ -36,6 +36,7 @@ public class SecurityContextServiceImpl implements SecurityContextService {
         securityContext.setAuthentication(usernamePasswordAuthenticationToken);
     }
 
+
     @Override
     public UserInformation getCurrentUser() {
         Authentication authentication = securityContext.getAuthentication();
