@@ -2,6 +2,8 @@ package com.cepa.generalservice.controllers;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import com.cepa.generalservice.data.dto.request.SubjectRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.services.subjectService.SubjectService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,39 +57,17 @@ public class SubjectController {
                                 .body(subjectService.getSubjects(page, size, field, sortType));
         }
 
+        @Operation(summary = "Get subject by id")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Get subjectId successfully.", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class))
+                        }),
+                        @ApiResponse(responseCode = "404", description = "subjectId not found", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundException.class)) })
+        })
         @GetMapping("/{id}")
-        public ResponseEntity<SubjectResponse> getSubjectById(@PathVariable Long id) {
+        public ResponseEntity<SubjectResponse> getSubjectById(@Valid @PathVariable Long id) {
                 return ResponseEntity.status(HttpStatus.OK).body(subjectService.getSubjectById(id));
         }
 
-        @Operation(summary = "Create a new subject")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "Subject created successfully.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectResponse.class)) }),
-                        @ApiResponse(responseCode = "400", description = "Bad request.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) }) })
-        @PostMapping()
-        public ResponseEntity<SubjectResponse> createSubject(@RequestBody SubjectRequest subjectRequest) {
-                SubjectResponse createdSubject = subjectService.createSubject(subjectRequest);
-                return ResponseEntity.status(HttpStatus.CREATED).body(createdSubject);
-        }
-
-        @Operation(summary = "Get subject successfully")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "Subject .", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectResponse.class)) }),
-                        @ApiResponse(responseCode = "400", description = "Bad request.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) }) })
-        @PutMapping("/{id}")
-        public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long id,
-                        @RequestBody SubjectRequest subjectRequest) {
-                SubjectResponse updatedSubject = subjectService.updateSubject(id, subjectRequest);
-                return ResponseEntity.status(HttpStatus.OK).body(updatedSubject);
-        }
-
-        @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteSubject(@PathVariable Long id) {
-                subjectService.deleteSubject(id);
-                return ResponseEntity.noContent().build();
-        }
 }

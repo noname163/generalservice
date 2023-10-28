@@ -16,6 +16,7 @@ import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.mappers.SubjectMapper;
 import com.cepa.generalservice.services.subjectService.SubjectService;
@@ -50,6 +51,10 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public SubjectResponse createSubject(SubjectRequest subjectRequest) {
+
+        subjectRepository.findByName(subjectRequest.getName()).ifPresent(subjectInformation -> {
+            throw new DataConfilictException("Subject name already exist.");
+        });
         Subject subject = new Subject();
         subject.setName(subjectRequest.getName());
         subject.setUrl(subjectRequest.getUrl());
@@ -72,6 +77,9 @@ public class SubjectServiceImpl implements SubjectService {
         Subject existingSubject = subjectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
+        subjectRepository.findByName(subjectRequest.getName()).ifPresent(subjectInformation -> {
+            throw new DataConfilictException("Subject name already exist.");
+        });
         existingSubject.setName(subjectRequest.getName());
         existingSubject.setUrl(subjectRequest.getUrl());
         existingSubject.setDescription(subjectRequest.getDescription());
