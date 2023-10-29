@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.request.SubjectRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
@@ -54,7 +55,7 @@ public class SubjectController {
                         @RequestParam(required = false) String field,
                         @RequestParam(required = false, defaultValue = "ASC") SortType sortType) {
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(subjectService.getSubjects(page, size, field, sortType));
+                                .body(subjectService.getSubjects(page, size, field, sortType, StateType.TRUE));
         }
 
         @Operation(summary = "Get subject by id")
