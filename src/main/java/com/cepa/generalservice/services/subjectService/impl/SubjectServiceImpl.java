@@ -1,6 +1,5 @@
 package com.cepa.generalservice.services.subjectService.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.SortType;
-import com.cepa.generalservice.data.dto.request.PaginationRequest;
+import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.request.SubjectRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
-import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.mappers.SubjectMapper;
@@ -37,10 +35,24 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public PaginationResponse<List<SubjectResponse>> getSubjects(Integer page, Integer size, String field,
-            SortType sortType) {
+            SortType sortType, StateType stateType) {
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
+        Page<Subject> listSubject;
 
-        Page<Subject> listSubject = subjectRepository.findAll(pageable);
+        switch (stateType) {
+            case ALL:
+                listSubject = subjectRepository.findAll(pageable);
+                break;
+            case TRUE:
+                listSubject = subjectRepository.findAllByStateTrue(pageable);
+                break;
+            case FALSE:
+                listSubject = subjectRepository.findAllByStateFalse(pageable);
+                break;
+            default:
+                listSubject = subjectRepository.findAll(pageable);
+                break;
+        }
 
         return PaginationResponse.<List<SubjectResponse>>builder()
                 .data(subjectMapper.mapEntitiesToDtos(listSubject.getContent()))
@@ -67,14 +79,14 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public SubjectResponse getSubjectById(Long id) {
-        Subject subject = subjectRepository.findById(id)
+        Subject subject = subjectRepository.findByIdAndStateTrue(id)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
         return subjectMapper.mapEntityToDto(subject);
     }
 
     @Override
     public SubjectResponse updateSubject(Long id, SubjectRequest subjectRequest) {
-        Subject existingSubject = subjectRepository.findById(id)
+        Subject existingSubject = subjectRepository.findByIdAndStateTrue(id)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         subjectRepository.findByName(subjectRequest.getName()).ifPresent(subjectInformation -> {
@@ -91,10 +103,20 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public void deleteSubject(Long id) {
+        Subject subject = subjectRepository.findByIdAndStateTrue(id)
+                .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
+
+        subject.setState(false);
+        subjectRepository.save(subject);
+    }
+
+    @Override
+    public void activeStateSubject(Long id) {
         Subject subject = subjectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
-        subjectRepository.delete(subject);
+        subject.setState(true);
+        subjectRepository.save(subject);
     }
 
 }
