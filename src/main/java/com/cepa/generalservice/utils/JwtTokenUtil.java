@@ -65,7 +65,7 @@ public class JwtTokenUtil {
         String email = claims.get("email").toString();
         UserInformation userInformation = userService.getUserByEmail(email);
 
-        if (!token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
+        if (from.equals(Common.BEARER) && !token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
@@ -108,12 +108,12 @@ public class JwtTokenUtil {
         return refreshTokenClaims.getBody();
     }
     public Boolean verifyAccessToken(String accessToken) {
-        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(accessToken);
-        if (refreshTokenClaims.getBody().getExpiration().before(new Date())) {
+        Jws<Claims> accessTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(accessToken);
+        if (accessTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
 
-        UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(refreshTokenClaims.getBody()));
+        UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(accessTokenClaims.getBody()));
 
         if(!accessToken.equals(userInformation.getAccessToken())){
             throw new InValidAuthorizationException("Token not valid");
