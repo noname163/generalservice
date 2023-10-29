@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.studentService.StudentInformationService;

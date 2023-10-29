@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.Subject;
@@ -47,14 +48,15 @@ public class SubjectServiceImplTest {
 
     @Test
     void getSubject_ShouldReturnData() {
-         // Arrange
+        // Arrange
         int page = 1;
         int size = 10;
         String field = "fieldName";
         SortType sortType = SortType.ASC;
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        when(pageableUtil.getPageable(page, size, field, sortType)).thenReturn(pageable);
+        when(pageableUtil.getPageable(page, size, field,
+                sortType)).thenReturn(pageable);
 
         Page<Subject> pageResult = new PageImpl<>(Collections.emptyList());
         when(subjectRepository.findAll(pageable)).thenReturn(pageResult);
@@ -63,7 +65,8 @@ public class SubjectServiceImplTest {
         when(subjectMapper.mapEntitiesToDtos(pageResult.getContent())).thenReturn(subjectResponses);
 
         // Act
-        PaginationResponse<List<SubjectResponse>> response = subjectService.getSubjects(page, size, field, sortType);
+        PaginationResponse<List<SubjectResponse>> response = subjectService.getSubjects(page, size, field, sortType,
+                StateType.ALL);
 
         // Assert
         assertNotNull(response);
