@@ -1,6 +1,5 @@
 package com.cepa.generalservice.services.subjectService.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.StateType;
-import com.cepa.generalservice.data.dto.request.PaginationRequest;
 import com.cepa.generalservice.data.dto.request.SubjectRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
-import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.mappers.SubjectMapper;
@@ -40,17 +37,21 @@ public class SubjectServiceImpl implements SubjectService {
     public PaginationResponse<List<SubjectResponse>> getSubjects(Integer page, Integer size, String field,
             SortType sortType, StateType stateType) {
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
+        Page<Subject> listSubject;
 
-        Page<Subject> listSubject = subjectRepository.findAll(pageable);
-        if (stateType == StateType.ALL) {
-
-            listSubject = subjectRepository.findAll(pageable);
-        } else if (stateType == StateType.TRUE) {
-            listSubject = subjectRepository.findAllByStateTrue(pageable);
-        } else if (stateType == StateType.FALSE) {
-            listSubject = subjectRepository.findAllByStateFalse(pageable);
-        } else {
-            listSubject = subjectRepository.findAll(pageable);
+        switch (stateType) {
+            case ALL:
+                listSubject = subjectRepository.findAll(pageable);
+                break;
+            case TRUE:
+                listSubject = subjectRepository.findAllByStateTrue(pageable);
+                break;
+            case FALSE:
+                listSubject = subjectRepository.findAllByStateFalse(pageable);
+                break;
+            default:
+                listSubject = subjectRepository.findAll(pageable);
+                break;
         }
 
         return PaginationResponse.<List<SubjectResponse>>builder()
