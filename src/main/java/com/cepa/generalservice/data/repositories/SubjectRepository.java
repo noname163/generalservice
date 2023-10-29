@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.cepa.generalservice.data.entities.Subject;
 
-public interface SubjectRepository extends JpaRepository<Subject, Long>{
+public interface SubjectRepository extends JpaRepository<Subject, Long> {
     public Optional<List<Subject>> findByIdIn(List<Long> ids);
+
+    public Optional<Subject> findByName(String subjectName);
 }

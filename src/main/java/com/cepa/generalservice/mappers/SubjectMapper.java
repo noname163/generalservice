@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.cepa.generalservice.data.dto.request.UserRegister;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.Subject;
+import com.cepa.generalservice.data.entities.UserInformation;
 
 @Component
 public class SubjectMapper {
@@ -22,5 +24,11 @@ public class SubjectMapper {
     public List<SubjectResponse> mapEntitiesToDtos(List<Subject> subjects) {
         return subjects.stream().map(this::mapEntityToDto)
                 .collect(Collectors.toList());
+    }
+
+    public Subject mapDtoToEntity(SubjectResponse subjectResponse) {
+        return Subject
+                .builder().id(subjectResponse.getId()).name(subjectResponse.getName()).url(subjectResponse.getUrl())
+                .description(subjectResponse.getDescription()).build();
     }
 }
