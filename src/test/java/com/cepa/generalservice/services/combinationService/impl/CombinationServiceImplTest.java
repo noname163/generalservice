@@ -19,13 +19,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.mappers.CombinationMapper;
 import com.cepa.generalservice.utils.PageableUtil;
-
 
 public class CombinationServiceImplTest {
 
@@ -64,7 +64,8 @@ public class CombinationServiceImplTest {
         when(combinationMapper.mapEntitiesToDtos(pageResult.getContent())).thenReturn(combinationResponses);
 
         // Act
-        PaginationResponse<List<CombinationResponse>> response = combinationService.getCombination(page, size, field, sortType);
+        PaginationResponse<List<CombinationResponse>> response = combinationService.getCombination(page, size, field,
+                sortType, StateType.ALL);
 
         // Assert
         assertNotNull(response);
