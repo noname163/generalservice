@@ -16,6 +16,8 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
     public Optional<List<Subject>> findByIdIn(List<Long> ids);
 
+    public Optional<List<Subject>> findByIdInAndStateTrue(List<Long> ids);
+
     public Optional<Subject> findByName(String subjectName);
 
     public Optional<Subject> findByIdAndStateTrue(Long id);

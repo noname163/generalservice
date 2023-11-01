@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Entity
 @Table(name = "Combination")
@@ -34,6 +35,8 @@ public class Combination {
     private String name;
 
     private String description;
+    @Default
+    private Boolean state = true;
 
     private LocalDateTime createDate;
 

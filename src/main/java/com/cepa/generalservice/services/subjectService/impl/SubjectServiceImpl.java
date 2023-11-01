@@ -12,7 +12,9 @@ import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.request.SubjectRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.SubjectResponse;
+import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.entities.Subject;
+import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.NotFoundException;
@@ -28,6 +30,8 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private CombinationRepository combinationRepository;
     @Autowired
     private PageableUtil pageableUtil;
     @Autowired
@@ -90,7 +94,9 @@ public class SubjectServiceImpl implements SubjectService {
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         subjectRepository.findByName(subjectRequest.getName()).ifPresent(subjectInformation -> {
-            throw new DataConfilictException("Subject name already exist.");
+            if (subjectInformation.getId() != id) {
+                throw new DataConfilictException("Subject name already exists.");
+            }
         });
         existingSubject.setName(subjectRequest.getName());
         existingSubject.setUrl(subjectRequest.getUrl());
@@ -106,8 +112,18 @@ public class SubjectServiceImpl implements SubjectService {
         Subject subject = subjectRepository.findByIdAndStateTrue(id)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
-        subject.setState(false);
-        subjectRepository.save(subject);
+        List<Combination> combinations = combinationRepository.findByStateTrueAndSubjectContaining(subject)
+                .orElseThrow(() -> new NotFoundException(""));
+
+        if (!combinations.isEmpty()) {
+
+            throw new DataConfilictException("Subject is associated with combinations and cannot be deleted.");
+        } else {
+
+            subject.setState(false);
+            subjectRepository.save(subject);
+        }
+
     }
 
     @Override
