@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,11 +15,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.cepa.generalservice.data.constants.StateType;
+import com.cepa.generalservice.data.constants.UserStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Entity
 @Table(name = "Student_Target")
@@ -33,6 +39,10 @@ public class StudentTarget {
     private long id;
 
     private double grade;
+
+    @Enumerated(EnumType.STRING)
+    @Default
+    private StateType stateType = StateType.TRUE;
 
     private LocalDateTime createDate;
 

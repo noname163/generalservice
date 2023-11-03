@@ -1,9 +1,14 @@
 package com.cepa.generalservice.services.studentService.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
+import com.cepa.generalservice.data.entities.StudentTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.mappers.StudentMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
@@ -29,8 +34,12 @@ public class StudentInformationServiceImpl implements StudentInformationService 
         StudentResponse studentResponse = studentMapper.mapEntityToDto(userInformation);
         if (userInformation.getStudentTargets() != null
                 && !userInformation.getStudentTargets().isEmpty()) {
-            studentResponse.setTargets(studentTargetMapper
-                    .mapEntitiesToDtos(userInformation.getStudentTargets()));
+            List<StudentTarget> filteredTargets = userInformation.getStudentTargets().stream()
+                    .filter(target -> target.getStateType() == StateType.TRUE)
+                    .collect(Collectors.toList());
+            studentResponse.setTargets(studentTargetMapper.mapEntitiesToDtos(filteredTargets));
+            // studentResponse.setTargets(studentTargetMapper
+            // .mapEntitiesToDtos(userInformation.getStudentTargets()));
         }
         return studentResponse;
     }
