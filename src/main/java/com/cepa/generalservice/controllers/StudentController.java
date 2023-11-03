@@ -62,7 +62,7 @@ public class StudentController {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
 
         })
-        @GetMapping("/{studentId}/targets")
+        @GetMapping("/targets/{studentId}")
         public ResponseEntity<List<StudentTargetResponse>> getStudentTargets(@PathVariable Long studentId) {
                 List<StudentTargetResponse> studentTargets = studentTargetService
                                 .getStudentTargetsByStudentId(studentId);
@@ -75,7 +75,7 @@ public class StudentController {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
 
         })
-        @GetMapping("/{studentId}/target/{targetId}")
+        @GetMapping("/target/{studentId}/{targetId}")
         public ResponseEntity<StudentTargetResponse> getStudentTargetById(@PathVariable Long studentId,
                         @PathVariable Long targetId) {
                 StudentTargetResponse studentTarget = studentTargetService.getStudentTargetById(studentId, targetId);
@@ -88,13 +88,13 @@ public class StudentController {
                         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
         })
-        @PostMapping("/{studentId}/target")
+        @PostMapping("/target/{studentId}")
         public ResponseEntity<String> createStudentTarget(@Valid @PathVariable Long studentId,
                         @RequestBody StudentTargetRequest studentTargetRequest) {
 
                 studentTargetService.createTarget(studentId, studentTargetRequest);
 
-                return ResponseEntity.status(HttpStatus.OK).body("Student Target created successfully.");
+                return ResponseEntity.status(HttpStatus.CREATED).body("Student Target created successfully.");
         }
 
         @Operation(summary = "Update Student Target")
@@ -103,7 +103,7 @@ public class StudentController {
                         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
         })
-        @PutMapping("/{studentId}/target/{targetId}")
+        @PutMapping("/target/{studentId}/{targetId}")
         public ResponseEntity<String> editStudentTarget(
                         @PathVariable Long studentId,
                         @PathVariable Long targetId,
@@ -118,7 +118,7 @@ public class StudentController {
                         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
         })
-        @DeleteMapping("/{studentId}/target/{targetId}")
+        @DeleteMapping("/target/{studentId}/{targetId}")
         public ResponseEntity<String> deleteStudentTarget(
                         @PathVariable Long studentId,
                         @PathVariable Long targetId) {

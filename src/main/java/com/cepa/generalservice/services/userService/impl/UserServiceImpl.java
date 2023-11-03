@@ -87,9 +87,6 @@ public class UserServiceImpl implements UserService {
 
         userExist.setFullName(userRequest.getFullName());
         userExist.setImageURL(userRequest.getUrl());
-        System.out.println(userRequest.getFullName());
-        System.out.println(userRequest.getUrl());
-        System.out.println(userRequest.getDateOfBirth());
         if (userRequest.getDateOfBirth() != null) {
             userExist.setDateOfBirth(userRequest.getDateOfBirth());
         } else {
