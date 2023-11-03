@@ -2,6 +2,7 @@ package com.cepa.generalservice.data.repositories;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ import com.cepa.generalservice.data.entities.Subject;
 
 public interface CombinationRepository extends JpaRepository<Combination, Long> {
     public Optional<List<Combination>> findByIdIn(List<Long> ids);
+    
+    public Optional<List<Combination>> findByIdIn(Set<Long> ids);
 
     public Page<Combination> findAllByStateTrue(Pageable pageable);
 

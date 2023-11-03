@@ -1,5 +1,6 @@
 package com.cepa.generalservice.controllers;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 
@@ -149,8 +150,8 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponse> reFreshToken(@Valid @RequestBody TokenRequest token) {
-        return ResponseEntity.ok().body(authenticationService.reFreshToken(token.getToken()));
+    public ResponseEntity<LoginResponse> reFreshToken(HttpServletRequest request) {
+        return ResponseEntity.ok().body(authenticationService.reFreshToken(request));
     }
 
     @Operation(summary = "Logout ")

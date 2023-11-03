@@ -119,7 +119,7 @@ public class RegisterServiceImplTest {
         verify(userInformationRepository, times(1)).findByEmail(any());
         verify(userInformationMapper).mapDtoToEntity(studentRegister.getUserRegister());
         verify(userInformationRepository, times(1)).save(any());
-        verify(studentTargetService, times(1)).createStudentTarget(any(), anyList());
+        verify(studentTargetService, times(1)).createStudentTargets(any(), anyList());
     }
 
     @Test

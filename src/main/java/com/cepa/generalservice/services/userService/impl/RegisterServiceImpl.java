@@ -75,7 +75,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         UserInformation userInformation = userRegister(newUserInformation);
 
-        studentTargetService.createStudentTarget(userInformation, studentRegister.getCombinationIds());
+        studentTargetService.createStudentTargets(userInformation, studentRegister.getCombinationIds());
     }
 
     private UserInformation userRegister(UserRegister userRegister) {
