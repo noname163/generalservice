@@ -18,6 +18,7 @@ import com.cepa.generalservice.data.dto.request.CombinationRequest;
 import com.cepa.generalservice.data.dto.response.CombinationResponse;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.entities.Combination;
+import com.cepa.generalservice.data.entities.StudentTarget;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.repositories.CombinationRepository;

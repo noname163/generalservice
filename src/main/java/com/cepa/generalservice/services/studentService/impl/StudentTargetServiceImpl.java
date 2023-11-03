@@ -1,8 +1,9 @@
 package com.cepa.generalservice.services.studentService.impl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -22,7 +23,6 @@ import com.cepa.generalservice.data.repositories.StudentTargetRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.NotFoundException;
-import com.cepa.generalservice.mappers.CombinationMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 
@@ -39,29 +39,41 @@ public class StudentTargetServiceImpl implements StudentTargetService {
 
     @Override
     @Transactional
-    public void createStudentTarget(UserInformation userInformation, List<Long> combinationIds) {
-        List<Combination> combinations = combinationRepository
-                .findByIdIn(combinationIds)
-                .orElseThrow(() -> new BadRequestException("Cannot found combination"));
+    public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds) {
+        Set<Long> idSet = combinationIds.stream().collect(Collectors.toSet());
+
+        Optional<List<Combination>> combinations = combinationRepository.findByIdIn(idSet);
+
+        if (!combinations.isPresent() || combinations.get().isEmpty()) {
+            throw new BadRequestException("Cannot found combination");
+        }
+
+        List<StudentTarget> newStudentTargets = convertCombinationtoStudentTarget(userInformation, combinations.get());
+
+        studentTargetRepository.saveAll(newStudentTargets);
+    }
+
+    private List<StudentTarget> convertCombinationtoStudentTarget(UserInformation userInformation,
+            List<Combination> combinations) {
         List<StudentTarget> existingStudentTargets = studentTargetRepository
                 .findByStudentInformation(userInformation);
 
-        List<StudentTarget> newStudentTargets = new ArrayList<>();
+        List<StudentTarget> studentTargets = new ArrayList<>();
         for (Combination combination : combinations) {
             boolean subjectAlreadyExists = existingStudentTargets.stream()
                     .anyMatch(studentTarget -> studentTarget.getCombination().equals(combination));
 
             if (subjectAlreadyExists) {
-                throw new BadRequestException("Subject " + combination.getName() + " already exists.");
+                throw new BadRequestException("Combination " + combination.getName() + " already exists.");
             }
 
-            newStudentTargets.add(StudentTarget.builder()
+            studentTargets.add(StudentTarget.builder()
                     .studentInformation(userInformation)
                     .combination(combination)
                     .build());
         }
 
-        studentTargetRepository.saveAll(newStudentTargets);
+        return studentTargets;
     }
 
     @Override
@@ -157,5 +169,4 @@ public class StudentTargetServiceImpl implements StudentTargetService {
 
         return studentTargetMapper.mapEntityToDto(studentTarget);
     }
-
 }
