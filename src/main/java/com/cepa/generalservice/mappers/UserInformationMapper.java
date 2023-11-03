@@ -25,6 +25,8 @@ public class UserInformationMapper {
                 .id(userInformation.getId())
                 .fullName(userInformation.getFullName())
                 .email(userInformation.getEmail())
+                .url(userInformation.getImageURL())
+                .dateOfBirth(userInformation.getDateOfBirth())
                 .build();
     }
 
