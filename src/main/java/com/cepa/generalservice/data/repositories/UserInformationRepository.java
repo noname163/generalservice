@@ -9,5 +9,8 @@ import com.cepa.generalservice.data.entities.UserInformation;
 
 public interface UserInformationRepository extends JpaRepository<UserInformation, Long> {
     public Optional<UserInformation> findByEmail(String email);
+
     public Optional<UserInformation> findByEmailAndStatus(String email, UserStatus status);
+
+    public Optional<UserInformation> findByIdAndStatus(Long id, UserStatus status);
 }
