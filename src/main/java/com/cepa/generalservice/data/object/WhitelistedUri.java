@@ -13,9 +13,8 @@ public class WhitelistedUri {
     private String uri;
     private String httpMethod;
 
-
     public boolean matches(HttpServletRequest request) {
-        boolean uriMatches = request.getRequestURI().startsWith(uri);
+        boolean uriMatches = request.getRequestURI().equals(uri);
         boolean methodMatches = httpMethod == null || request.getMethod().equals(httpMethod);
         return uriMatches && methodMatches;
     }
@@ -31,4 +30,3 @@ public class WhitelistedUri {
         }
     }
 }
-
