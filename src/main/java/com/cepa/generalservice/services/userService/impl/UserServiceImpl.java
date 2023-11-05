@@ -81,9 +81,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse updateUserById(Long id, UserRequest userRequest) {
-        UserInformation userExist = userInformationRepository.findByIdAndStatus(id, UserStatus.ENABLE)
-                .orElseThrow(() -> new BadRequestException("User not found with id: " + id));
+    public UserResponse updateUserByEmail(String email, UserRequest userRequest) {
+        UserInformation userExist = userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE)
+                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
 
         userExist.setFullName(userRequest.getFullName());
         userExist.setImageURL(userRequest.getUrl());

@@ -18,6 +18,6 @@ public interface UserService {
 
     public void userActivateAccount(String token);
 
-    public UserResponse updateUserById(Long id, UserRequest userRequest);
+    public UserResponse updateUserByEmail(String email, UserRequest userRequest);
 
 }

@@ -60,10 +60,10 @@ public class UserController {
                         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
         })
-        @PutMapping("update/{id}")
-        public ResponseEntity<UserResponse> UpdateUserInformation(@Valid @PathVariable Long id,
+        @PutMapping("update/{email}")
+        public ResponseEntity<UserResponse> UpdateUserInformation(@Valid @PathVariable String email,
                         @RequestBody UserRequest userRequest) {
-                userService.updateUserById(id, userRequest);
+                userService.updateUserByEmail(email, userRequest);
 
                 return ResponseEntity.status(HttpStatus.OK).build();
         }

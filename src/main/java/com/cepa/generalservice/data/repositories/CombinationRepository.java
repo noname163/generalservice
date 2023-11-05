@@ -13,16 +13,14 @@ import com.cepa.generalservice.data.entities.Subject;
 
 public interface CombinationRepository extends JpaRepository<Combination, Long> {
     public Optional<List<Combination>> findByIdIn(List<Long> ids);
-    
+
     public Optional<List<Combination>> findByIdIn(Set<Long> ids);
 
-    public Page<Combination> findAllByStateTrue(Pageable pageable);
-
-    public Page<Combination> findAllByStateFalse(Pageable pageable);
+    public Page<Combination> findAllByState(Pageable pageable, Boolean state);
 
     public Optional<Combination> findByName(String subjectName);
 
     public Optional<List<Combination>> findByStateTrueAndSubjectContaining(Subject subject);
 
-    public Optional<Combination> findByIdAndStateTrue(Long id);
+    public Optional<Combination> findByIdAndState(Long id, Boolean state);
 }

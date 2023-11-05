@@ -10,15 +10,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.cepa.generalservice.data.entities.Subject;
 
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
-    public Page<Subject> findAllByStateTrue(Pageable pageable);
-
-    public Page<Subject> findAllByStateFalse(Pageable pageable);
+    public Page<Subject> findAllByState(Pageable pageable, Boolean state);
 
     public Optional<List<Subject>> findByIdIn(List<Long> ids);
 
-    public Optional<List<Subject>> findByIdInAndStateTrue(List<Long> ids);
+    public Optional<List<Subject>> findByIdInAndState(List<Long> ids, Boolean state);
 
     public Optional<Subject> findByName(String subjectName);
 
-    public Optional<Subject> findByIdAndStateTrue(Long id);
+    public Optional<Subject> findByIdAndState(Long id, Boolean state);
 }
