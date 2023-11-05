@@ -45,10 +45,10 @@ public class JwtTokenUtil {
 
     public Jws<Claims> getJwsClaims(String token, String from) {
         String secretKey = "";
-        if(Common.BEARER.equals(from)){
+        if (Common.BEARER.equals(from)) {
             secretKey = environmentVariables.getJwtSecret();
         }
-        if(Common.SERVICE.equals(from)){
+        if (Common.SERVICE.equals(from)) {
             secretKey = environmentVariables.getJwtSecretService();
         }
         Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -65,12 +65,14 @@ public class JwtTokenUtil {
         String email = claims.get("email").toString();
         UserInformation userInformation = userService.getUserByEmail(email);
 
-        if (from.equals(Common.BEARER) && !token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
+        if (from.equals(Common.BEARER) && !token.equals(userInformation.getAccessToken())
+                && !token.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
         return tokenInfor;
     }
+
     public Jws<Claims> getJwsClaimsForService(String token) {
         Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(token);
         Claims claims = tokenInfor.getBody();
@@ -94,28 +96,31 @@ public class JwtTokenUtil {
     }
 
     public Claims verifyRefreshToken(String refreshToken) {
-        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(refreshToken);
+        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret())
+                .parseClaimsJws(refreshToken);
         if (refreshTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
 
         UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(refreshTokenClaims.getBody()));
 
-        if(!refreshToken.equals(userInformation.getRefreshToken())){
+        if (!refreshToken.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
         return refreshTokenClaims.getBody();
     }
+
     public Boolean verifyAccessToken(String accessToken) {
-        Jws<Claims> accessTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(accessToken);
+        Jws<Claims> accessTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret())
+                .parseClaimsJws(accessToken);
         if (accessTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
 
         UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(accessTokenClaims.getBody()));
 
-        if(!accessToken.equals(userInformation.getAccessToken())){
+        if (!accessToken.equals(userInformation.getAccessToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
@@ -128,5 +133,28 @@ public class JwtTokenUtil {
 
     public String getPhoneFromClaims(Claims claims) {
         return claims.get("phone").toString();
+    }
+
+    public UserInformation getJwsClaimsForGoogle(String token) {
+        Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(environmentVariables.getGoogleSecretKey())
+                .parseClaimsJws(token);
+        Claims claims = tokenInfor.getBody();
+
+        // Check if the token has expired
+        Date expirationDate = claims.getExpiration();
+        Date now = new Date();
+
+        if (expirationDate != null && expirationDate.before(now)) {
+            throw new InValidAuthorizationException("Token has expired");
+        }
+
+        String email = claims.get("email").toString();
+        UserInformation userInformation = userService.getUserByEmail(email);
+
+        if (!token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
+            throw new InValidAuthorizationException("Token not valid");
+        }
+
+        return userInformation;
     }
 }
