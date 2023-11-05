@@ -47,25 +47,15 @@ public class CombinationServiceImpl implements CombinationService {
 
     @Override
     public PaginationResponse<List<CombinationResponse>> getCombination(Integer page, Integer size, String field,
-            SortType sortType,StateType stateType) {
+            SortType sortType, StateType stateType) {
 
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
 
-        Page<Combination> listCombinations;
-
-        switch (stateType) {
-            case ALL:
-                listCombinations = combinationRepository.findAll(pageable);
-                break;
-            case TRUE:
-                listCombinations = combinationRepository.findAllByStateTrue(pageable);
-                break;
-            case FALSE:
-                listCombinations = combinationRepository.findAllByStateFalse(pageable);
-                break;
-            default:
-                listCombinations = combinationRepository.findAll(pageable);
-                break;
+        Page<Combination> listCombinations = combinationRepository.findAll(pageable);
+        if (stateType.equals(StateType.TRUE)) {
+            listCombinations = combinationRepository.findAllByState(pageable, true);
+        } else if (stateType.equals(StateType.FALSE)) {
+            listCombinations = combinationRepository.findAllByState(pageable, false);
         }
 
         return PaginationResponse.<List<CombinationResponse>>builder()
@@ -76,35 +66,44 @@ public class CombinationServiceImpl implements CombinationService {
 
     }
 
-    @Override
-    @Transactional
-    public void createCombination(CombinationRequest combinationRequest) {
-        combinationRepository.findByName(combinationRequest.getName()).ifPresent(combinationInformation -> {
-            throw new DataConfilictException("Combination name already exist.");
+    private void checkCombinationNameConflict(Long combinationId, String combinationName) {
+        combinationRepository.findByName(combinationName).ifPresent(existingCombination -> {
+            if (combinationId == null || (existingCombination.getId() != combinationId)) {
+                throw new DataConfilictException("Combination name already exists.");
+            }
         });
+    }
 
-        List<Subject> subjects = subjectRepository.findByIdInAndStateTrue(combinationRequest.getSubjectIds())
+    private List<Subject> validateSubjects(List<Long> subjectIds) {
+        List<Subject> subjects = subjectRepository.findByIdInAndState(subjectIds, true)
                 .orElseThrow(() -> new BadRequestException(
-                        "Cannot found subject with ID: " + combinationRequest.getSubjectIds().toString()));
+                        "Cannot find subjects with ID: " + subjectIds.toString()));
 
-        // handle check subject empty, not exist and duplicate
         if (subjects.isEmpty()) {
-            throw new BadRequestException("SubjectIds not found: "
-                    + combinationRequest.getSubjectIds().toString());
-        } else if (subjects.size() != combinationRequest.getSubjectIds().size()) {
+            throw new BadRequestException("SubjectIds not found: " + subjectIds.toString());
+        } else if (subjects.size() != subjectIds.size()) {
             List<Long> existingSubjectIds = subjects.stream()
                     .map(Subject::getId)
                     .collect(Collectors.toList());
-            List<Long> nonExistentSubjectIds = combinationRequest.getSubjectIds().stream()
+            List<Long> nonExistentSubjectIds = subjectIds.stream()
                     .filter(id -> !existingSubjectIds.contains(id))
                     .collect(Collectors.toList());
             if (nonExistentSubjectIds.isEmpty()) {
                 throw new DataConfilictException("Duplicate subject IDs are not allowed.");
             } else {
-
                 throw new NotFoundException("Subjects with IDs " + nonExistentSubjectIds + " do not exist.");
             }
         }
+
+        return subjects;
+    }
+
+    @Override
+    @Transactional
+    public void createCombination(CombinationRequest combinationRequest) {
+        checkCombinationNameConflict(null, combinationRequest.getName());
+
+        List<Subject> subjects = validateSubjects(combinationRequest.getSubjectIds());
 
         combinationRepository.save(Combination
                 .builder()
@@ -116,7 +115,7 @@ public class CombinationServiceImpl implements CombinationService {
 
     @Override
     public CombinationResponse getCombinationById(Long id) {
-        Combination combination = combinationRepository.findByIdAndStateTrue(id)
+        Combination combination = combinationRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Combination not found with id: " + id));
         return combinationMapper.mapEntityToDto(combination);
     }
@@ -124,35 +123,12 @@ public class CombinationServiceImpl implements CombinationService {
     @Override
     @Transactional
     public CombinationResponse updateCombination(Long id, CombinationRequest combinationRequest) {
-        Combination existingCombination = combinationRepository.findByIdAndStateTrue(id)
+        Combination existingCombination = combinationRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Combination not found with id: " + id));
 
-        combinationRepository.findByName(combinationRequest.getName()).ifPresent(combinationInformation -> {
-            if (combinationInformation.getId() != id) {
-                throw new DataConfilictException("Combination name already exists.");
-            }
-        });
+        checkCombinationNameConflict(id, combinationRequest.getName());
 
-        List<Subject> subjects = subjectRepository.findByIdInAndStateTrue(combinationRequest.getSubjectIds())
-                .orElseThrow(() -> new NotFoundException(
-                        "Cannot found subject with ID: " + combinationRequest.getSubjectIds().toString()));
-        if (subjects.isEmpty()) {
-            throw new BadRequestException("SubjectIds not found: "
-                    + combinationRequest.getSubjectIds().toString());
-        } else if (subjects.size() != combinationRequest.getSubjectIds().size()) {
-            List<Long> existingSubjectIds = subjects.stream()
-                    .map(Subject::getId)
-                    .collect(Collectors.toList());
-            List<Long> nonExistentSubjectIds = combinationRequest.getSubjectIds().stream()
-                    .filter(subjectId -> !existingSubjectIds.contains(subjectId))
-                    .collect(Collectors.toList());
-            if (nonExistentSubjectIds.isEmpty()) {
-                throw new DataConfilictException("Duplicate subject IDs are not allowed.");
-            } else {
-
-                throw new NotFoundException("Subjects with IDs " + nonExistentSubjectIds + " do not exist.");
-            }
-        }
+        List<Subject> subjects = validateSubjects(combinationRequest.getSubjectIds());
 
         existingCombination.setName(combinationRequest.getName());
         existingCombination.setDescription(combinationRequest.getDescription());
@@ -165,7 +141,7 @@ public class CombinationServiceImpl implements CombinationService {
 
     @Override
     public void deleteCombination(Long id) {
-        Combination combination = combinationRepository.findByIdAndStateTrue(id)
+        Combination combination = combinationRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Combination not found with id: " + id));
 
         combination.setState(false);
@@ -181,7 +157,7 @@ public class CombinationServiceImpl implements CombinationService {
                 .map(Subject::getId)
                 .collect(Collectors.toList());
 
-        List<Subject> subjects = subjectRepository.findByIdInAndStateTrue(subjectIds)
+        List<Subject> subjects = subjectRepository.findByIdInAndState(subjectIds, true)
                 .orElseThrow(() -> new BadRequestException(
                         "Cannot found subject with ID: " + subjectIds));
 

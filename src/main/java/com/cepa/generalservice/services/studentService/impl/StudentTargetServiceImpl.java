@@ -28,145 +28,155 @@ import com.cepa.generalservice.services.studentService.StudentTargetService;
 
 @Service
 public class StudentTargetServiceImpl implements StudentTargetService {
-    @Autowired
-    private StudentTargetRepository studentTargetRepository;
-    @Autowired
-    private UserInformationRepository userInformationRepository;
-    @Autowired
-    private CombinationRepository combinationRepository;
-    @Autowired
-    private StudentTargetMapper studentTargetMapper;
+        @Autowired
+        private StudentTargetRepository studentTargetRepository;
+        @Autowired
+        private UserInformationRepository userInformationRepository;
+        @Autowired
+        private CombinationRepository combinationRepository;
+        @Autowired
+        private StudentTargetMapper studentTargetMapper;
 
-    @Override
-    @Transactional
-    public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds) {
-        Set<Long> idSet = combinationIds.stream().collect(Collectors.toSet());
+        @Override
+        @Transactional
+        public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds) {
+                Set<Long> idSet = combinationIds.stream().collect(Collectors.toSet());
 
-        Optional<List<Combination>> combinations = combinationRepository.findByIdIn(idSet);
+                Optional<List<Combination>> combinations = combinationRepository.findByIdIn(idSet);
 
-        if (!combinations.isPresent() || combinations.get().isEmpty()) {
-            throw new BadRequestException("Cannot found combination");
+                if (!combinations.isPresent() || combinations.get().isEmpty()) {
+                        throw new BadRequestException("Cannot found combination");
+                }
+
+                List<StudentTarget> newStudentTargets = convertCombinationtoStudentTarget(userInformation,
+                                combinations.get());
+
+                studentTargetRepository.saveAll(newStudentTargets);
         }
 
-        List<StudentTarget> newStudentTargets = convertCombinationtoStudentTarget(userInformation, combinations.get());
+        private List<StudentTarget> convertCombinationtoStudentTarget(UserInformation userInformation,
+                        List<Combination> combinations) {
+                List<StudentTarget> existingStudentTargets = studentTargetRepository
+                                .findByStudentInformation(userInformation);
 
-        studentTargetRepository.saveAll(newStudentTargets);
-    }
+                List<StudentTarget> studentTargets = new ArrayList<>();
+                for (Combination combination : combinations) {
+                        boolean subjectAlreadyExists = existingStudentTargets.stream()
+                                        .anyMatch(studentTarget -> studentTarget.getCombination().equals(combination));
 
-    private List<StudentTarget> convertCombinationtoStudentTarget(UserInformation userInformation,
-            List<Combination> combinations) {
-        List<StudentTarget> existingStudentTargets = studentTargetRepository
-                .findByStudentInformation(userInformation);
+                        if (subjectAlreadyExists) {
+                                throw new BadRequestException(
+                                                "Combination " + combination.getName() + " already exists.");
+                        }
 
-        List<StudentTarget> studentTargets = new ArrayList<>();
-        for (Combination combination : combinations) {
-            boolean subjectAlreadyExists = existingStudentTargets.stream()
-                    .anyMatch(studentTarget -> studentTarget.getCombination().equals(combination));
+                        studentTargets.add(StudentTarget.builder()
+                                        .studentInformation(userInformation)
+                                        .combination(combination)
+                                        .build());
+                }
 
-            if (subjectAlreadyExists) {
-                throw new BadRequestException("Combination " + combination.getName() + " already exists.");
-            }
-
-            studentTargets.add(StudentTarget.builder()
-                    .studentInformation(userInformation)
-                    .combination(combination)
-                    .build());
+                return studentTargets;
         }
 
-        return studentTargets;
-    }
+        @Override
+        @Transactional
+        public void createTarget(long id, StudentTargetRequest studentTargetRequest) {
+                Combination combination = combinationRepository.findById(studentTargetRequest.getCombinationId())
+                                .orElseThrow(() -> new BadRequestException("Combination not found"));
+                UserInformation userInformation = userInformationRepository.findByIdAndStatus(id, UserStatus.ENABLE)
+                                .orElseThrow(() -> new NotFoundException("User not exist"));
+                List<StudentTarget> existingStudentTargets = studentTargetRepository
+                                .findByStudentInformation(userInformation);
 
-    @Override
-    @Transactional
-    public void createTarget(long id, StudentTargetRequest studentTargetRequest) {
-        Combination combination = combinationRepository.findById(studentTargetRequest.getCombinationId())
-                .orElseThrow(() -> new BadRequestException("Combination not found"));
-        UserInformation userInformation = userInformationRepository.findByIdAndStatus(id, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not exist"));
-        List<StudentTarget> existingStudentTargets = studentTargetRepository.findByStudentInformation(userInformation);
+                boolean combinationAlreadyExists = existingStudentTargets.stream()
+                                .anyMatch(studentTarget -> studentTarget.getCombination().equals(combination));
 
-        boolean combinationAlreadyExists = existingStudentTargets.stream()
-                .anyMatch(studentTarget -> studentTarget.getCombination().equals(combination));
+                if (combinationAlreadyExists) {
+                        throw new BadRequestException("Combination " + combination.getName() + " already exists.");
+                }
 
-        if (combinationAlreadyExists) {
-            throw new BadRequestException("Combination " + combination.getName() + " already exists.");
+                StudentTarget newStudentTarget = StudentTarget.builder()
+                                .studentInformation(userInformation)
+                                .combination(combination)
+                                .grade(studentTargetRequest.getGrade())
+                                .build();
+
+                studentTargetRepository.save(newStudentTarget);
         }
 
-        StudentTarget newStudentTarget = StudentTarget.builder()
-                .studentInformation(userInformation)
-                .combination(combination)
-                .grade(studentTargetRequest.getGrade())
-                .build();
+        @Override
+        public List<StudentTargetResponse> getStudentTargetsByStudentId(long studentId) {
+                UserInformation userInformation = userInformationRepository
+                                .findByIdAndStatus(studentId, UserStatus.ENABLE)
+                                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        studentTargetRepository.save(newStudentTarget);
-    }
+                List<StudentTarget> studentTargets = studentTargetRepository.findByStudentInformation(userInformation);
 
-    @Override
-    public List<StudentTargetResponse> getStudentTargetsByStudentId(long studentId) {
-        UserInformation userInformation = userInformationRepository.findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                List<StudentTarget> filteredStudentTargets = studentTargets.stream()
+                                .filter(target -> target.getStateType() == StateType.TRUE)
+                                .collect(Collectors.toList());
 
-        List<StudentTarget> studentTargets = studentTargetRepository.findByStudentInformation(userInformation);
-
-        List<StudentTarget> filteredStudentTargets = studentTargets.stream()
-                .filter(target -> target.getStateType() == StateType.TRUE)
-                .collect(Collectors.toList());
-
-        return studentTargetMapper.mapEntitiesToDtos(filteredStudentTargets);
-    }
-
-    @Override
-    public void updateTarget(long studentId, long targetId, StudentTargetRequest studentTargetRequest) {
-        UserInformation userInformation = userInformationRepository.findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        Combination combination = combinationRepository.findByIdAndStateTrue(studentTargetRequest.getCombinationId())
-                .orElseThrow(() -> new BadRequestException("Combination not found"));
-        StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
-                .orElseThrow(() -> new NotFoundException("Student Target not found"));
-
-        List<StudentTarget> existingStudentTargets = studentTargetRepository.findByStudentInformation(userInformation);
-        boolean combinationNameAlreadyExists = existingStudentTargets.stream()
-                .anyMatch(target -> target.getCombination().getName().equals(combination.getName()) &&
-                        target.getId() != targetId);
-
-        if (combinationNameAlreadyExists) {
-            throw new BadRequestException(
-                    "Combination with name " + combination.getName() + " already exists for this student.");
+                return studentTargetMapper.mapEntitiesToDtos(filteredStudentTargets);
         }
 
-        studentTarget.setCombination(combination);
-        studentTarget.setGrade(studentTargetRequest.getGrade());
+        @Override
+        public void updateTarget(long studentId, long targetId, StudentTargetRequest studentTargetRequest) {
+                UserInformation userInformation = userInformationRepository
+                                .findByIdAndStatus(studentId, UserStatus.ENABLE)
+                                .orElseThrow(() -> new NotFoundException("User not found"));
+                Combination combination = combinationRepository
+                                .findByIdAndState(studentTargetRequest.getCombinationId(), true)
+                                .orElseThrow(() -> new BadRequestException("Combination not found"));
+                StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
+                                .orElseThrow(() -> new NotFoundException("Student Target not found"));
 
-        studentTargetRepository.save(studentTarget);
-    }
+                List<StudentTarget> existingStudentTargets = studentTargetRepository
+                                .findByStudentInformation(userInformation);
+                boolean combinationNameAlreadyExists = existingStudentTargets.stream()
+                                .anyMatch(target -> target.getCombination().getName().equals(combination.getName()) &&
+                                                target.getId() != targetId);
 
-    @Override
-    public void deleteStudentTarget(long studentId, long targetId) {
-        UserInformation userInformation = userInformationRepository.findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                if (combinationNameAlreadyExists) {
+                        throw new BadRequestException(
+                                        "Combination with name " + combination.getName()
+                                                        + " already exists for this student.");
+                }
 
-        StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
-                .orElseThrow(() -> new NotFoundException("Student Target not found"));
+                studentTarget.setCombination(combination);
+                studentTarget.setGrade(studentTargetRequest.getGrade());
 
-        if (!studentTarget.getStudentInformation().equals(userInformation)) {
-            throw new BadRequestException("Student Target does not belong to the specified student.");
-        }
-        studentTarget.setStateType(StateType.FALSE);
-        studentTargetRepository.save(studentTarget);
-    }
-
-    @Override
-    public StudentTargetResponse getStudentTargetById(long studentId, long targetId) {
-        UserInformation userInformation = userInformationRepository.findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
-                .orElseThrow(() -> new NotFoundException("Student Target not found"));
-
-        if (!studentTarget.getStudentInformation().equals(userInformation)) {
-            throw new BadRequestException("Student Target does not belong to the specified student.");
+                studentTargetRepository.save(studentTarget);
         }
 
-        return studentTargetMapper.mapEntityToDto(studentTarget);
-    }
+        @Override
+        public void deleteStudentTarget(long studentId, long targetId) {
+                UserInformation userInformation = userInformationRepository
+                                .findByIdAndStatus(studentId, UserStatus.ENABLE)
+                                .orElseThrow(() -> new NotFoundException("User not found"));
+
+                StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
+                                .orElseThrow(() -> new NotFoundException("Student Target not found"));
+
+                if (!studentTarget.getStudentInformation().equals(userInformation)) {
+                        throw new BadRequestException("Student Target does not belong to the specified student.");
+                }
+                studentTarget.setStateType(StateType.FALSE);
+                studentTargetRepository.save(studentTarget);
+        }
+
+        @Override
+        public StudentTargetResponse getStudentTargetById(long studentId, long targetId) {
+                UserInformation userInformation = userInformationRepository
+                                .findByIdAndStatus(studentId, UserStatus.ENABLE)
+                                .orElseThrow(() -> new NotFoundException("User not found"));
+
+                StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
+                                .orElseThrow(() -> new NotFoundException("Student Target not found"));
+
+                if (!studentTarget.getStudentInformation().equals(userInformation)) {
+                        throw new BadRequestException("Student Target does not belong to the specified student.");
+                }
+
+                return studentTargetMapper.mapEntityToDto(studentTarget);
+        }
 }

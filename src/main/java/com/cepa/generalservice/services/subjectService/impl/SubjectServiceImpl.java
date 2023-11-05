@@ -41,21 +41,11 @@ public class SubjectServiceImpl implements SubjectService {
     public PaginationResponse<List<SubjectResponse>> getSubjects(Integer page, Integer size, String field,
             SortType sortType, StateType stateType) {
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
-        Page<Subject> listSubject;
-
-        switch (stateType) {
-            case ALL:
-                listSubject = subjectRepository.findAll(pageable);
-                break;
-            case TRUE:
-                listSubject = subjectRepository.findAllByStateTrue(pageable);
-                break;
-            case FALSE:
-                listSubject = subjectRepository.findAllByStateFalse(pageable);
-                break;
-            default:
-                listSubject = subjectRepository.findAll(pageable);
-                break;
+        Page<Subject> listSubject = subjectRepository.findAll(pageable);
+        if (stateType.equals(StateType.TRUE)) {
+            listSubject = subjectRepository.findAllByState(pageable, true);
+        } else if (stateType.equals(StateType.FALSE)) {
+            listSubject = subjectRepository.findAllByState(pageable, false);
         }
 
         return PaginationResponse.<List<SubjectResponse>>builder()
@@ -83,14 +73,14 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public SubjectResponse getSubjectById(Long id) {
-        Subject subject = subjectRepository.findByIdAndStateTrue(id)
+        Subject subject = subjectRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
         return subjectMapper.mapEntityToDto(subject);
     }
 
     @Override
     public SubjectResponse updateSubject(Long id, SubjectRequest subjectRequest) {
-        Subject existingSubject = subjectRepository.findByIdAndStateTrue(id)
+        Subject existingSubject = subjectRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         subjectRepository.findByName(subjectRequest.getName()).ifPresent(subjectInformation -> {
@@ -109,7 +99,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public void deleteSubject(Long id) {
-        Subject subject = subjectRepository.findByIdAndStateTrue(id)
+        Subject subject = subjectRepository.findByIdAndState(id, true)
                 .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         List<Combination> combinations = combinationRepository.findByStateTrueAndSubjectContaining(subject)
