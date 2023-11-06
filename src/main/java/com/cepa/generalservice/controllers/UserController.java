@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.CombinationRequest;
+import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -66,5 +69,17 @@ public class UserController {
                 userService.updateUserByEmail(email, userRequest);
 
                 return ResponseEntity.status(HttpStatus.OK).build();
+        }
+
+        @Operation(summary = "Change password")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "Change password successfull."),
+                        @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+        })
+        @PatchMapping("/change-password")
+        public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+                userService.changePassword(changePasswordRequest);
+                return ResponseEntity.status(HttpStatus.OK).body("Change password successfully");
         }
 }
