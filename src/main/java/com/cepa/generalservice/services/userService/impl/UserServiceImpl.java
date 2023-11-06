@@ -8,12 +8,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.UserStatus;
+import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
+import com.cepa.generalservice.exceptions.InValidInformation;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.userService.UserService;
@@ -95,6 +97,24 @@ public class UserServiceImpl implements UserService {
         userExist = userInformationRepository.save(userExist);
 
         return userInformationMapper.mapEntityToDto(userExist);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest changePasswordRequest) {
+        UserInformation userExist = userInformationRepository
+                .findByEmailAndStatus(changePasswordRequest.getEmail(), UserStatus.ENABLE)
+                .orElseThrow(() -> new BadRequestException(
+                        "User not found with email: " + changePasswordRequest.getEmail()));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), userExist.getPassword())) {
+            throw new InValidInformation("Password is incorrect. Please try again");
+        }
+        if (!changePasswordRequest.getConfirmPassword().equals(changePasswordRequest.getNewPassword())) {
+            throw new BadRequestException("Password did not match");
+        }
+        userExist.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userInformationRepository.save(userExist);
+
     }
 
 }

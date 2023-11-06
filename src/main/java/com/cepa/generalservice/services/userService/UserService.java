@@ -1,5 +1,6 @@
 package com.cepa.generalservice.services.userService;
 
+import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
 import com.cepa.generalservice.data.dto.response.UserResponse;
@@ -13,6 +14,8 @@ public interface UserService {
     public UserResponse getUserResponseByEmail(String email);
 
     public void forgotPassword(ForgotPassword forgotPassword);
+
+    public void changePassword(ChangePasswordRequest changePasswordRequest);
 
     public Boolean userConfirmEmail(String token);
 
