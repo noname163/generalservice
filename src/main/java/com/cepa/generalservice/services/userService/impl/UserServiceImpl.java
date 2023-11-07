@@ -16,6 +16,7 @@ import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.InValidInformation;
+import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.userService.UserService;
@@ -103,7 +104,7 @@ public class UserServiceImpl implements UserService {
     public void changePassword(ChangePasswordRequest changePasswordRequest) {
         UserInformation userExist = userInformationRepository
                 .findByEmailAndStatus(changePasswordRequest.getEmail(), UserStatus.ENABLE)
-                .orElseThrow(() -> new BadRequestException(
+                .orElseThrow(() -> new UserNotExistException(
                         "User not found with email: " + changePasswordRequest.getEmail()));
 
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), userExist.getPassword())) {
