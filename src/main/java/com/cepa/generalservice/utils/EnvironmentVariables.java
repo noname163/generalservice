@@ -32,7 +32,7 @@ public class EnvironmentVariables {
     @Value("${authentication.whitelistedUris}")
     private List<String> whiteListUrls;
 
-    @Value("{jwt.google.secret-key}")
+    @Value("${jwt.google.secret-key}")
     private String googleSecretKey;
 
 }

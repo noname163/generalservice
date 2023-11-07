@@ -1,5 +1,6 @@
 package com.cepa.generalservice.utils;
 
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +8,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cepa.generalservice.data.constants.Common;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.exceptions.InValidAuthorizationException;
@@ -16,8 +22,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.log4j.Log4j2;
 
 @Component
+@Log4j2
 public class JwtTokenUtil {
     @Autowired
     private EnvironmentVariables environmentVariables;
@@ -135,25 +143,24 @@ public class JwtTokenUtil {
         return claims.get("phone").toString();
     }
 
-    public UserInformation getJwsClaimsForGoogle(String token) {
-        Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(environmentVariables.getGoogleSecretKey())
-                .parseClaimsJws(token);
-        Claims claims = tokenInfor.getBody();
-
-        // Check if the token has expired
-        Date expirationDate = claims.getExpiration();
-        Date now = new Date();
-
-        if (expirationDate != null && expirationDate.before(now)) {
-            throw new InValidAuthorizationException("Token has expired");
-        }
-
-        String email = claims.get("email").toString();
+    public UserInformation getJwsClaimsForGoogle(String token) {        
+        String email = "";
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            if(!jwt.getIssuer().equals("https://accounts.google.com")|| !jwt.getAudience().get(0).equals("26921650638-a5s7agh9vm66h679a6891cqqq1o4slr4.apps.googleusercontent.com")){
+                throw new InValidAuthorizationException("Token from google not valid");
+            }
+            Date expirationDate = jwt.getExpiresAt();
+            Date now = new Date();
+            if (expirationDate != null && expirationDate.before(now)) {
+                throw new InValidAuthorizationException("Token has expired");
+            }
+            Claim claim = jwt.getClaim("email");
+            email = claim.toString();
+        } catch (Exception e) {
+            log.error("Google parse token error {}", e.getMessage());
+        }    
         UserInformation userInformation = userService.getUserByEmail(email);
-
-        if (!token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
-            throw new InValidAuthorizationException("Token not valid");
-        }
 
         return userInformation;
     }
