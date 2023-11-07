@@ -1,5 +1,6 @@
 package com.cepa.generalservice.utils;
 
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +8,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cepa.generalservice.data.constants.Common;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.exceptions.InValidAuthorizationException;
@@ -16,8 +22,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.log4j.Log4j2;
 
 @Component
+@Log4j2
 public class JwtTokenUtil {
     @Autowired
     private EnvironmentVariables environmentVariables;
@@ -45,10 +53,10 @@ public class JwtTokenUtil {
 
     public Jws<Claims> getJwsClaims(String token, String from) {
         String secretKey = "";
-        if(Common.BEARER.equals(from)){
+        if (Common.BEARER.equals(from)) {
             secretKey = environmentVariables.getJwtSecret();
         }
-        if(Common.SERVICE.equals(from)){
+        if (Common.SERVICE.equals(from)) {
             secretKey = environmentVariables.getJwtSecretService();
         }
         Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -65,12 +73,14 @@ public class JwtTokenUtil {
         String email = claims.get("email").toString();
         UserInformation userInformation = userService.getUserByEmail(email);
 
-        if (from.equals(Common.BEARER) && !token.equals(userInformation.getAccessToken()) && !token.equals(userInformation.getRefreshToken())) {
+        if (from.equals(Common.BEARER) && !token.equals(userInformation.getAccessToken())
+                && !token.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
         return tokenInfor;
     }
+
     public Jws<Claims> getJwsClaimsForService(String token) {
         Jws<Claims> tokenInfor = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(token);
         Claims claims = tokenInfor.getBody();
@@ -94,28 +104,31 @@ public class JwtTokenUtil {
     }
 
     public Claims verifyRefreshToken(String refreshToken) {
-        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(refreshToken);
+        Jws<Claims> refreshTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret())
+                .parseClaimsJws(refreshToken);
         if (refreshTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
 
         UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(refreshTokenClaims.getBody()));
 
-        if(!refreshToken.equals(userInformation.getRefreshToken())){
+        if (!refreshToken.equals(userInformation.getRefreshToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
         return refreshTokenClaims.getBody();
     }
+
     public Boolean verifyAccessToken(String accessToken) {
-        Jws<Claims> accessTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret()).parseClaimsJws(accessToken);
+        Jws<Claims> accessTokenClaims = Jwts.parser().setSigningKey(environmentVariables.getJwtSecret())
+                .parseClaimsJws(accessToken);
         if (accessTokenClaims.getBody().getExpiration().before(new Date())) {
             throw new InValidAuthorizationException("Refresh token has expired");
         }
 
         UserInformation userInformation = userService.getUserByEmail(getEmailFromClaims(accessTokenClaims.getBody()));
 
-        if(!accessToken.equals(userInformation.getAccessToken())){
+        if (!accessToken.equals(userInformation.getAccessToken())) {
             throw new InValidAuthorizationException("Token not valid");
         }
 
@@ -128,5 +141,27 @@ public class JwtTokenUtil {
 
     public String getPhoneFromClaims(Claims claims) {
         return claims.get("phone").toString();
+    }
+
+    public UserInformation getJwsClaimsForGoogle(String token) {        
+        String email = "";
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            if(!jwt.getIssuer().equals("https://accounts.google.com")|| !jwt.getAudience().get(0).equals("26921650638-a5s7agh9vm66h679a6891cqqq1o4slr4.apps.googleusercontent.com")){
+                throw new InValidAuthorizationException("Token from google not valid");
+            }
+            Date expirationDate = jwt.getExpiresAt();
+            Date now = new Date();
+            if (expirationDate != null && expirationDate.before(now)) {
+                throw new InValidAuthorizationException("Token has expired");
+            }
+            Claim claim = jwt.getClaim("email");
+            email = claim.toString();
+        } catch (Exception e) {
+            log.error("Google parse token error {}", e.getMessage());
+        }    
+        UserInformation userInformation = userService.getUserByEmail(email);
+
+        return userInformation;
     }
 }
