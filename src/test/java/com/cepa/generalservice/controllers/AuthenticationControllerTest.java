@@ -50,187 +50,187 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class AuthenticationControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private RegisterService registerService;
+        @MockBean
+        private RegisterService registerService;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+        @MockBean
+        private AuthenticationService authenticationService;
 
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
+        @MockBean
+        private JwtTokenUtil jwtTokenUtil;
 
-    @MockBean
-    private SecurityContextService securityContextService;
+        @MockBean
+        private SecurityContextService securityContextService;
 
-    @MockBean
-    private UserService userService;
+        @MockBean
+        private UserService userService;
 
-    @MockBean
-    private EventPublisher eventPublisher;
+        @MockBean
+        private EventPublisher eventPublisher;
 
-    @MockBean
-    private EnvironmentVariables environmentVariables;
+        @MockBean
+        private EnvironmentVariables environmentVariables;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+        @Autowired
+        private WebApplicationContext webApplicationContext;
 
-    @Test
-    void testCreateTeacherAccount() throws Exception {
+        @Test
+        void testCreateTeacherAccount() throws Exception {
 
-        doNothing().when(registerService).teacherRegister(any(TeacherRegister.class));
+                doNothing().when(registerService).teacherRegister(any(TeacherRegister.class));
 
-        UserRegister userRegister = UserRegister
-                .builder()
-                .email("teacher@gmail.com")
-                .confirmPassword("123456")
-                .fullName("test12345")
-                .password("123456")
-                .build();
-        TeacherRegister teacherRegister = TeacherRegister
-                .builder()
-                .userRegister(userRegister)
-                .subjectIds(List.of(1l, 2l, 3l))
-                .build();
+                UserRegister userRegister = UserRegister
+                                .builder()
+                                .email("teacher@gmail.com")
+                                .confirmPassword("123456")
+                                .fullName("test12345")
+                                .password("123456")
+                                .build();
+                TeacherRegister teacherRegister = TeacherRegister
+                                .builder()
+                                .userRegister(userRegister)
+                                .subjectIds(List.of(1l, 2l, 3l))
+                                .build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/api/authentication/register/teacher")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(teacherRegister)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .post("/api/authentication/register/teacher")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(teacherRegister)))
+                                .andExpect(MockMvcResultMatchers.status().isCreated());
+        }
 
-    @Test
-    void testCreateStudentAccount() throws Exception {
+        @Test
+        void testCreateStudentAccount() throws Exception {
 
-        doNothing().when(registerService).studentRegister(any(StudentRegister.class));
+                doNothing().when(registerService).studentRegister(any(StudentRegister.class));
 
-        UserRegister userRegister = UserRegister
-                .builder()
-                .email("student@gmail.com")
-                .confirmPassword("123456")
-                .fullName("test12345")
-                .password("123456")
-                .build();
-        StudentRegister studentRegister = StudentRegister
-                .builder()
-                .userRegister(userRegister)
-                .combinationIds(List.of(1l, 2l, 3l))
-                .build();
+                UserRegister userRegister = UserRegister
+                                .builder()
+                                .email("student@gmail.com")
+                                .confirmPassword("123456")
+                                .fullName("test12345")
+                                .password("123456")
+                                .build();
+                StudentRegister studentRegister = StudentRegister
+                                .builder()
+                                .userRegister(userRegister)
+                                .combinationIds(List.of(1l, 2l, 3l))
+                                .build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/api/authentication/register/student")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(studentRegister)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .post("/api/authentication/register/student")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(studentRegister)))
+                                .andExpect(MockMvcResultMatchers.status().isCreated());
+        }
 
-    @Test
-    void loginSuccessReturnLoginResponse() throws JsonProcessingException, Exception {
+        @Test
+        void loginSuccessReturnLoginResponse() throws JsonProcessingException, Exception {
 
-        LoginRequest loginRequest = LoginRequest
-                .builder()
-                .email("test@gmail.com")
-                .password("password").build();
+                LoginRequest loginRequest = LoginRequest
+                                .builder()
+                                .email("test@gmail.com")
+                                .password("password").build();
 
-        LoginResponse loginResponse = LoginResponse.builder()
-                .accessToken("sampleAccessToken")
-                .refreshToken("sampleRefreshToken").build();
+                LoginResponse loginResponse = LoginResponse.builder()
+                                .accessToken("sampleAccessToken")
+                                .refreshToken("sampleRefreshToken").build();
 
-        when(authenticationService.login(any(LoginRequest.class))).thenReturn(loginResponse);
+                when(authenticationService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
+                MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentication/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(loginRequest)))
+                                .andExpect(status().isOk())
+                                .andReturn();
 
-        assertEquals("{\"accessToken\":\"sampleAccessToken\",\"refreshToken\":\"sampleRefreshToken\"}",
-                mvcResult.getResponse().getContentAsString());
-    }
+                assertEquals("{\"accessToken\":\"sampleAccessToken\",\"refreshToken\":\"sampleRefreshToken\"}",
+                                mvcResult.getResponse().getContentAsString());
+        }
 
-    @Test
-    void testForgotPasswordSuccess() throws Exception {
+        @Test
+        void testForgotPasswordSuccess() throws Exception {
 
-        String userEmail = "test@gmail.com";
-        UserInformation userInformation = UserInformation.builder().build();
-        EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
-        when(userService.getUserByEmail(userEmail)).thenReturn(userInformation);
+                String userEmail = "test@gmail.com";
+                UserInformation userInformation = UserInformation.builder().build();
+                EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
+                when(userService.getUserByEmail(userEmail)).thenReturn(userInformation);
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/forgot-password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(emailRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/forgot-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(emailRequest)))
+                                .andExpect(status().isOk())
+                                .andReturn();
+        }
 
-    @Test
-    void testForgotPasswordUserNotFound() throws Exception {
+        @Test
+        void testForgotPasswordUserNotFound() throws Exception {
 
-        String userEmail = "nonexistent@gmail.com";
-        EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
-        when(userService.getUserByEmail(emailRequest.getEmail()))
-                .thenThrow(new BadRequestException("User not valid."));
+                String userEmail = "nonexistent@gmail.com";
+                EmailRequest emailRequest = EmailRequest.builder().email(userEmail).build();
+                when(userService.getUserByEmail(emailRequest.getEmail()))
+                                .thenThrow(new BadRequestException("User not valid."));
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/forgot-password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(emailRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
-                .andReturn();
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/forgot-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(emailRequest)))
+                                .andExpect(status().isOk())
+                                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
+                                .andReturn();
+        }
 
-    @Test
-    void testResetPasswordSuccess() throws Exception {
+        @Test
+        void testResetPasswordSuccess() throws Exception {
 
-        ForgotPassword forgotPassword = ForgotPassword.builder().build();
-        forgotPassword.setPassword("newPassword");
-        forgotPassword.setConfirmPassword("newPassword");
-        forgotPassword.setUuid("token123");
+                ForgotPassword forgotPassword = ForgotPassword.builder().build();
+                forgotPassword.setPassword("newPassword");
+                forgotPassword.setConfirmPassword("newPassword");
+                forgotPassword.setUuid("token123");
 
-        doNothing().when(userService).forgotPassword(any(ForgotPassword.class));
+                doNothing().when(userService).forgotPassword(any(ForgotPassword.class));
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/reset-password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"password\":\"newPassword\",\"confirmPassword\":\"newPassword\",\"uuid\":\"token123\"}"))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/reset-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"password\":\"newPassword\",\"confirmPassword\":\"newPassword\",\"uuid\":\"token123\"}"))
+                                .andExpect(status().isOk())
+                                .andReturn();
+        }
 
-    @Test
-    void testResetPasswordUserNotValid() throws Exception {
-        ForgotPassword forgotPassword = ForgotPassword.builder().build();
-        forgotPassword.setPassword("newPassword");
-        forgotPassword.setConfirmPassword("newPassword");
-        forgotPassword.setUuid("token123");
+        @Test
+        void testResetPasswordUserNotValid() throws Exception {
+                ForgotPassword forgotPassword = ForgotPassword.builder().build();
+                forgotPassword.setPassword("newPassword");
+                forgotPassword.setConfirmPassword("newPassword");
+                forgotPassword.setUuid("token123");
 
-        Mockito.doThrow(new BadRequestException("User not valid.")).when(userService)
-                .forgotPassword(any(ForgotPassword.class));
+                Mockito.doThrow(new BadRequestException("User not valid.")).when(userService)
+                                .forgotPassword(any(ForgotPassword.class));
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/reset-password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(forgotPassword)))
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
-                .andReturn();
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/reset-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(forgotPassword)))
+                                .andExpect(status().isOk())
+                                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"User not valid.\"}"))
+                                .andReturn();
+        }
 
     @Test
     void testConfirmOtpSuccess() throws Exception {
@@ -247,45 +247,45 @@ class AuthenticationControllerTest {
                 .andReturn();
     }
 
-    @Test
-    void testConfirmOtpInvalidToken() throws Exception {
+        @Test
+        void testConfirmOtpInvalidToken() throws Exception {
 
-        Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
-                .userConfirmEmail(Mockito.anyString());
+                Mockito.doThrow(new BadRequestException("Token not valid")).when(userService)
+                                .userConfirmEmail(Mockito.anyString());
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/confirm")
-                .content("{\"token\":\"ehfg112fs\"}")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
-                .andReturn();
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/confirm")
+                                .content("{\"token\":\"ehfg112fs\"}")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"Token not valid\"}"))
+                                .andReturn();
+        }
 
-    @Test
-    void testResendToken() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/resend-token")
-                .content("{\"email\":\"test@gmail.com\"}")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
+        @Test
+        void testResendToken() throws Exception {
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/resend-token")
+                                .content("{\"email\":\"test@gmail.com\"}")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andReturn();
+        }
 
-    @Test
-    void testResendTokenWithInvalidEmail() throws Exception {
-        String email = "invalidemail@gmail.com";
+        @Test
+        void testResendTokenWithInvalidEmail() throws Exception {
+                String email = "invalidemail@gmail.com";
 
-        Mockito.doThrow(new BadRequestException("Email not valid.")).when(userService)
-                .getUserByEmailIgnorStatus(email);
+                Mockito.doThrow(new BadRequestException("Email not valid.")).when(userService)
+                                .getUserByEmailIgnorStatus(email);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/authentication/resend-token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"invalidemail@gmail.com\"}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Email not valid."));
-    }
+                mockMvc.perform(MockMvcRequestBuilders
+                                .patch("/api/authentication/resend-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"email\":\"invalidemail@gmail.com\"}"))
+                                .andExpect(MockMvcResultMatchers.status().isOk())
+                                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Email not valid."));
+        }
 }
