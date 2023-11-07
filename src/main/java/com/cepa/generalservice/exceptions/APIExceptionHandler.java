@@ -23,34 +23,36 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.cepa.generalservice.data.dto.response.ExceptionResponse;
 
-
-
 @RestControllerAdvice
 public class APIExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ExceptionResponse> handleBadRequestException(BadRequestException ex) {
-        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).build();
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(4).build();
+        return new ResponseEntity<>(errors, HttpStatus.OK);
     }
+
     @ExceptionHandler(SuccessHandler.class)
     public ResponseEntity<ExceptionResponse> handleSuccessException(SuccessHandler ex) {
+        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(9).build();
+        return new ResponseEntity<>(errors, HttpStatus.OK);
+    }
+
+    @ExceptionHandler(InValidInformation.class)
+    public ResponseEntity<ExceptionResponse> inValidInformation(InValidInformation ex) {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(1).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
-    @ExceptionHandler(InValidInformation.class)
-    public ResponseEntity<ExceptionResponse> inValidInformation(InValidInformation ex) {
+
+    @ExceptionHandler(DataConfilictException.class)
+    public ResponseEntity<ExceptionResponse> dataConfilictException(DataConfilictException ex) {
         ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(2).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
-    @ExceptionHandler(DataConfilictException.class)
-    public ResponseEntity<ExceptionResponse> dataConfilictException(DataConfilictException ex) {
-        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(3).build();
-        return new ResponseEntity<>(errors, HttpStatus.OK);
-    }
+
     @ExceptionHandler(UserNotExistException.class)
     public ResponseEntity<ExceptionResponse> userNotExistException(UserNotExistException ex) {
-        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(4).build();
+        ExceptionResponse errors = ExceptionResponse.builder().message(ex.getMessage()).code(3).build();
         return new ResponseEntity<>(errors, HttpStatus.OK);
     }
 
@@ -77,6 +79,7 @@ public class APIExceptionHandler {
         ExceptionResponse error = ExceptionResponse.builder().message(ex.getMessage()).build();
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
+
     @ExceptionHandler(EmptyException.class)
     public ResponseEntity<ExceptionResponse> handleEmptyException(EmptyException ex) {
         ExceptionResponse error = ExceptionResponse.builder().message(ex.getMessage()).build();
