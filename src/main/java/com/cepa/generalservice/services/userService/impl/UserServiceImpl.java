@@ -1,8 +1,5 @@
 package com.cepa.generalservice.services.userService.impl;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,6 +65,7 @@ public class UserServiceImpl implements UserService {
             userInformation.setStatus(UserStatus.ENABLE);
             userInformationRepository.save(userInformation);
         }
+        confirmTokenService.verifyToken(token);
     }
 
     @Override

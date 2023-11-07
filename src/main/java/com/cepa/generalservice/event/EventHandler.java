@@ -66,8 +66,8 @@ public class EventHandler implements ApplicationListener<Event> {
             sendEmailService.sendMailService(sendMailRequest);
         }
         if(api.equals("confirm")){
-            userService.userActivateAccount(usertoken);
-            log.info("Actived success for token" + usertoken);
+            userService.userConfirmEmail(usertoken);
+            log.info("Confirm success for token" + usertoken);
         }
     }
 }
