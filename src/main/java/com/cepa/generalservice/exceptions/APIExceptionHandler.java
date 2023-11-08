@@ -70,7 +70,7 @@ public class APIExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException ex) {
-        ExceptionResponse error = ExceptionResponse.builder().message(ex.getMessage()).build();
+        ExceptionResponse error = ExceptionResponse.builder().message(ex.getMessage()).code(5).build();
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
