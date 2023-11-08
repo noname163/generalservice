@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.LoginRequest;
+import com.cepa.generalservice.data.dto.request.TokenRequest;
 import com.cepa.generalservice.data.dto.response.LoginResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
@@ -88,7 +89,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public LoginResponse reFreshToken(HttpServletRequest request) {
         String refreshToken = cookiesUtil.getCookieValue(request, "refresh-token");
-        if(refreshToken==null){
+        if (refreshToken == null) {
             throw new NotFoundException("Refresh token not found in cookies");
         }
 
@@ -96,8 +97,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String email = jwtTokenUtil.getEmailFromClaims(claims);
         UserInformation userInformation = userInformationRepository.findByEmailAndStatus(email, UserStatus.ENABLE)
                 .orElseThrow(() -> new UserNotExistException("User not exist."));
-        
+
         return generateLoginResponseByUser(userInformation);
-        
+
+    }
+
+    @Override
+    public LoginResponse loginWithGoogle(TokenRequest token) {
+        UserInformation userInformation = jwtTokenUtil.getJwsClaimsForGoogle(token.getToken());
+        return generateLoginResponseByUser(userInformation);
     }
 }
