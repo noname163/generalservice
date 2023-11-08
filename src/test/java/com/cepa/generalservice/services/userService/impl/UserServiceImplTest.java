@@ -174,7 +174,7 @@ public class UserServiceImplTest {
         userService.userActivateAccount(token);
 
         // Assert
-        verify(confirmTokenService, times(1)).verifyToken(token);
+        verify(confirmTokenService, times(2)).verifyToken(token);
         verify(confirmTokenService, times(1)).getUserByToken(token);
         verify(userInformationRepository, times(1)).save(userInformation);
     }

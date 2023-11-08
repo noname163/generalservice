@@ -134,18 +134,28 @@ public class AuthenticationController {
                 return ResponseEntity.status(HttpStatus.OK).build();
         }
 
-        @Operation(summary = "Verify token")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Verify successfull."),
-                        @ApiResponse(responseCode = "400", description = "Token not valid.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
-        })
-        @PatchMapping("/confirm")
-        public ResponseEntity<Void> confirmOtp(@Valid @RequestBody TokenRequest token) {
-                userService.userConfirmEmail(token.getToken());
-                eventPublisher.publishEvent(token.getToken());
-                return ResponseEntity.ok().build();
-        }
+    @Operation(summary = "Verify token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verify successfull."),
+            @ApiResponse(responseCode = "400", description = "Token not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PatchMapping("/confirm")
+    public ResponseEntity<Boolean> confirmOtp(@Valid  @RequestBody TokenRequest token) {
+        return ResponseEntity.ok().body(userService.userConfirmEmail(token.getToken()));
+    }
+
+    @Operation(summary = "User active account")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verify successfull."),
+            @ApiResponse(responseCode = "400", description = "Token not valid.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PatchMapping("/active-account")
+    public ResponseEntity<Void> activeAccount(@Valid  @RequestBody TokenRequest token) {
+        userService.userActivateAccount(token.getToken());
+        return ResponseEntity.ok().build();
+    }
 
         @Operation(summary = "Resend token")
         @ApiResponses(value = {
