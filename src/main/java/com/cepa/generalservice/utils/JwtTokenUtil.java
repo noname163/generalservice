@@ -143,11 +143,12 @@ public class JwtTokenUtil {
         return claims.get("phone").toString();
     }
 
-    public UserInformation getJwsClaimsForGoogle(String token) {        
+    public UserInformation getJwsClaimsForGoogle(String token) {
         String email = "";
         try {
             DecodedJWT jwt = JWT.decode(token);
-            if(!jwt.getIssuer().equals("https://accounts.google.com")|| !jwt.getAudience().get(0).equals("26921650638-a5s7agh9vm66h679a6891cqqq1o4slr4.apps.googleusercontent.com")){
+            if (!jwt.getIssuer().equals("https://accounts.google.com") || !jwt.getAudience().get(0)
+                    .equals("26921650638-a5s7agh9vm66h679a6891cqqq1o4slr4.apps.googleusercontent.com")) {
                 throw new InValidAuthorizationException("Token from google not valid");
             }
             Date expirationDate = jwt.getExpiresAt();
@@ -156,10 +157,10 @@ public class JwtTokenUtil {
                 throw new InValidAuthorizationException("Token has expired");
             }
             Claim claim = jwt.getClaim("email");
-            email = claim.toString();
+            email = claim.asString();
         } catch (Exception e) {
             log.error("Google parse token error {}", e.getMessage());
-        }    
+        }
         UserInformation userInformation = userService.getUserByEmail(email);
 
         return userInformation;

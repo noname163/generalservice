@@ -4,5 +4,6 @@ public enum UserStatus {
     ENABLE,
     DISABLE,
     WATTING,
-    BANNED
+    BANNED,
+    ALL
 }
