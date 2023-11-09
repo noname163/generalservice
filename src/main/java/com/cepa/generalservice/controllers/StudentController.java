@@ -15,10 +15,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cepa.generalservice.data.constants.SortType;
+import com.cepa.generalservice.data.constants.StateType;
+import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.CombinationRequest;
 import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
+import com.cepa.generalservice.data.dto.response.CombinationResponse;
+import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
 import com.cepa.generalservice.data.entities.StudentTarget;
@@ -32,7 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@PreAuthorize("hasAuthority('STUDENT')")
+// @PreAuthorize("hasAuthority('STUDENT')")
 @RestController
 @RequestMapping("/api/student")
 public class StudentController {
@@ -40,6 +46,25 @@ public class StudentController {
         private StudentInformationService studentInformationService;
         @Autowired
         private StudentTargetService studentTargetService;
+
+        @Operation(summary = "Get students")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
+                        @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+        })
+        @PreAuthorize("hasAuthority('ADMIN')")
+        @GetMapping()
+        public ResponseEntity<PaginationResponse<List<StudentResponse>>> getCombinations(
+                        @RequestParam(required = false, defaultValue = "0") Integer page,
+                        @RequestParam(required = false, defaultValue = "20") Integer size,
+                        @RequestParam(required = false) String field,
+                        @RequestParam(required = false, defaultValue = "ASC") SortType sortType,
+                        @RequestParam(required = false, defaultValue = "ALL") UserStatus userStatus) {
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(studentInformationService.getStudents(page, size, field, sortType, userStatus));
+        }
 
         @Operation(summary = "Get student information")
         @ApiResponses(value = {
