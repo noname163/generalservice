@@ -1,18 +1,13 @@
 package com.cepa.generalservice.data.dto.request;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 @Builder
-@Getter
-@Setter
+@Data
 public class StudentTargetRequest {
-
-    @NotNull(message = "Target grade is require.")
-    private double grade;
-    @NotNull(message = "Combination is required")
-    private Long combinationId;
+    StudentCombinationTarget studentCombinationTarget;
+    List<StudentSubjectTargetRequest> studentTargetRequest;
 }

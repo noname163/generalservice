@@ -14,5 +14,5 @@ public class StudentRequest {
     private String fullName;
     private String url;
     private Date dateOfBirth;
-    private List<StudentTargetRequest> targets;
+    private List<StudentSubjectTargetRequest> targets;
 }

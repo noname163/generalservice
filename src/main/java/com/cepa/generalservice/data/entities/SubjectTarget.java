@@ -30,9 +30,13 @@ public class SubjectTarget {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "subject_target_sequence")
     private long id;
 
+    private long subjectId;
+    
     private Integer max;
 
     private Integer min;
+
+    private double grade;
 
     private String level;
 

@@ -42,7 +42,9 @@ public class CombinationMapper {
 
     public Combination mapDtoToEntity(CombinationResponse combinationResponse) {
         return Combination
-                .builder().id(combinationResponse.getId()).name(combinationResponse.getName())
+                .builder()
+                .id(combinationResponse.getId())
+                .name(combinationResponse.getName())
                 .description(combinationResponse.getDescription()).build();
     }
 }
