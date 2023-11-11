@@ -14,9 +14,7 @@ import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
-import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.entities.StudentTarget;
-import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.mappers.StudentMapper;
@@ -52,8 +50,6 @@ public class StudentInformationServiceImpl implements StudentInformationService 
                     .filter(target -> target.getStateType() == StateType.TRUE)
                     .collect(Collectors.toList());
             studentResponse.setTargets(studentTargetMapper.mapEntitiesToDtos(filteredTargets));
-            // studentResponse.setTargets(studentTargetMapper
-            // .mapEntitiesToDtos(userInformation.getStudentTargets()));
         }
         return studentResponse;
     }
@@ -63,7 +59,6 @@ public class StudentInformationServiceImpl implements StudentInformationService 
             SortType sortType, UserStatus userStatus) {
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
         Page<UserInformation> listStudent;
-        System.out.println(userStatus);
         if (userStatus != null && userStatus != UserStatus.ALL) {
 
             listStudent = userInformationRepository.findAllByRoleAndStatus(pageable, Role.STUDENT, userStatus);
