@@ -44,7 +44,7 @@ public class StudentController {
     @Autowired
     private StudentTargetService studentTargetService;
 
-    @Operation(summary = "Get students")
+    @Operation(summary = "Get students for admin")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
             @ApiResponse(responseCode = "400", description = "Bad request.", content = {
@@ -52,7 +52,7 @@ public class StudentController {
     })
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping()
-    public ResponseEntity<PaginationResponse<List<StudentResponse>>> getCombinations(
+    public ResponseEntity<PaginationResponse<List<StudentResponse>>> getAllStudent(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) String field,

@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
+import com.cepa.generalservice.data.dto.response.AdminEditUserStatus;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
@@ -114,6 +116,21 @@ public class UserServiceImpl implements UserService {
         userExist.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userInformationRepository.save(userExist);
 
+    }
+
+    @Override
+    public void editUserStatus(AdminEditUserStatus editUserStatus) {
+        UserInformation userInformation = userInformationRepository
+                .findById(editUserStatus.getUserId())
+                .orElseThrow(() -> new BadRequestException("Cannot found user with id " + editUserStatus.getUserId()));
+        if(userInformation.getRole().equals(Role.ADMIN)){
+            throw new BadRequestException("Cannot change admin account");
+        }
+        if (userInformation.getStatus().equals(editUserStatus.getUserStatus())) {
+            throw new BadRequestException("There is no difference to change");
+        }
+        userInformation.setStatus(editUserStatus.getUserStatus());
+        userInformationRepository.save(userInformation);
     }
 
 }

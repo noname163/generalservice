@@ -1,5 +1,6 @@
 package com.cepa.generalservice.services.studentService.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,14 +61,21 @@ public class StudentInformationServiceImpl implements StudentInformationService 
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
         Page<UserInformation> listStudent;
         if (userStatus != null && userStatus != UserStatus.ALL) {
-
             listStudent = userInformationRepository.findAllByRoleAndStatus(pageable, Role.STUDENT, userStatus);
         } else {
-
             listStudent = userInformationRepository.findAllByRole(pageable, Role.STUDENT);
         }
+        List<StudentResponse> studentResponses = new ArrayList<>();
+        for (UserInformation userInformation : listStudent) {
+            List<StudentTarget> filteredTargets = userInformation.getStudentTargets().stream()
+                    .filter(target -> target.getStateType() == StateType.TRUE)
+                    .collect(Collectors.toList());
+            StudentResponse studentResponse = studentMapper.mapEntityToDto(userInformation);
+            studentResponse.setTargets(studentTargetMapper.mapEntitiesToDtos(filteredTargets));
+            studentResponses.add(studentResponse);
+        }
         return PaginationResponse.<List<StudentResponse>>builder()
-                .data(studentMapper.mapEntitiesToDtos(listStudent.getContent()))
+                .data(studentResponses)
                 .totalPage(listStudent.getTotalPages())
                 .totalRow(listStudent.getTotalElements())
                 .build();

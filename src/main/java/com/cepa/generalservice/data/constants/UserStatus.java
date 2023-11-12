@@ -3,7 +3,7 @@ package com.cepa.generalservice.data.constants;
 public enum UserStatus {
     ENABLE,
     DISABLE,
-    WATTING,
+    WAITTING,
     BANNED,
     ALL
 }

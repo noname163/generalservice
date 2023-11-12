@@ -17,6 +17,7 @@ public class StudentMapper {
                 .builder()
                 .id(userInformation.getId())
                 .fullName(userInformation.getFullName())
+                .userStatus(userInformation.getStatus())
                 .email(userInformation.getEmail())
                 .url(userInformation.getImageURL() != null ? userInformation.getImageURL() : "empty")
                 .dateOfBirth(userInformation.getDateOfBirth() != null ? userInformation.getDateOfBirth() : null)

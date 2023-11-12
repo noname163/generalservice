@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.CombinationRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
+import com.cepa.generalservice.data.dto.response.AdminEditUserStatus;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.exceptions.BadRequestException;
@@ -81,5 +83,18 @@ public class UserController {
         public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
                 userService.changePassword(changePasswordRequest);
                 return ResponseEntity.status(HttpStatus.OK).body("Change password successfully");
+        }
+
+        @Operation(summary = "Change password")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "Change status successfull."),
+                        @ApiResponse(responseCode = "400", description = "User not valid.", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+        })
+        @PreAuthorize("hasAuthority('ADMIN')")
+        @PatchMapping("/change-user-status")
+        public ResponseEntity<String> editUserStatus(@Valid @RequestBody AdminEditUserStatus adminEditUserStatus) {
+                userService.editUserStatus(adminEditUserStatus);
+                return ResponseEntity.status(HttpStatus.OK).body("Change status successfully");
         }
 }
