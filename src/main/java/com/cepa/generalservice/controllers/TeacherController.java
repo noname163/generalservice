@@ -33,7 +33,7 @@ public class TeacherController {
         @Autowired
         private TeacherInformationService teacherInformationService;
 
-        @Operation(summary = "Get teachers")
+        @Operation(summary = "Get teachers for admin")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
                         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
