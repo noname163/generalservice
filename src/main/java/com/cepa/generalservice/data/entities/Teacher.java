@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -39,7 +40,7 @@ public class Teacher {
     @ManyToMany
     private List<Subject> subjects;
     
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "information_id")
     private UserInformation information;
 }

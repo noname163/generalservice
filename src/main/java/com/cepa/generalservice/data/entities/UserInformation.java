@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -64,8 +65,8 @@ public class UserInformation {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @OneToMany(mappedBy = "information")
-    private List<Teacher> teachers;
+    @OneToOne(mappedBy = "information")
+    private Teacher teachers;
 
     @OneToMany(mappedBy = "information")
     private List<PaymentInformation> paymentInformation;
