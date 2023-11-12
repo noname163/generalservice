@@ -88,7 +88,7 @@ public class RegisterServiceImpl implements RegisterService {
         userRegister.setPassword(passwordEncoder.encode(userRegister.getPassword()));
 
         UserInformation newUser = userInformationMapper.mapDtoToEntity(userRegister);
-        newUser.setStatus(UserStatus.WATTING);
+        newUser.setStatus(UserStatus.WAITTING);
 
         return userInformationRepository.save(newUser);
     }

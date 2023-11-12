@@ -3,6 +3,7 @@ package com.cepa.generalservice.services.userService;
 import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
+import com.cepa.generalservice.data.dto.response.AdminEditUserStatus;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 
@@ -23,4 +24,5 @@ public interface UserService {
 
     public UserResponse updateUserByEmail(String email, UserRequest userRequest);
 
+    public void editUserStatus(AdminEditUserStatus editUserStatus);
 }
