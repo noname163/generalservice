@@ -13,7 +13,6 @@ import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
 import com.cepa.generalservice.data.dto.request.TeacherRegister;
 import com.cepa.generalservice.data.dto.request.UserRegister;
-import com.cepa.generalservice.data.entities.ConfirmToken;
 import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
@@ -23,9 +22,7 @@ import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.DataConfilictException;
 import com.cepa.generalservice.exceptions.InValidInformation;
-import com.cepa.generalservice.exceptions.SuccessHandler;
 import com.cepa.generalservice.mappers.UserInformationMapper;
-import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 import com.cepa.generalservice.services.userService.RegisterService;
 
@@ -47,7 +44,7 @@ public class RegisterServiceImpl implements RegisterService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserInformationMapper userInformationMapper;
-
+    
     @Override
     @Transactional
     public void teacherRegister(TeacherRegister teacherRegister) {

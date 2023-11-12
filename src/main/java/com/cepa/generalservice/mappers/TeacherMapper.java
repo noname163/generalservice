@@ -5,9 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.cepa.generalservice.data.dto.response.SubjectResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
-import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.UserInformation;
 
 @Component
@@ -17,6 +15,9 @@ public class TeacherMapper {
                 .builder()
                 .id(userInformation.getId())
                 .fullName(userInformation.getFullName())
+                .createDate(userInformation.getCreateDate())
+                .subject(userInformation.getTeachers().getSubjects().stream().findFirst().get().getName())
+                .status(userInformation.getStatus())
                 .email(userInformation.getEmail())
                 .url(userInformation.getImageURL() != null ? userInformation.getImageURL() : "empty")
                 .dateOfBirth(userInformation.getDateOfBirth() != null ? userInformation.getDateOfBirth() : null)
