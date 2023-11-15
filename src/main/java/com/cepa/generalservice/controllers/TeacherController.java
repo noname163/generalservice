@@ -30,40 +30,40 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @RequestMapping("/api/teacher")
 public class TeacherController {
-        @Autowired
-        private TeacherInformationService teacherInformationService;
+    @Autowired
+    private TeacherInformationService teacherInformationService;
 
-        @Operation(summary = "Get teachers for admin")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
-                        @ApiResponse(responseCode = "400", description = "Bad request.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
-        })
-        @PreAuthorize("hasAuthority('ADMIN')")
-        @GetMapping()
-        public ResponseEntity<PaginationResponse<List<TeacherResponse>>> getCombinations(
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false) String field,
-                        @RequestParam(required = false, defaultValue = "ASC") SortType sortType,
-                        @RequestParam(required = false, defaultValue = "ALL") UserStatus userStatus) {
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(teacherInformationService.getTeachers(page, size, field, sortType, userStatus));
-        }
+    @Operation(summary = "Get teachers for admin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get combinations successfull."),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping()
+    public ResponseEntity<PaginationResponse<List<TeacherResponse>>> getCombinations(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size,
+            @RequestParam(required = false) String field,
+            @RequestParam(required = false, defaultValue = "ASC") SortType sortType,
+            @RequestParam(required = false, defaultValue = "ALL") UserStatus userStatus) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(teacherInformationService.getTeachers(page, size, field, sortType, userStatus));
+    }
 
-        @Operation(summary = "Get teacher information")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Get teacher information successfull.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = StudentResponse.class))
-                        }),
-                        @ApiResponse(responseCode = "400", description = "Bad request.", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
-        })
-        @GetMapping("/{email}")
-        public ResponseEntity<TeacherResponse> getTeacherInformation(@PathVariable String email) {
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(teacherInformationService.getTeacherByEmail(email));
-        }
+    @Operation(summary = "Get teacher information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get teacher information successfull.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @GetMapping("/detail")
+    public ResponseEntity<TeacherResponse> getTeacherInformation() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(teacherInformationService.getTeacherInformation());
+    }
 }

@@ -20,6 +20,7 @@ import com.cepa.generalservice.data.entities.StudentTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.mappers.StudentMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.UserService;
 
 public class StudentInformationServiceImplTest {
@@ -32,6 +33,9 @@ public class StudentInformationServiceImplTest {
 
     @Mock
     private StudentTargetMapper studentTargetMapper;
+
+    @Mock
+    private SecurityContextService securityContextService;
 
     @InjectMocks
     private StudentInformationServiceImpl studentInformationService;
@@ -54,11 +58,12 @@ public class StudentInformationServiceImplTest {
         StudentResponse studentResponse = StudentResponse.builder().build();
         studentResponse.setEmail("student@example.com");
 
+        when(securityContextService.getCurrentUser()).thenReturn(userInformation);
         when(userService.getUserByEmail("student@example.com")).thenReturn(userInformation);
        
         when(studentMapper.mapEntityToDto(userInformation)).thenReturn(studentResponse);
 
-        StudentResponse result = studentInformationService.getStudentByEmail("student@example.com");
+        StudentResponse result = studentInformationService.getStudentInformation();
 
         // Verify the result
         assertEquals(studentResponse, result);
@@ -79,11 +84,12 @@ public class StudentInformationServiceImplTest {
         StudentResponse studentResponse = StudentResponse.builder().build();
         studentResponse.setEmail("student@example.com");
 
+        when(securityContextService.getCurrentUser()).thenReturn(userInformation);
         when(userService.getUserByEmail("student@example.com")).thenReturn(userInformation);
         when(studentTargetMapper.mapEntitiesToDtos(studentTargets)).thenReturn(studentTargetResponses);
         when(studentMapper.mapEntityToDto(userInformation)).thenReturn(studentResponse);
 
-        StudentResponse result = studentInformationService.getStudentByEmail("student@example.com");
+        StudentResponse result = studentInformationService.getStudentInformation();
 
         verify(studentTargetMapper).mapEntitiesToDtos(studentTargets);
 
