@@ -72,11 +72,11 @@ public class StudentController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PreAuthorize("hasAuthority('STUDENT')")
-    @GetMapping("/{email}")
-    public ResponseEntity<StudentResponse> getStudentInformation(@PathVariable String email) {
+    @GetMapping("/detail")
+    public ResponseEntity<StudentResponse> getStudentInformation() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(studentInformationService.getStudentByEmail(email));
+                .body(studentInformationService.getStudentInformation());
     }
 
     @Operation(summary = "Get student targets")

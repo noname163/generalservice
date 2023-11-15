@@ -9,7 +9,7 @@ import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
 
 public interface TeacherInformationService {
-    public TeacherResponse getTeacherByEmail(String email);
+    public TeacherResponse getTeacherInformation();
 
     public PaginationResponse<List<TeacherResponse>> getTeachers(Integer page, Integer size, String field,
             SortType sortType, UserStatus userStatus);

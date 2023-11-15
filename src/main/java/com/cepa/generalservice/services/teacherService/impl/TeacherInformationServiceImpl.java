@@ -15,6 +15,7 @@ import com.cepa.generalservice.data.dto.response.TeacherResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.mappers.TeacherMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.teacherService.TeacherInformationService;
 import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.PageableUtil;
@@ -33,10 +34,13 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
     private PageableUtil pageableUtil;
     @Autowired
     private UserInformationRepository userInformationRepository;
+    @Autowired
+    private SecurityContextService securityContextService;
 
     @Override
-    public TeacherResponse getTeacherByEmail(String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
+    public TeacherResponse getTeacherInformation() {
+        UserInformation currentUser = securityContextService.getCurrentUser();
+        UserInformation userInformation = userService.getUserByEmail(currentUser.getEmail());
         TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
         return teacherResponse;
     }
