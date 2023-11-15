@@ -20,6 +20,7 @@ import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.mappers.StudentMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
 import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.PageableUtil;
@@ -40,10 +41,13 @@ public class StudentInformationServiceImpl implements StudentInformationService 
     private StudentTargetMapper studentTargetMapper;
     @Autowired
     private UserInformationRepository userInformationRepository;
+    @Autowired
+    private SecurityContextService securityContextService;
 
     @Override
-    public StudentResponse getStudentByEmail(String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
+    public StudentResponse getStudentInformation() {
+        UserInformation currentUser = securityContextService.getCurrentUser();
+        UserInformation userInformation = userService.getUserByEmail(currentUser.getEmail());
         StudentResponse studentResponse = studentMapper.mapEntityToDto(userInformation);
         if (userInformation.getStudentTargets() != null
                 && !userInformation.getStudentTargets().isEmpty()) {
