@@ -1,5 +1,6 @@
 package com.cepa.generalservice.services.teacherService.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
+import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.mappers.TeacherMapper;
@@ -42,6 +44,11 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
         UserInformation currentUser = securityContextService.getCurrentUser();
         UserInformation userInformation = userService.getUserByEmail(currentUser.getEmail());
         TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
+        List<String> subjects = new ArrayList<>();
+        for (Subject subject : userInformation.getTeachers().getSubjects()) {
+            subjects.add(subject.getName());
+        }
+        teacherResponse.setSubject(subjects);
         return teacherResponse;
     }
 

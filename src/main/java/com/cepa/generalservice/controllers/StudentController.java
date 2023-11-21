@@ -25,6 +25,7 @@ import com.cepa.generalservice.data.dto.request.TargetUpdateRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
+import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
@@ -34,7 +35,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 
 @RestController
 @RequestMapping("/api/student")
@@ -135,6 +135,7 @@ public class StudentController {
         studentTargetService.updateTarget(targetUpdateRequest);
         return ResponseEntity.status(HttpStatus.OK).body("Student Target edited successfully.");
     }
+
     @PreAuthorize("hasAuthority('STUDENT')")
     @Operation(summary = "Delete Student Target")
     @ApiResponses(value = {
@@ -148,5 +149,21 @@ public class StudentController {
             @PathVariable Long targetId) {
         studentTargetService.deleteStudentTarget(studentId, targetId);
         return ResponseEntity.status(HttpStatus.OK).body("Student Target deleted successfully.");
+    }
+
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @Operation(summary = "Get Student Subject Target")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get Student Subject Target successfully.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectTargetResponse.class)) }),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @GetMapping("/subject-targets/{targetId}")
+    public ResponseEntity<List<SubjectTargetResponse>> getStudentTargetSubject(
+            @PathVariable Long targetId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(studentTargetService.getSubjectTargetById(targetId));
     }
 }
