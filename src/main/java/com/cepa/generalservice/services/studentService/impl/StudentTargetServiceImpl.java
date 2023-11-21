@@ -17,16 +17,21 @@ import com.cepa.generalservice.data.dto.request.StudentSubjectTargetRequest;
 import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
 import com.cepa.generalservice.data.dto.request.TargetUpdateRequest;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
+import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.entities.StudentTarget;
 import com.cepa.generalservice.data.entities.SubjectTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
+import com.cepa.generalservice.data.object.interfaces.SubjectTargetResponseInterface;
 import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.data.repositories.StudentTargetRepository;
+import com.cepa.generalservice.data.repositories.SubjectTargetRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
+import com.cepa.generalservice.mappers.SubjectTargetMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
 
 @Service
@@ -36,9 +41,15 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     @Autowired
     private UserInformationRepository userInformationRepository;
     @Autowired
+    private SubjectTargetRepository subjectTargetRepository;
+    @Autowired
+    private SubjectTargetMapper subjectTargetMapper;
+    @Autowired
     private CombinationRepository combinationRepository;
     @Autowired
     private StudentTargetMapper studentTargetMapper;
+    @Autowired
+    private SecurityContextService securityContextService;
 
     @Override
     @Transactional
@@ -99,23 +110,23 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         if (combinationAlreadyExists) {
             throw new BadRequestException("Combination " + combination.getName() + " already exists.");
         }
-        List<SubjectTarget> subjectTargets = new ArrayList<>();
-        for (StudentSubjectTargetRequest subjectTargetRequest : studentTargetRequest.getStudentTargetRequest()) {
-            SubjectTarget subjectTarget = SubjectTarget.builder()
-                    .subjectId(subjectTargetRequest.getSubjectId())
-                    .grade(subjectTargetRequest.getGrade())
-                    .build();
-            subjectTargets.add(subjectTarget);
-        }
-
         StudentTarget studentTarget = StudentTarget
                 .builder()
                 .combination(combination)
                 .studentInformation(userInformation)
-                .subjectTargets(subjectTargets)
                 .build();
+        studentTarget = studentTargetRepository.save(studentTarget);
+        List<SubjectTarget> subjectTargets = new ArrayList<>();
+        for (StudentSubjectTargetRequest subjectTargetRequest : studentTargetRequest.getStudentTargetRequest()) {
+            SubjectTarget subjectTarget = SubjectTarget.builder()
+                    .subjectId(subjectTargetRequest.getSubjectId())
+                    .studentTarget(studentTarget)
+                    .grade(subjectTargetRequest.getGrade())
+                    .build();
+            subjectTargets.add(subjectTarget);
+        }
+        subjectTargetRepository.saveAll(subjectTargets);
 
-        studentTargetRepository.save(studentTarget);
     }
 
     @Override
@@ -197,5 +208,13 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         }
 
         return studentTargetMapper.mapEntityToDto(studentTarget);
+    }
+
+    @Override
+    public List<SubjectTargetResponse> getSubjectTargetById(Long studentTargetId) {
+        UserInformation currentUser = securityContextService.getCurrentUser();
+        List<SubjectTargetResponseInterface> subjectTargets = subjectTargetRepository
+                .getSubjectTargetsByStudentTargetIdAndUserId( studentTargetId);
+        return subjectTargetMapper.mapToStudentTargetResponses(subjectTargets);
     }
 }

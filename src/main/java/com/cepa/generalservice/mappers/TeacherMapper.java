@@ -16,7 +16,6 @@ public class TeacherMapper {
                 .id(userInformation.getId())
                 .fullName(userInformation.getFullName())
                 .createDate(userInformation.getCreateDate())
-                .subject(userInformation.getTeachers().getSubjects().stream().findFirst().get().getName())
                 .status(userInformation.getStatus())
                 .email(userInformation.getEmail())
                 .url(userInformation.getImageURL() != null ? userInformation.getImageURL() : "empty")
