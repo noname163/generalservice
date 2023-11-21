@@ -6,7 +6,7 @@ import lombok.Data;
 @Builder
 @Data
 public class SubjectTargetResponse {
-    private long subjectId;
+    private long id;
     private String name;
     private double grade;
 }

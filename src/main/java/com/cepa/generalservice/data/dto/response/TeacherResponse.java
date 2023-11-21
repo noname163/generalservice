@@ -24,6 +24,6 @@ public class TeacherResponse {
     private String url;
     private LocalDateTime createDate;
     private UserStatus status;
-    private String subject;
+    private List<String> subject;
     private Date dateOfBirth;
 }
