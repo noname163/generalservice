@@ -22,6 +22,7 @@ import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
 import com.cepa.generalservice.data.dto.request.TargetUpdateRequest;
+import com.cepa.generalservice.data.dto.request.UpdateSubjectTarget;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
@@ -122,6 +123,20 @@ public class StudentController {
         studentTargetService.createTarget(studentTargetRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Student Target created successfully.");
+    }
+    @Operation(summary = "Edit Student Target")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Student Target created successfully."),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @PostMapping("/edit-target")
+    public ResponseEntity<String> editStudentTarget(@RequestBody UpdateSubjectTarget updateSubjectTarget) {
+
+        subjectTargetService.updateSubjectTarget(updateSubjectTarget);;
+
+        return ResponseEntity.status(HttpStatus.OK).body("Update Target successfully.");
     }
 
     @Operation(summary = "Update Student Target")

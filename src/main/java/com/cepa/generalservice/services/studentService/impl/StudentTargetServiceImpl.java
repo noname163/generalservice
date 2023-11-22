@@ -90,11 +90,12 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     @Override
     @Transactional
     public void createTarget(StudentTargetRequest studentTargetRequest) {
+        Long studentId = securityContextService.getCurrentUser().getId();
         Combination combination = combinationRepository
                 .findById(studentTargetRequest.getStudentCombinationTarget().getCombinationId())
                 .orElseThrow(() -> new BadRequestException("Combination not found"));
         UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(studentTargetRequest.getStudentCombinationTarget().getStudentId(), UserStatus.ENABLE)
+                .findByIdAndStatus(studentId, UserStatus.ENABLE)
                 .orElseThrow(() -> new NotFoundException("User not exist"));
         List<StudentTarget> existingStudentTargets = studentTargetRepository
                 .findByStudentInformation(userInformation);
@@ -122,7 +123,8 @@ public class StudentTargetServiceImpl implements StudentTargetService {
                 .getStudentTargetsByStudentId(studentId);
         List<StudentTargetResponse> studentTargetResponses = new ArrayList<>();
         for (StudentTargetResponse studentTargetResponse : studentTargetMapper.mapInterfacesToDtos(studentTargets)) {
-            List<SubjectTargetResponse> subjectTargetResponses = subjectTargetService.getSubjectTargetById(studentTargetResponse.getId());
+            List<SubjectTargetResponse> subjectTargetResponses = subjectTargetService
+                    .getSubjectTargetById(studentTargetResponse.getId());
             studentTargetResponse.setSubjectTargetResponses(subjectTargetResponses);
             studentTargetResponses.add(studentTargetResponse);
         }
@@ -131,10 +133,9 @@ public class StudentTargetServiceImpl implements StudentTargetService {
 
     @Override
     public void updateTarget(TargetUpdateRequest targetUpdateRequest) {
+        Long studentId = securityContextService.getCurrentUser().getId();
         UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(
-                        targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getStudentId(),
-                        UserStatus.ENABLE)
+                .findByIdAndStatus(studentId,UserStatus.ENABLE)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         Combination combination = combinationRepository
                 .findByIdAndState(
@@ -193,6 +194,11 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         }
 
         return studentTargetMapper.mapEntityToDto(studentTarget);
+    }
+
+    @Override
+    public Boolean isExistTarget(Long studentId ,Long targetId) {
+        return studentTargetRepository.existByStudentInformationIdAndId(studentId,targetId);
     }
 
 }

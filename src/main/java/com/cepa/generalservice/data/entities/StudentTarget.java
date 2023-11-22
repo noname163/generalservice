@@ -52,8 +52,6 @@ public class StudentTarget {
     @JoinColumn(name = "combination_id")
     private Combination combination;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
     private UserInformation studentInformation;
 
     @OneToMany(mappedBy = "studentTarget")

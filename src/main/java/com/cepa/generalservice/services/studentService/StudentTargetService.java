@@ -20,5 +20,6 @@ public interface StudentTargetService {
 
     public StudentTargetResponse getStudentTargetById(long studentId, long targetId);
 
-    
+    public Boolean isExistTarget(Long studentId, Long targetId);
+
 }
