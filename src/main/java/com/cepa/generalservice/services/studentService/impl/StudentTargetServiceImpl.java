@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.StateType;
@@ -37,6 +38,7 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     private StudentTargetRepository studentTargetRepository;
     @Autowired
     private UserInformationRepository userInformationRepository;
+    @Lazy
     @Autowired
     private SubjectTargetService subjectTargetService;
     @Autowired
@@ -47,7 +49,6 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     private SecurityContextService securityContextService;
 
     @Override
-    @Transactional
     public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds) {
         Set<Long> idSet = combinationIds.stream().collect(Collectors.toSet());
 
@@ -88,7 +89,6 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     }
 
     @Override
-    @Transactional
     public void createTarget(StudentTargetRequest studentTargetRequest) {
         Long studentId = securityContextService.getCurrentUser().getId();
         Combination combination = combinationRepository
