@@ -14,12 +14,15 @@ import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
+import com.cepa.generalservice.data.dto.response.StudentPublicResponse;
 import com.cepa.generalservice.data.dto.response.StudentResponse;
+import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
 import com.cepa.generalservice.data.entities.StudentTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.mappers.StudentMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
+import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
@@ -41,9 +44,11 @@ public class StudentInformationServiceImpl implements StudentInformationService 
     @Autowired
     private StudentTargetMapper studentTargetMapper;
     @Autowired
-    private StudentTargetService studentTargetService;
+    private UserInformationMapper userInformationMapper;
     @Autowired
     private UserInformationRepository userInformationRepository;
+    @Autowired
+    private StudentTargetService studentTargetService;
     @Autowired
     private SecurityContextService securityContextService;
 
@@ -80,6 +85,19 @@ public class StudentInformationServiceImpl implements StudentInformationService 
                 .totalPage(listStudent.getTotalPages())
                 .totalRow(listStudent.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public StudentPublicResponse getStudentInformationByEmail(String email) {
+        UserInformation userInformation = userService.getUserByEmail(email);
+        List<StudentTargetResponse> studentTargetResponses = studentTargetService
+                .getStudentTargetsById(userInformation.getId());
+        return StudentPublicResponse
+                .builder()
+                .userResponse(userInformationMapper.mapEntityToDto(userInformation))
+                .targets(studentTargetResponses)
+                .build();
+
     }
 
 }

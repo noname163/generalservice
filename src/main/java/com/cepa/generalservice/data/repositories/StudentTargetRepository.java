@@ -31,4 +31,6 @@ public interface StudentTargetRepository extends JpaRepository<StudentTarget, Lo
     @Query("SELECT CASE WHEN COUNT(st) > 0 THEN true ELSE false END FROM StudentTarget st WHERE st.studentInformation.id = :studentId AND st.id = :id")
     Boolean existByStudentInformationIdAndId(@Param("studentId") Long studentId, @Param("id") Long id);
 
+    Optional<StudentTarget> findByStudentInformationIdAndId(Long studentId, Long id);
+
 }

@@ -1,5 +1,6 @@
 package com.cepa.generalservice.data.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.Builder;
@@ -15,4 +16,5 @@ public class UserResponse {
     private String fullName;
     private String url;
     private Date dateOfBirth;
+    private LocalDateTime createDate;
 }

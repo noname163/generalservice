@@ -3,7 +3,6 @@ package com.cepa.generalservice.services.subjectTargetService;
 import java.util.List;
 
 import com.cepa.generalservice.data.dto.request.StudentSubjectTargetRequest;
-import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
 import com.cepa.generalservice.data.dto.request.UpdateSubjectTarget;
 import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.data.entities.StudentTarget;
