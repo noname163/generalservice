@@ -13,26 +13,23 @@ import org.springframework.stereotype.Service;
 
 import com.cepa.generalservice.data.constants.StateType;
 import com.cepa.generalservice.data.constants.UserStatus;
-import com.cepa.generalservice.data.dto.request.StudentSubjectTargetRequest;
 import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
 import com.cepa.generalservice.data.dto.request.TargetUpdateRequest;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
 import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.entities.StudentTarget;
-import com.cepa.generalservice.data.entities.SubjectTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
-import com.cepa.generalservice.data.object.interfaces.SubjectTargetResponseInterface;
+import com.cepa.generalservice.data.object.interfaces.StudentTargetResponseInterface;
 import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.data.repositories.StudentTargetRepository;
-import com.cepa.generalservice.data.repositories.SubjectTargetRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
-import com.cepa.generalservice.mappers.SubjectTargetMapper;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
+import com.cepa.generalservice.services.subjectTargetService.SubjectTargetService;
 
 @Service
 public class StudentTargetServiceImpl implements StudentTargetService {
@@ -41,9 +38,7 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     @Autowired
     private UserInformationRepository userInformationRepository;
     @Autowired
-    private SubjectTargetRepository subjectTargetRepository;
-    @Autowired
-    private SubjectTargetMapper subjectTargetMapper;
+    private SubjectTargetService subjectTargetService;
     @Autowired
     private CombinationRepository combinationRepository;
     @Autowired
@@ -116,32 +111,22 @@ public class StudentTargetServiceImpl implements StudentTargetService {
                 .studentInformation(userInformation)
                 .build();
         studentTarget = studentTargetRepository.save(studentTarget);
-        List<SubjectTarget> subjectTargets = new ArrayList<>();
-        for (StudentSubjectTargetRequest subjectTargetRequest : studentTargetRequest.getStudentTargetRequest()) {
-            SubjectTarget subjectTarget = SubjectTarget.builder()
-                    .subjectId(subjectTargetRequest.getSubjectId())
-                    .studentTarget(studentTarget)
-                    .grade(subjectTargetRequest.getGrade())
-                    .build();
-            subjectTargets.add(subjectTarget);
-        }
-        subjectTargetRepository.saveAll(subjectTargets);
+        subjectTargetService.createStudentTargetSubject(studentTargetRequest.getStudentTargetRequest(), studentTarget);
 
     }
 
     @Override
-    public List<StudentTargetResponse> getStudentTargetsByStudentId(long studentId) {
-        UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        List<StudentTarget> studentTargets = userInformation.getStudentTargets();
-
-        List<StudentTarget> filteredStudentTargets = studentTargets.stream()
-                .filter(target -> target.getStateType() == StateType.TRUE)
-                .collect(Collectors.toList());
-
-        return studentTargetMapper.mapEntitiesToDtos(filteredStudentTargets);
+    public List<StudentTargetResponse> getStudentTargetsOfCurrentStudent() {
+        Long studentId = securityContextService.getCurrentUser().getId();
+        List<StudentTargetResponseInterface> studentTargets = studentTargetRepository
+                .getStudentTargetsByStudentId(studentId);
+        List<StudentTargetResponse> studentTargetResponses = new ArrayList<>();
+        for (StudentTargetResponse studentTargetResponse : studentTargetMapper.mapInterfacesToDtos(studentTargets)) {
+            List<SubjectTargetResponse> subjectTargetResponses = subjectTargetService.getSubjectTargetById(studentTargetResponse.getId());
+            studentTargetResponse.setSubjectTargetResponses(subjectTargetResponses);
+            studentTargetResponses.add(studentTargetResponse);
+        }
+        return studentTargetResponses;
     }
 
     @Override
@@ -210,11 +195,4 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         return studentTargetMapper.mapEntityToDto(studentTarget);
     }
 
-    @Override
-    public List<SubjectTargetResponse> getSubjectTargetById(Long studentTargetId) {
-        UserInformation currentUser = securityContextService.getCurrentUser();
-        List<SubjectTargetResponseInterface> subjectTargets = subjectTargetRepository
-                .getSubjectTargetsByStudentTargetIdAndUserId( studentTargetId);
-        return subjectTargetMapper.mapToStudentTargetResponses(subjectTargets);
-    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
 import com.cepa.generalservice.data.entities.StudentTarget;
+import com.cepa.generalservice.data.object.interfaces.StudentTargetResponseInterface;
 
 @Component
 public class StudentTargetMapper {
@@ -22,6 +23,20 @@ public class StudentTargetMapper {
     public List<StudentTargetResponse> mapEntitiesToDtos(List<StudentTarget> studentTargets) {
         return studentTargets.stream()
                 .map(this::mapEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    public StudentTargetResponse mapInterfaceToDto(StudentTargetResponseInterface studentTarget) {
+        return StudentTargetResponse
+                .builder()
+                .id(studentTarget.getId())
+                .name(studentTarget.getName())
+                .grade(studentTarget.getGrade())
+                .build();
+    }
+    public List<StudentTargetResponse> mapInterfacesToDtos(List<StudentTargetResponseInterface> studentTargets) {
+        return studentTargets.stream()
+                .map(this::mapInterfaceToDto)
                 .collect(Collectors.toList());
     }
 }

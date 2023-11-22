@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
-import com.cepa.generalservice.data.dto.response.StudentResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.teacherService.TeacherInformationService;
@@ -65,5 +63,21 @@ public class TeacherController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(teacherInformationService.getTeacherInformation());
+    }
+
+    @Operation(summary = "Get teacher information for user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get teacher information successfull.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @GetMapping("/detail/user")
+    public ResponseEntity<TeacherResponse> getTeacherInformationForUser(
+            @RequestParam(required = true) String email) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(teacherInformationService.getTeacherInformationByEmail(email));
     }
 }

@@ -45,7 +45,8 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
         UserInformation userInformation = userService.getUserByEmail(currentUser.getEmail());
         TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
         List<String> subjects = new ArrayList<>();
-        for (Subject subject : userInformation.getTeachers().getSubjects()) {
+        List<Subject> subjectsObject = userInformation.getTeachers().getSubjects();
+        for (Subject subject : subjectsObject) {
             subjects.add(subject.getName());
         }
         teacherResponse.setSubject(subjects);
@@ -70,6 +71,19 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
                 .totalPage(listTeacher.getTotalPages())
                 .totalRow(listTeacher.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public TeacherResponse getTeacherInformationByEmail(String email) {
+        UserInformation userInformation = userService.getUserByEmail(email);
+        TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
+        List<String> subjects = new ArrayList<>();
+        List<Subject> subjectsObject = userInformation.getTeachers().getSubjects();
+        for (Subject subject : subjectsObject) {
+            subjects.add(subject.getName());
+        }
+        teacherResponse.setSubject(subjects);
+        return teacherResponse;
     }
 
 }
