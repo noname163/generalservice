@@ -18,4 +18,6 @@ public interface SubjectTargetRepository extends JpaRepository<SubjectTarget, Lo
     List<SubjectTargetResponseInterface> getSubjectTargetsByStudentTargetIdAndUserId(
             @Param("studentTargetId") Long studentTargetId);
 
+    List<SubjectTarget> findByStudentTargetId(Long studentTargetId);
+
 }

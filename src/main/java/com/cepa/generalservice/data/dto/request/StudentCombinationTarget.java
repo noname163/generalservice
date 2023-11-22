@@ -10,7 +10,5 @@ import lombok.Data;
 public class StudentCombinationTarget {
     @NotNull(message = "Combination is required")
     private Long combinationId;
-    @NotNull(message = "Student id is required")
-    private Long studentId;
     private Double grade;
 }

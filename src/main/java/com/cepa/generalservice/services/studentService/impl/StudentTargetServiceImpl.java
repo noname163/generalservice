@@ -90,11 +90,12 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     @Override
     @Transactional
     public void createTarget(StudentTargetRequest studentTargetRequest) {
+        Long studentId = securityContextService.getCurrentUser().getId();
         Combination combination = combinationRepository
                 .findById(studentTargetRequest.getStudentCombinationTarget().getCombinationId())
                 .orElseThrow(() -> new BadRequestException("Combination not found"));
         UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(studentTargetRequest.getStudentCombinationTarget().getStudentId(), UserStatus.ENABLE)
+                .findByIdAndStatus(studentId, UserStatus.ENABLE)
                 .orElseThrow(() -> new NotFoundException("User not exist"));
         List<StudentTarget> existingStudentTargets = studentTargetRepository
                 .findByStudentInformation(userInformation);
@@ -111,7 +112,8 @@ public class StudentTargetServiceImpl implements StudentTargetService {
                 .studentInformation(userInformation)
                 .build();
         studentTarget = studentTargetRepository.save(studentTarget);
-        subjectTargetService.createStudentTargetSubject(studentTargetRequest.getStudentTargetRequest(), studentTarget);
+        subjectTargetService.createStudentTargetSubject(studentTargetRequest.getStudentTargetRequest(),
+                studentTarget);
 
     }
 
@@ -121,8 +123,10 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         List<StudentTargetResponseInterface> studentTargets = studentTargetRepository
                 .getStudentTargetsByStudentId(studentId);
         List<StudentTargetResponse> studentTargetResponses = new ArrayList<>();
-        for (StudentTargetResponse studentTargetResponse : studentTargetMapper.mapInterfacesToDtos(studentTargets)) {
-            List<SubjectTargetResponse> subjectTargetResponses = subjectTargetService.getSubjectTargetById(studentTargetResponse.getId());
+        for (StudentTargetResponse studentTargetResponse : studentTargetMapper
+                .mapInterfacesToDtos(studentTargets)) {
+            List<SubjectTargetResponse> subjectTargetResponses = subjectTargetService
+                    .getSubjectTargetById(studentTargetResponse.getId());
             studentTargetResponse.setSubjectTargetResponses(subjectTargetResponses);
             studentTargetResponses.add(studentTargetResponse);
         }
@@ -131,14 +135,14 @@ public class StudentTargetServiceImpl implements StudentTargetService {
 
     @Override
     public void updateTarget(TargetUpdateRequest targetUpdateRequest) {
+        Long studentId = securityContextService.getCurrentUser().getId();
         UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(
-                        targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getStudentId(),
-                        UserStatus.ENABLE)
+                .findByIdAndStatus(studentId, UserStatus.ENABLE)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         Combination combination = combinationRepository
                 .findByIdAndState(
-                        targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getCombinationId(),
+                        targetUpdateRequest.getStudentTargetRequest()
+                                .getStudentCombinationTarget().getCombinationId(),
                         true)
                 .orElseThrow(() -> new BadRequestException("Combination not found"));
         StudentTarget studentTarget = studentTargetRepository
@@ -158,7 +162,8 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         }
 
         studentTarget.setCombination(combination);
-        studentTarget.setGrade(targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getGrade());
+        studentTarget.setGrade(
+                targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getGrade());
 
         studentTargetRepository.save(studentTarget);
     }
@@ -193,6 +198,24 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         }
 
         return studentTargetMapper.mapEntityToDto(studentTarget);
+    }
+
+    @Override
+    public Boolean isExistTarget(Long studentId, Long targetId) {
+        return studentTargetRepository.findByStudentInformationIdAndId(studentId, targetId).isPresent();
+    }
+
+    @Override
+    public List<StudentTargetResponse> getStudentTargetsById(Long studentId) {
+        List<StudentTargetResponseInterface> studentTargets = studentTargetRepository
+                .getStudentTargetsByStudentId(studentId);
+        return studentTargetMapper.mapInterfacesToDtos(studentTargets);
+    }
+
+    @Override
+    public StudentTarget getTargetById(Long id) {
+        return studentTargetRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Cannot found target with id " + id));
     }
 
 }
