@@ -27,6 +27,7 @@ public class UserInformationMapper {
                 .email(userInformation.getEmail())
                 .url(userInformation.getImageURL())
                 .dateOfBirth(userInformation.getDateOfBirth())
+                .createDate(userInformation.getCreateDate())
                 .build();
     }
 
