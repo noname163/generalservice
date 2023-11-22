@@ -29,6 +29,7 @@ import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
 import com.cepa.generalservice.services.studentService.StudentTargetService;
+import com.cepa.generalservice.services.subjectTargetService.SubjectTargetService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,6 +44,8 @@ public class StudentController {
     private StudentInformationService studentInformationService;
     @Autowired
     private StudentTargetService studentTargetService;
+    @Autowired
+    private SubjectTargetService subjectTargetService;
 
     @Operation(summary = "Get students for admin")
     @ApiResponses(value = {
@@ -86,26 +89,25 @@ public class StudentController {
 
     })
     @PreAuthorize("hasAuthority('STUDENT')")
-    @GetMapping("/targets/{studentId}")
-    public ResponseEntity<List<StudentTargetResponse>> getStudentTargets(@PathVariable Long studentId) {
-        List<StudentTargetResponse> studentTargets = studentTargetService
-                .getStudentTargetsByStudentId(studentId);
+    @GetMapping("/targets")
+    public ResponseEntity<List<StudentTargetResponse>> getStudentTargets() {
+        List<StudentTargetResponse> studentTargets = studentTargetService.getStudentTargetsOfCurrentStudent();
         return ResponseEntity.status(HttpStatus.OK).body(studentTargets);
     }
 
-    @Operation(summary = "Get student target by Id")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Student Target createdsuccessfully."),
-            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    // @Operation(summary = "Get student target by Id")
+    // @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Student Target createdsuccessfully."),
+    //         @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+    //                 @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
 
-    })
-    @PreAuthorize("hasAuthority('STUDENT')")
-    @GetMapping("/target/{studentId}/{targetId}")
-    public ResponseEntity<StudentTargetResponse> getStudentTargetById(@PathVariable Long studentId,
-            @PathVariable Long targetId) {
-        StudentTargetResponse studentTarget = studentTargetService.getStudentTargetById(studentId, targetId);
-        return ResponseEntity.status(HttpStatus.OK).body(studentTarget);
-    }
+    // })
+    // @PreAuthorize("hasAuthority('STUDENT')")
+    // @GetMapping("/target/{studentId}/{targetId}")
+    // public ResponseEntity<StudentTargetResponse> getStudentTargetById(@PathVariable Long studentId,
+    //         @PathVariable Long targetId) {
+    //     StudentTargetResponse studentTarget = studentTargetService.getStudentTargetById(studentId, targetId);
+    //     return ResponseEntity.status(HttpStatus.OK).body(studentTarget);
+    // }
 
     @Operation(summary = "Create a new Student Target")
     @ApiResponses(value = {
@@ -151,7 +153,6 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body("Student Target deleted successfully.");
     }
 
-    @PreAuthorize("hasAuthority('STUDENT')")
     @Operation(summary = "Get Student Subject Target")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get Student Subject Target successfully.", content = {
@@ -159,11 +160,12 @@ public class StudentController {
             @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
+    @PreAuthorize("hasAuthority('STUDENT')")
     @GetMapping("/subject-targets/{targetId}")
     public ResponseEntity<List<SubjectTargetResponse>> getStudentTargetSubject(
             @PathVariable Long targetId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(studentTargetService.getSubjectTargetById(targetId));
+                .body(subjectTargetService.getSubjectTargetById(targetId));
     }
 }

@@ -22,6 +22,7 @@ import com.cepa.generalservice.mappers.StudentMapper;
 import com.cepa.generalservice.mappers.StudentTargetMapper;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.studentService.StudentInformationService;
+import com.cepa.generalservice.services.studentService.StudentTargetService;
 import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.PageableUtil;
 
@@ -40,6 +41,8 @@ public class StudentInformationServiceImpl implements StudentInformationService 
     @Autowired
     private StudentTargetMapper studentTargetMapper;
     @Autowired
+    private StudentTargetService studentTargetService;
+    @Autowired
     private UserInformationRepository userInformationRepository;
     @Autowired
     private SecurityContextService securityContextService;
@@ -49,13 +52,7 @@ public class StudentInformationServiceImpl implements StudentInformationService 
         UserInformation currentUser = securityContextService.getCurrentUser();
         UserInformation userInformation = userService.getUserByEmail(currentUser.getEmail());
         StudentResponse studentResponse = studentMapper.mapEntityToDto(userInformation);
-        if (userInformation.getStudentTargets() != null
-                && !userInformation.getStudentTargets().isEmpty()) {
-            List<StudentTarget> filteredTargets = userInformation.getStudentTargets().stream()
-                    .filter(target -> target.getStateType() == StateType.TRUE)
-                    .collect(Collectors.toList());
-            studentResponse.setTargets(studentTargetMapper.mapEntitiesToDtos(filteredTargets));
-        }
+        studentResponse.setTargets(studentTargetService.getStudentTargetsOfCurrentStudent());
         return studentResponse;
     }
 

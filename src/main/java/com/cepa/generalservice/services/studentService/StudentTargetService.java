@@ -2,17 +2,15 @@ package com.cepa.generalservice.services.studentService;
 
 import java.util.List;
 
-import com.cepa.generalservice.data.dto.request.StudentSubjectTargetRequest;
 import com.cepa.generalservice.data.dto.request.StudentTargetRequest;
 import com.cepa.generalservice.data.dto.request.TargetUpdateRequest;
 import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
-import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 
 public interface StudentTargetService {
     public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds);
 
-    public List<StudentTargetResponse> getStudentTargetsByStudentId(long studentId);
+    public List<StudentTargetResponse> getStudentTargetsOfCurrentStudent();
 
     public void createTarget(StudentTargetRequest studentTargetRequest);
 
@@ -22,5 +20,5 @@ public interface StudentTargetService {
 
     public StudentTargetResponse getStudentTargetById(long studentId, long targetId);
 
-    public List<SubjectTargetResponse> getSubjectTargetById(Long studentTargetId);
+    
 }
