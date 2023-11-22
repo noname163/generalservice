@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,9 +38,9 @@ public class RegisterServiceImpl implements RegisterService {
     private TeacherRepository teacherRepository;
     @Autowired
     private SubjectRepository subjectRepository;
+    @Lazy
     @Autowired
     private StudentTargetService studentTargetService;
-    
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
