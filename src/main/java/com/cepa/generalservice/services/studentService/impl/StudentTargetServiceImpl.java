@@ -92,7 +92,7 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     public void createTarget(StudentTargetRequest studentTargetRequest) {
         Long studentId = securityContextService.getCurrentUser().getId();
         Combination combination = combinationRepository
-                .findById(studentTargetRequest.getStudentCombinationTarget().getCombinationId())
+                .findById(studentTargetRequest.getCombinationId())
                 .orElseThrow(() -> new BadRequestException("Combination not found"));
         UserInformation userInformation = userInformationRepository
                 .findByIdAndStatus(studentId, UserStatus.ENABLE)
@@ -141,8 +141,7 @@ public class StudentTargetServiceImpl implements StudentTargetService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         Combination combination = combinationRepository
                 .findByIdAndState(
-                        targetUpdateRequest.getStudentTargetRequest()
-                                .getStudentCombinationTarget().getCombinationId(),
+                        targetUpdateRequest.getStudentTargetRequest().getCombinationId(),
                         true)
                 .orElseThrow(() -> new BadRequestException("Combination not found"));
         StudentTarget studentTarget = studentTargetRepository
@@ -162,8 +161,6 @@ public class StudentTargetServiceImpl implements StudentTargetService {
         }
 
         studentTarget.setCombination(combination);
-        studentTarget.setGrade(
-                targetUpdateRequest.getStudentTargetRequest().getStudentCombinationTarget().getGrade());
 
         studentTargetRepository.save(studentTarget);
     }
