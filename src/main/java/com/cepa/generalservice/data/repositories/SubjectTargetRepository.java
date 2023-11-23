@@ -11,7 +11,8 @@ import com.cepa.generalservice.data.object.interfaces.SubjectTargetResponseInter
 
 public interface SubjectTargetRepository extends JpaRepository<SubjectTarget, Long> {
 
-    @Query("SELECT sub.name AS subjectName, s.grade AS grade, s.id AS id " +
+    @Query("SELECT sub.name AS subjectName, s.grade AS grade, s.id AS id, " +
+            "sub.id AS subjectId " +
             "FROM SubjectTarget s " +
             "JOIN Subject sub ON s.subjectId = sub.id " +
             "WHERE s.studentTarget.id = :studentTargetId ")
