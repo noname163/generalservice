@@ -66,8 +66,10 @@ public class SubjectTargetImpl implements SubjectTargetService {
         Combination combination = studentTarget.getCombination();
         long combinationId = combination.getId();
         List<Long> subjectOfCombinationId = combinationRepository.getSubjectIdsByCombinationId(combinationId);
+        boolean isCreate = true;
         for (StudentSubjectTargetRequest subjectTargetRequest : studentSubjectTargetRequests) {
             if (!subjectOfCombinationId.contains(subjectTargetRequest.getSubjectId())) {
+                isCreate = false;
                 throw new BadRequestException(
                         "Not exist subject with id " + subjectTargetRequest.getSubjectId() + " in combination "
                                 + combination.getName());
@@ -80,9 +82,11 @@ public class SubjectTargetImpl implements SubjectTargetService {
             total += subjectTargetRequest.getGrade();
             subjectTargets.add(subjectTarget);
         }
-        studentTarget.setGrade(total);
-        studentTargetRepository.save(studentTarget);
-        subjectTargetRepository.saveAll(subjectTargets);
+        if (isCreate) {
+            studentTarget.setGrade(total);
+            studentTargetRepository.save(studentTarget);
+            subjectTargetRepository.saveAll(subjectTargets);
+        }
     }
 
     @Override
@@ -107,7 +111,7 @@ public class SubjectTargetImpl implements SubjectTargetService {
                     throw new BadRequestException("Grade cannot smaller or equal 0");
                 }
                 Optional<SubjectTarget> optionalSubjectTarget = subjectTargets.stream()
-                        .filter(target -> target.getSubjectId() == subjectId)
+                        .filter(target -> target.getId() == subjectId)
                         .findFirst();
                 if (optionalSubjectTarget.isPresent()) {
                     SubjectTarget subjectTarget = optionalSubjectTarget.get();
