@@ -111,7 +111,7 @@ public class SubjectTargetImpl implements SubjectTargetService {
                     throw new BadRequestException("Grade cannot smaller or equal 0");
                 }
                 Optional<SubjectTarget> optionalSubjectTarget = subjectTargets.stream()
-                        .filter(target -> target.getSubjectId() == subjectId)
+                        .filter(target -> target.getId() == subjectId)
                         .findFirst();
                 if (optionalSubjectTarget.isPresent()) {
                     SubjectTarget subjectTarget = optionalSubjectTarget.get();

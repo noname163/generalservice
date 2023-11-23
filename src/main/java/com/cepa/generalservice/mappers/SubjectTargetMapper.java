@@ -35,6 +35,7 @@ public class SubjectTargetMapper {
         return SubjectTargetResponse
                 .builder()
                 .id(subjectTarget.getId())
+                .subjectId(subjectTarget.getSubjectId())
                 .grade(subjectTarget.getGrade())
                 .name(subjectTarget.getSubjectName())
                 .build();
