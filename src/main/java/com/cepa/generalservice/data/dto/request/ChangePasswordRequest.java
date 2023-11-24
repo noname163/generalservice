@@ -14,9 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChangePasswordRequest {
-    @NotBlank(message = "Email is require")
-    @NotNull(message = "Email Name is require.")
-    private String email;
     @NotBlank(message = "Password is require")
     @NotNull(message = "Password is require.")
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")

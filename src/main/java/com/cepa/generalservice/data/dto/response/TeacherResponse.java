@@ -23,7 +23,9 @@ public class TeacherResponse {
     private String fullName;
     private String url;
     private LocalDateTime createDate;
+    private String description;
     private UserStatus status;
     private List<String> subject;
     private Date dateOfBirth;
+    private Boolean isVerify;
 }
