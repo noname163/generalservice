@@ -1,15 +1,22 @@
 package com.cepa.generalservice.services.userService.impl;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
+import com.cepa.generalservice.data.dto.request.EditUserRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
 import com.cepa.generalservice.data.dto.request.UserRequest;
 import com.cepa.generalservice.data.dto.response.AdminEditUserStatus;
+import com.cepa.generalservice.data.dto.response.CloudinaryUrl;
+import com.cepa.generalservice.data.dto.response.FileResponse;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
@@ -17,8 +24,11 @@ import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.InValidInformation;
 import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
+import com.cepa.generalservice.services.uploadservice.UploadService;
 import com.cepa.generalservice.services.userService.UserService;
+import com.netflix.discovery.converters.Auto;
 
 import lombok.Builder;
 
@@ -33,6 +43,10 @@ public class UserServiceImpl implements UserService {
     private UserInformationMapper userInformationMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private SecurityContextService securityContextService;
+    @Autowired
+    private UploadService uploadService;
 
     @Override
     public UserInformation getUserByEmail(String email) {
@@ -102,10 +116,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(ChangePasswordRequest changePasswordRequest) {
-        UserInformation userExist = userInformationRepository
-                .findByEmailAndStatus(changePasswordRequest.getEmail(), UserStatus.ENABLE)
-                .orElseThrow(() -> new UserNotExistException(
-                        "User not found with email: " + changePasswordRequest.getEmail()));
+
+        UserInformation userExist = securityContextService.getCurrentUser();
 
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), userExist.getPassword())) {
             throw new InValidInformation("Password is incorrect. Please try again");
@@ -130,7 +142,24 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("There is no difference to change");
         }
         userInformation.setStatus(editUserStatus.getUserStatus());
+        userInformation.setUpdateDate(LocalDateTime.now());
         userInformationRepository.save(userInformation);
+    }
+
+    @Override
+    public void editUserInformation(EditUserRequest editUserRequest, MultipartFile multipartFile) {
+        UserInformation currentUser = securityContextService.getCurrentUser();
+        if(multipartFile!=null){
+            CloudinaryUrl cloudinaryUrl = uploadService.uploadMedia(multipartFile);
+            currentUser.setImageURL(cloudinaryUrl.getUrl());
+            currentUser.setCloudPublicId(cloudinaryUrl.getPublicId());
+        }
+
+        currentUser.setDateOfBirth(Optional.ofNullable(editUserRequest.getDateOfBirth()).orElse(currentUser.getDateOfBirth()));
+        currentUser.setFullName(Optional.ofNullable(editUserRequest.getFullName()).orElse(currentUser.getFullName()));
+        currentUser.setDescription(Optional.ofNullable(editUserRequest.getDesciption()).orElse(currentUser.getDescription()));
+        currentUser.setUpdateDate(LocalDateTime.now());
+        userInformationRepository.save(currentUser);
     }
 
 }

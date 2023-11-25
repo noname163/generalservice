@@ -21,6 +21,7 @@ public class StudentResponse {
     private String email;
     private String fullName;
     private UserStatus userStatus;
+    private String description;
     private String url;
     private Date dateOfBirth;
     private List<StudentTargetResponse> targets;
