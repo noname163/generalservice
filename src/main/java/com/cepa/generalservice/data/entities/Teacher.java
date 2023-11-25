@@ -3,6 +3,7 @@ package com.cepa.generalservice.data.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,6 +37,17 @@ public class Teacher {
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
+
+    private Boolean isValidation;
+
+    @Column(columnDefinition = "TEXT")
+    private String identify;
+
+    private String cardNumber;
+
+    private String publicId;
+
+    private String mediaType;
     
     @ManyToMany
     private List<Subject> subjects;

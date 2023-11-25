@@ -1,5 +1,6 @@
 package com.cepa.generalservice.services.userService.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -57,11 +58,12 @@ public class RegisterServiceImpl implements RegisterService {
         List<Subject> subjects = subjectRepository.findByIdIn(teacherRegister.getSubjectIds())
                 .orElseThrow(() -> new BadRequestException(
                         "Cannot found subject with ID: " + teacherRegister.getSubjectIds().toString()));
-
+    
         teacherRepository.save(Teacher
                 .builder()
                 .information(userInformation)
                 .subjects(subjects)
+                .isValidation(false)
                 .build());
     }
 
@@ -90,6 +92,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         UserInformation newUser = userInformationMapper.mapDtoToEntity(userRegister);
         newUser.setStatus(UserStatus.WAITTING);
+        newUser.setCreateDate(LocalDateTime.now());
 
         return userInformationRepository.save(newUser);
     }

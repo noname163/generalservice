@@ -16,6 +16,7 @@ public class StudentMapper {
         return StudentResponse
                 .builder()
                 .id(userInformation.getId())
+                .description(userInformation.getDescription())
                 .fullName(userInformation.getFullName())
                 .userStatus(userInformation.getStatus())
                 .email(userInformation.getEmail())

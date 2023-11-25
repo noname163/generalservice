@@ -1,6 +1,8 @@
 package com.cepa.generalservice.utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -35,4 +37,24 @@ public class EnvironmentVariables {
     @Value("${jwt.google.secret-key}")
     private String googleSecretKey;
 
+    @Value("${cloudinary.name}")
+    private String cloudinaryName;
+
+    @Value("${cloudinary.api.key}")
+    private String cloudinaryApiKey;
+
+    @Value("${cloudinary.api.secret}")
+    private String cloudinaryApiSecret;
+
+    @Value("${allowed.content.types}")
+    private String allowedContentTypes;
+
+    public Map<String,String> initializeAllowedContentTypes() {
+        Map<String, String> result = new HashMap<>();
+        String[] types = allowedContentTypes.split(",");
+        for (String type : types) {
+            result.put(type, type);
+        }
+        return result;
+    }
 }

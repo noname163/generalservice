@@ -44,10 +44,14 @@ public class UserInformation {
 
     private String password;
 
+    private String description;
+
     private Date dateOfBirth;
 
     @Column(columnDefinition = "TEXT")
     private String imageURL;
+
+    private String cloudPublicId;
 
     @Column(columnDefinition = "TEXT")
     private String accessToken;
@@ -67,18 +71,6 @@ public class UserInformation {
 
     @OneToOne(mappedBy = "information")
     private Teacher teachers;
-
-    @OneToMany(mappedBy = "information")
-    private List<PaymentInformation> paymentInformation;
-
-    @OneToMany(mappedBy = "adminInformation")
-    private List<SystemTransaction> adminTransactions;
-
-    @OneToMany(mappedBy = "teacherInformation")
-    private List<SystemTransaction> teacherTransactions;
-
-    @OneToMany(mappedBy = "studentInformation")
-    private List<SystemTransaction> studentTransactions;
 
     @OneToMany(mappedBy = "studentInformation")
     private List<StudentTarget> studentTargets;

@@ -38,6 +38,8 @@ public class UserRegister {
     @Size(min = Validation.MIN_LENGTH_PASSWORD, message = "Password must more than 6 digit")
     private String confirmPassword;
 
+    private String desciption;
+
     @JsonIgnore
     private Role role;
 }

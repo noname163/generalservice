@@ -13,6 +13,7 @@ public class UserInformationMapper {
         return UserInformation
                 .builder()
                 .email(userRegister.getEmail())
+                .description(userRegister.getDesciption())
                 .role(userRegister.getRole())
                 .fullName(userRegister.getFullName())
                 .password(userRegister.getPassword())
@@ -27,6 +28,7 @@ public class UserInformationMapper {
                 .email(userInformation.getEmail())
                 .url(userInformation.getImageURL())
                 .dateOfBirth(userInformation.getDateOfBirth())
+                .description(userInformation.getDescription())
                 .createDate(userInformation.getCreateDate())
                 .build();
     }
