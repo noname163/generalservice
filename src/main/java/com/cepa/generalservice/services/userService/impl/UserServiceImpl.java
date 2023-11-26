@@ -4,28 +4,31 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
+import com.cepa.generalservice.data.dto.request.BanRequest;
 import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.EditUserRequest;
 import com.cepa.generalservice.data.dto.request.ForgotPassword;
+import com.cepa.generalservice.data.dto.request.SendMailRequest;
 import com.cepa.generalservice.data.dto.request.UserRequest;
 import com.cepa.generalservice.data.dto.response.AdminEditUserStatus;
 import com.cepa.generalservice.data.dto.response.CloudinaryUrl;
-import com.cepa.generalservice.data.dto.response.FileResponse;
 import com.cepa.generalservice.data.dto.response.UserResponse;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.InValidInformation;
-import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.mappers.UserInformationMapper;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
+import com.cepa.generalservice.services.notificationService.SendEmailService;
+import com.cepa.generalservice.services.notificationService.notificationTemplate.VerificationTokenTemplate;
 import com.cepa.generalservice.services.uploadservice.UploadService;
 import com.cepa.generalservice.services.userService.UserService;
 
@@ -46,6 +49,9 @@ public class UserServiceImpl implements UserService {
     private SecurityContextService securityContextService;
     @Autowired
     private UploadService uploadService;
+    @Autowired
+    @Lazy
+    private SendEmailService sendEmailService;
 
     @Override
     public UserInformation getUserByEmail(String email) {
@@ -134,7 +140,7 @@ public class UserServiceImpl implements UserService {
         UserInformation userInformation = userInformationRepository
                 .findById(editUserStatus.getUserId())
                 .orElseThrow(() -> new BadRequestException("Cannot found user with id " + editUserStatus.getUserId()));
-        if(userInformation.getRole().equals(Role.ADMIN)){
+        if (userInformation.getRole().equals(Role.ADMIN)) {
             throw new BadRequestException("Cannot change admin account");
         }
         if (userInformation.getStatus().equals(editUserStatus.getUserStatus())) {
@@ -148,17 +154,34 @@ public class UserServiceImpl implements UserService {
     @Override
     public void editUserInformation(EditUserRequest editUserRequest, MultipartFile multipartFile) {
         UserInformation currentUser = securityContextService.getCurrentUser();
-        if(multipartFile!=null){
+        if (multipartFile != null) {
             CloudinaryUrl cloudinaryUrl = uploadService.uploadMedia(multipartFile);
             currentUser.setImageURL(cloudinaryUrl.getUrl());
             currentUser.setCloudPublicId(cloudinaryUrl.getPublicId());
         }
 
-        currentUser.setDateOfBirth(Optional.ofNullable(editUserRequest.getDateOfBirth()).orElse(currentUser.getDateOfBirth()));
+        currentUser.setDateOfBirth(
+                Optional.ofNullable(editUserRequest.getDateOfBirth()).orElse(currentUser.getDateOfBirth()));
         currentUser.setFullName(Optional.ofNullable(editUserRequest.getFullName()).orElse(currentUser.getFullName()));
-        currentUser.setDescription(Optional.ofNullable(editUserRequest.getDesciption()).orElse(currentUser.getDescription()));
+        currentUser.setDescription(
+                Optional.ofNullable(editUserRequest.getDesciption()).orElse(currentUser.getDescription()));
         currentUser.setUpdateDate(LocalDateTime.now());
         userInformationRepository.save(currentUser);
+    }
+
+    @Override
+    public void banUser(BanRequest banRequest) {
+        UserInformation userInformation = userInformationRepository
+                .findByIdAndStatusNot(banRequest.getAccountId(), UserStatus.BANNED)
+                .orElseThrow(() -> new BadRequestException("Not exist user with id " + banRequest.getAccountId()));
+        userInformation.setStatus(UserStatus.BANNED);
+        userInformationRepository.save(userInformation);
+        sendEmailService.sendMailService(SendMailRequest
+                .builder()
+                .subject("Thông báo hệ thống")
+                .mailTemplate(VerificationTokenTemplate.banEmail(userInformation.getFullName(), banRequest.getReason()))
+                .userEmail(userInformation.getEmail())
+                .build());
     }
 
 }

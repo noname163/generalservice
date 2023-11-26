@@ -2,12 +2,16 @@ package com.cepa.generalservice.controllers;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -17,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.EditTeacherRequest;
+import com.cepa.generalservice.data.dto.request.VerifyRequest;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponseForAdmin;
@@ -85,7 +90,8 @@ public class TeacherController {
                 .status(HttpStatus.OK)
                 .body(teacherInformationService.getTeacherInformationByEmail(email));
     }
-    @Operation(summary = "Get teacher information for user")
+
+    @Operation(summary = "Get list teacher verification")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get teacher information successfull.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherResponse.class))
@@ -95,13 +101,32 @@ public class TeacherController {
     })
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/admin/verification-list")
-    public ResponseEntity<PaginationResponse<List<TeacherResponseForAdmin>>> getTeacherVerificationInformation(@RequestParam(required = false, defaultValue = "0") Integer page,
+    public ResponseEntity<PaginationResponse<List<TeacherResponseForAdmin>>> getTeacherVerificationInformation(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) String field,
             @RequestParam(required = false, defaultValue = "ASC") SortType sortType) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(teacherInformationService.getListVerifyTeacher(page, size, field, sortType));
+    }
+
+    @Operation(summary = "Get teacher information detail for admin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get teacher information successfull.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin/detail")
+    public ResponseEntity<TeacherResponseForAdmin> getTeacherAdminResponseDetailForAdmin(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = true) Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(teacherInformationService.getTeacherVerifyById(id));
     }
 
     @Operation(summary = "Edit teacher information ")
@@ -115,6 +140,19 @@ public class TeacherController {
     public ResponseEntity<Void> editCurrentTeacherInformation(@RequestPart EditTeacherRequest editTeacherRequest,
             @RequestPart(required = false) MultipartFile indentify) {
         teacherInformationService.editTeacherInformation(editTeacherRequest, indentify);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Verify teacher information ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verify teacher information successfull."),
+            @ApiResponse(responseCode = "400", description = "Bad request.", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/verify-information")
+    public ResponseEntity<Void> verifyTeacherInformation(@Valid @RequestBody VerifyRequest verifyRequest) {
+        teacherInformationService.verifyTeacher(verifyRequest);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
