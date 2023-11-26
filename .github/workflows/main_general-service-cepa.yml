@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -7,6 +19,12 @@ on:
   push:
     branches:
       - main
+      - fixbug
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -21,8 +39,11 @@ jobs:
         with:
           java-version: '11'
 
-      - name: Build with Maven
+      - name: Clean package
         run: mvn clean install
+      - name: Build with Maven
+        if: ${{ job.status == 'success' }}
+        run: mvn -B package --file pom.xml
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -51,3 +72,17 @@ jobs:
           slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B6F04C48F5964859A5C4C017B33B5F56 }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

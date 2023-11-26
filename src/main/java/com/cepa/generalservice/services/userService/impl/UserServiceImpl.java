@@ -28,7 +28,6 @@ import com.cepa.generalservice.services.authenticationService.SecurityContextSer
 import com.cepa.generalservice.services.confirmTokenService.ConfirmTokenService;
 import com.cepa.generalservice.services.uploadservice.UploadService;
 import com.cepa.generalservice.services.userService.UserService;
-import com.netflix.discovery.converters.Auto;
 
 import lombok.Builder;
 
