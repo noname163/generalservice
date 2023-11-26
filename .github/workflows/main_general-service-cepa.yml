@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -59,4 +71,18 @@ jobs:
           app-name: 'general-service-cepa'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CDD662D8D9CC4B198E5C5D2EF88E65C0 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B6F04C48F5964859A5C4C017B33B5F56 }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
