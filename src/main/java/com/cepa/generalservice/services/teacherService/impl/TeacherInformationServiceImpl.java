@@ -15,6 +15,8 @@ import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.SortType;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.EditTeacherRequest;
+import com.cepa.generalservice.data.dto.request.SendMailRequest;
+import com.cepa.generalservice.data.dto.request.VerifyRequest;
 import com.cepa.generalservice.data.dto.response.CloudinaryUrl;
 import com.cepa.generalservice.data.dto.response.PaginationResponse;
 import com.cepa.generalservice.data.dto.response.TeacherResponse;
@@ -23,12 +25,15 @@ import com.cepa.generalservice.data.entities.Subject;
 import com.cepa.generalservice.data.entities.Teacher;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.object.interfaces.TeacherResponseForAdminInterface;
+import com.cepa.generalservice.data.object.interfaces.TeacherResponseInterface;
 import com.cepa.generalservice.data.repositories.SubjectRepository;
 import com.cepa.generalservice.data.repositories.TeacherRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.mappers.TeacherMapper;
 import com.cepa.generalservice.services.authenticationService.SecurityContextService;
+import com.cepa.generalservice.services.notificationService.SendEmailService;
+import com.cepa.generalservice.services.notificationService.notificationTemplate.VerificationTokenTemplate;
 import com.cepa.generalservice.services.teacherService.TeacherInformationService;
 import com.cepa.generalservice.services.uploadservice.UploadService;
 import com.cepa.generalservice.services.userService.UserService;
@@ -56,6 +61,8 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
     private UploadService uploadService;
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private SendEmailService sendEmailService;
 
     @Override
     public TeacherResponse getTeacherInformation() {
@@ -76,17 +83,17 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
     public PaginationResponse<List<TeacherResponse>> getTeachers(Integer page, Integer size, String field,
             SortType sortType, UserStatus userStatus) {
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
-        Page<UserInformation> listTeacher;
+        Page<TeacherResponseInterface> listTeacherInterface;
         if (userStatus != null && userStatus != UserStatus.ALL) {
-            listTeacher = userInformationRepository.findAllByRoleAndStatus(pageable, Role.TEACHER, userStatus);
+            listTeacherInterface = teacherRepository.getTeachersByStatus(userStatus, pageable);
         } else {
-            listTeacher = userInformationRepository.findAllByRole(pageable, Role.TEACHER);
+            listTeacherInterface = teacherRepository.getTeacherResponses(pageable);
         }
 
         return PaginationResponse.<List<TeacherResponse>>builder()
-                .data(teacherMapper.mapEntitiesToDtos(listTeacher.getContent()))
-                .totalPage(listTeacher.getTotalPages())
-                .totalRow(listTeacher.getTotalElements())
+                .data(teacherMapper.mapToTeacherResponseList(listTeacherInterface.getContent()))
+                .totalPage(listTeacherInterface.getTotalPages())
+                .totalRow(listTeacherInterface.getTotalElements())
                 .build();
     }
 
@@ -139,6 +146,46 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
                 .totalPage(teacherResponses.getTotalPages())
                 .totalRow(teacherResponses.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public TeacherResponseForAdmin getTeacherVerifyById(Long id) {
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Cannot found teacher with id " + id));
+        UserInformation teacherInformation = teacher.getInformation();
+        List<Subject> teacherSubject = teacher.getSubjects();
+        List<String> subjects = new ArrayList<>();
+        for (Subject subject : teacherSubject) {
+            subjects.add(subject.getName());
+        }
+        TeacherResponseForAdmin teacherResponseForAdmin = teacherMapper
+                .mapEntityToTeacherResponseForAdmin(teacherInformation);
+        teacherResponseForAdmin.setIndentify(teacher.getIdentify());
+        teacherResponseForAdmin.setSubject(subjects);
+        return teacherResponseForAdmin;
+    }
+
+    @Override
+    public void verifyTeacher(VerifyRequest verifyRequest) {
+        Teacher teacher = teacherRepository.findById(verifyRequest.getTeacherId()).orElseThrow(
+                () -> new BadRequestException("Not found teacher with id " + verifyRequest.getTeacherId()));
+        String mailTemplate = "";
+        UserInformation userInformation = teacher.getInformation();
+        if (Boolean.TRUE.equals(verifyRequest.getVerify())) {
+            teacher.setIsValidation(true);
+            teacherRepository.save(teacher);
+            mailTemplate = VerificationTokenTemplate.verifySuccessEmail(userInformation.getFullName());
+        } else {
+            mailTemplate = VerificationTokenTemplate.verifyFailEmail(userInformation.getFullName(),
+                    verifyRequest.getReason());
+        }
+        sendEmailService.sendMailService(SendMailRequest
+                .builder()
+                .subject("Thông báo hệ thống")
+                .mailTemplate(mailTemplate)
+                .userEmail(userInformation.getEmail())
+                .build());
+
     }
 
 }

@@ -22,8 +22,6 @@ public class SendEmailServiceImpl implements SendEmailService {
 
     @Autowired
     private JavaMailSender javaMailSender;
-    @Autowired
-    private UserService userService;
 
     @Override
     public void sendVerificationEmail(String to, String userName,String url) {

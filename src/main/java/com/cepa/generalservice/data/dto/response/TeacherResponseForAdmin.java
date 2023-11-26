@@ -15,6 +15,7 @@ public class TeacherResponseForAdmin {
     private long id;
     private String email;
     private String fullName;
+    private String description;
     private String url;
     private LocalDateTime createDate;
     private UserStatus status;
