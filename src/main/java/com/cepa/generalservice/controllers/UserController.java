@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cepa.generalservice.data.dto.request.BanRequest;
 import com.cepa.generalservice.data.dto.request.ChangePasswordRequest;
 import com.cepa.generalservice.data.dto.request.EditUserRequest;
 import com.cepa.generalservice.data.dto.request.UserRequest;
@@ -86,16 +87,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("Change password successfully");
     }
 
-    @Operation(summary = "Change user status")
+    @Operation(summary = "Admin ban user account")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Change status successfull."),
+            @ApiResponse(responseCode = "201", description = "Ban successfull."),
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/change-user-status")
-    public ResponseEntity<String> editUserStatus(@Valid @RequestBody AdminEditUserStatus adminEditUserStatus) {
-        userService.editUserStatus(adminEditUserStatus);
-        return ResponseEntity.status(HttpStatus.OK).body("Change status successfully");
+    @PatchMapping("/ban-user")
+    public ResponseEntity<Void> banUserAccount(@Valid @RequestBody BanRequest banRequest) {
+        userService.banUser(banRequest);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

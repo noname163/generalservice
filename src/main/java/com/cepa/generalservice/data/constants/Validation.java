@@ -18,6 +18,7 @@ public class Validation {
     public static final String TOKEN_FORMAT = "^[A-Za-z0-9-_]+\\\\.[A-Za-z0-9-_]+\\\\.[A-Za-z0-9-_]+$";
     public static final int MIN_LENGTH_PASSWORD = 6;
     public static final int MIN_LENGTH_FULLNAME = 4;
+    public static final int MIN_LENGTH_REASON = 20;
     public static final int MIN_AGE = 16;
     public static final int MAX_AGE = 100;
     public static final int MAX_LENGTH_PASSWORD = 24;

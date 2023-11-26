@@ -18,6 +18,8 @@ public interface UserInformationRepository extends JpaRepository<UserInformation
 
     public Optional<UserInformation> findByIdAndStatus(Long id, UserStatus status);
 
+    public Optional<UserInformation> findByIdAndStatusNot(Long id, UserStatus status);
+
     public Page<UserInformation> findAllByRole(Pageable pageable, Role role);
 
     public Page<UserInformation> findAllByRoleAndStatus(Pageable pageable, Role role, UserStatus userStatus);
