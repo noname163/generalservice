@@ -7,12 +7,6 @@ on:
   push:
     branches:
       - main
-      - fixbug
-  pull_request:
-    types:
-      - closed
-    branches:
-      - develop
   workflow_dispatch:
 
 jobs:
@@ -27,11 +21,8 @@ jobs:
         with:
           java-version: '11'
 
-      - name: Clean package
-        run: mvn clean install
       - name: Build with Maven
-        if: ${{ job.status == 'success' }}
-        run: mvn -B package --file pom.xml
+        run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -59,4 +50,4 @@ jobs:
           app-name: 'general-service-cepa'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CDD662D8D9CC4B198E5C5D2EF88E65C0 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B6F04C48F5964859A5C4C017B33B5F56 }}
