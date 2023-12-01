@@ -68,9 +68,9 @@ public class UserController {
     })
     @PutMapping("/edit-information")
     @PreAuthorize("hasAnyAuthority('TEACHER','STUDENT')")
-    public ResponseEntity<UserResponse> updateUserInformation(@Valid @RequestPart EditUserRequest courseRequest,
+    public ResponseEntity<UserResponse> updateUserInformation(@Valid @RequestPart EditUserRequest editUserRequest,
             @RequestPart(required = false) MultipartFile avatar) {
-        userService.editUserInformation(courseRequest, avatar);
+        userService.editUserInformation(editUserRequest, avatar);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
