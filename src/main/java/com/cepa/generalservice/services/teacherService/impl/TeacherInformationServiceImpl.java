@@ -46,8 +46,6 @@ import lombok.Builder;
 public class TeacherInformationServiceImpl implements TeacherInformationService {
 
     @Autowired
-    private UserService userService;
-    @Autowired
     private TeacherMapper teacherMapper;
     @Autowired
     private TeacherRepository teacherRepository;
@@ -99,7 +97,7 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
     @Override
     public TeacherResponse getTeacherInformationByEmail(String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
+        UserInformation userInformation = userInformationRepository.findByEmail(email).orElseThrow(()-> new BadRequestException("Not exist user with email "+ email));
         TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
         List<String> subjects = new ArrayList<>();
         Teacher teacher = userInformation.getTeachers();
