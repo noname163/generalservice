@@ -83,7 +83,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void logout() {
         UserInformation userInformation = securityContextService.getCurrentUser();
-
         userInformation.setAccessToken("");
         userInformation.setRefreshToken("");
         userInformationRepository.save(userInformation);
