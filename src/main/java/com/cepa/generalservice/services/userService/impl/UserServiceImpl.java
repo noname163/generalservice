@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UploadService uploadService;
     @Autowired
-    @Lazy
     private SendEmailService sendEmailService;
 
     @Override
