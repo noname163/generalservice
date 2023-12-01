@@ -42,7 +42,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         if (isUriWhitelisted(request)
                 && !request.getRequestURI().contains("/change-password")
-                && !request.getRequestURI().contains("/edit-information")) {
+                && !request.getRequestURI().contains("/edit-information")
+                && !request.getRequestURI().contains("/logout")) {
             filterChain.doFilter(request, response);
         } else {
             processAuthentication(request, response, filterChain);

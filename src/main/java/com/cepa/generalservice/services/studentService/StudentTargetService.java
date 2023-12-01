@@ -21,7 +21,7 @@ public interface StudentTargetService {
 
     public void updateTarget(TargetUpdateRequest targetUpdateRequest);
 
-    public void deleteStudentTarget(long studentId, long targetId);
+    public void deleteStudentTarget(long targetId);
 
     public StudentTargetResponse getStudentTargetById(long studentId, long targetId);
 

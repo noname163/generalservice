@@ -39,7 +39,6 @@ public class RegisterServiceImpl implements RegisterService {
     private TeacherRepository teacherRepository;
     @Autowired
     private SubjectRepository subjectRepository;
-    @Lazy
     @Autowired
     private StudentTargetService studentTargetService;
     @Autowired

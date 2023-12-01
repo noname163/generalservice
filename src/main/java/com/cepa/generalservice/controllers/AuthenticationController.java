@@ -7,6 +7,7 @@ import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -187,9 +188,10 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "User not valid.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
+    @PreAuthorize("hasAnyAuthority('ADMIN','STUDENT','TEACHER')")
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @RequestBody EmailRequest email) {
-        authenticationService.logout(email.getEmail());
+    public ResponseEntity<Void> logout() {
+        authenticationService.logout();
         return ResponseEntity.ok().build();
     }
 
