@@ -155,9 +155,8 @@ public class StudentController {
     })
     @DeleteMapping("/target/{studentId}/{targetId}")
     public ResponseEntity<String> deleteStudentTarget(
-            @PathVariable Long studentId,
             @PathVariable Long targetId) {
-        studentTargetService.deleteStudentTarget(studentId, targetId);
+        studentTargetService.deleteStudentTarget(targetId);
         return ResponseEntity.status(HttpStatus.OK).body("Student Target deleted successfully.");
     }
 
