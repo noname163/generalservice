@@ -153,7 +153,7 @@ public class StudentController {
             @ApiResponse(responseCode = "400", description = "Bad request.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestException.class)) })
     })
-    @DeleteMapping("/target/{studentId}/{targetId}")
+    @DeleteMapping("/target/{targetId}")
     public ResponseEntity<String> deleteStudentTarget(
             @PathVariable Long targetId) {
         studentTargetService.deleteStudentTarget(targetId);
