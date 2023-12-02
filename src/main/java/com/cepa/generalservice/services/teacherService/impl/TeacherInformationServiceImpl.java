@@ -150,9 +150,10 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
     @Override
     public TeacherResponseForAdmin getTeacherVerifyById(Long id) {
-        Teacher teacher = teacherRepository.findById(id)
+        UserInformation teacherInformation = userInformationRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Cannot found teacher with id " + id));
-        UserInformation teacherInformation = teacher.getInformation();
+
+        Teacher teacher = teacherInformation.getTeachers();
         List<Subject> teacherSubject = teacher.getSubjects();
         List<String> subjects = new ArrayList<>();
         for (Subject subject : teacherSubject) {
@@ -167,8 +168,10 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
     @Override
     public void verifyTeacher(VerifyRequest verifyRequest) {
-        Teacher teacher = teacherRepository.findById(verifyRequest.getTeacherId()).orElseThrow(
-                () -> new BadRequestException("Not found teacher with id " + verifyRequest.getTeacherId()));
+        UserInformation teacherInformation = userInformationRepository.findById(verifyRequest.getTeacherId())
+                .orElseThrow(
+                        () -> new BadRequestException("Cannot found teacher with id " + verifyRequest.getTeacherId()));
+        Teacher teacher = teacherInformation.getTeachers();
         String mailTemplate = "";
         UserInformation userInformation = teacher.getInformation();
         if (Boolean.TRUE.equals(verifyRequest.getVerify())) {
