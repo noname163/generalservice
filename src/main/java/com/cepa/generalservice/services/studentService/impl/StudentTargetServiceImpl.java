@@ -20,10 +20,12 @@ import com.cepa.generalservice.data.dto.response.StudentTargetResponse;
 import com.cepa.generalservice.data.dto.response.SubjectTargetResponse;
 import com.cepa.generalservice.data.entities.Combination;
 import com.cepa.generalservice.data.entities.StudentTarget;
+import com.cepa.generalservice.data.entities.SubjectTarget;
 import com.cepa.generalservice.data.entities.UserInformation;
 import com.cepa.generalservice.data.object.interfaces.StudentTargetResponseInterface;
 import com.cepa.generalservice.data.repositories.CombinationRepository;
 import com.cepa.generalservice.data.repositories.StudentTargetRepository;
+import com.cepa.generalservice.data.repositories.SubjectTargetRepository;
 import com.cepa.generalservice.data.repositories.UserInformationRepository;
 import com.cepa.generalservice.exceptions.BadRequestException;
 import com.cepa.generalservice.exceptions.NotFoundException;
@@ -47,6 +49,8 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     private StudentTargetMapper studentTargetMapper;
     @Autowired
     private SecurityContextService securityContextService;
+    @Autowired
+    private SubjectTargetRepository subjectTargetRepository;
 
     @Override
     public void createStudentTargets(UserInformation userInformation, List<Long> combinationIds) {
@@ -171,12 +175,12 @@ public class StudentTargetServiceImpl implements StudentTargetService {
 
         StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
                 .orElseThrow(() -> new NotFoundException("Student Target not found"));
-
+        List<SubjectTarget> subjectTargets = studentTarget.getSubjectTargets();
         if (studentTarget.getStudentInformation().getId()!=userInformation.getId()) {
             throw new BadRequestException("Student Target does not belong to the specified student.");
         }
-        studentTarget.setStateType(StateType.FALSE);
-        studentTargetRepository.save(studentTarget);
+        subjectTargetRepository.deleteAll(subjectTargets);
+        studentTargetRepository.delete(studentTarget);
     }
 
     @Override
