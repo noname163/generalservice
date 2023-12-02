@@ -6,10 +6,10 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cepa.generalservice.data.constants.Common;
 import com.cepa.generalservice.data.constants.Role;
 import com.cepa.generalservice.data.constants.UserStatus;
 import com.cepa.generalservice.data.dto.request.StudentRegister;
@@ -45,7 +45,7 @@ public class RegisterServiceImpl implements RegisterService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserInformationMapper userInformationMapper;
-    
+
     @Override
     @Transactional
     public void teacherRegister(TeacherRegister teacherRegister) {
@@ -57,7 +57,7 @@ public class RegisterServiceImpl implements RegisterService {
         List<Subject> subjects = subjectRepository.findByIdIn(teacherRegister.getSubjectIds())
                 .orElseThrow(() -> new BadRequestException(
                         "Cannot found subject with ID: " + teacherRegister.getSubjectIds().toString()));
-    
+
         teacherRepository.save(Teacher
                 .builder()
                 .information(userInformation)
@@ -92,10 +92,12 @@ public class RegisterServiceImpl implements RegisterService {
         UserInformation newUser = userInformationMapper.mapDtoToEntity(userRegister);
         newUser.setStatus(UserStatus.WAITTING);
         newUser.setCreateDate(LocalDateTime.now());
-
+        if (userRegister.getRole().equals(Role.STUDENT)) {
+            newUser.setImageURL(Common.STUDENT_DEFAULT_AVATAR);
+        } else {
+            newUser.setImageURL(Common.TEACHER_DEFAULT_AVATAR);
+        }
         return userInformationRepository.save(newUser);
     }
-
-   
 
 }
