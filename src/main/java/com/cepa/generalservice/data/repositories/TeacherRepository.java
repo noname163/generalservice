@@ -17,7 +17,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByInformationId(long id);
 
     @Query("SELECT " +
-            "t.id AS id, " +
+            "t.information.id AS id, " +
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
@@ -33,7 +33,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Page<TeacherResponseForAdminInterface> findTeachersForAdmin(Pageable pageable);
 
      @Query("SELECT " +
-            "t.id AS id, " +
+            "t.information.id AS id, " +
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
@@ -49,7 +49,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Page<TeacherResponseInterface> getTeacherResponses(Pageable pageable);
 
     @Query("SELECT " +
-            "t.id AS id, " +
+            "t.information.id AS id, " +
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
