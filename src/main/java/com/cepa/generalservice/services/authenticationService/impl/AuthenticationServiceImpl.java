@@ -18,6 +18,7 @@ import com.cepa.generalservice.exceptions.InValidInformation;
 import com.cepa.generalservice.exceptions.NotFoundException;
 import com.cepa.generalservice.exceptions.UserNotExistException;
 import com.cepa.generalservice.services.authenticationService.AuthenticationService;
+import com.cepa.generalservice.services.authenticationService.SecurityContextService;
 import com.cepa.generalservice.services.userService.UserService;
 import com.cepa.generalservice.utils.CookiesUtil;
 import com.cepa.generalservice.utils.JwtTokenUtil;
@@ -31,6 +32,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
     private UserInformationRepository userInformationRepository;
+    @Autowired
+    private SecurityContextService securityContextService;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -78,9 +81,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void logout(String email) {
-        UserInformation userInformation = userService.getUserByEmail(email);
-
+    public void logout() {
+        UserInformation userInformation = securityContextService.getCurrentUser();
         userInformation.setAccessToken("");
         userInformation.setRefreshToken("");
         userInformationRepository.save(userInformation);

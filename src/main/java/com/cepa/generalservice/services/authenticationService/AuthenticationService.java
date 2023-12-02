@@ -15,5 +15,5 @@ public interface AuthenticationService {
 
     public LoginResponse loginWithGoogle(TokenRequest token);
 
-    public void logout(String email);
+    public void logout();
 }

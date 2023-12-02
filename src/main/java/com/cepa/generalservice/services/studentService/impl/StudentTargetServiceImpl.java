@@ -166,15 +166,13 @@ public class StudentTargetServiceImpl implements StudentTargetService {
     }
 
     @Override
-    public void deleteStudentTarget(long studentId, long targetId) {
-        UserInformation userInformation = userInformationRepository
-                .findByIdAndStatus(studentId, UserStatus.ENABLE)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+    public void deleteStudentTarget(long targetId) {
+        UserInformation userInformation = securityContextService.getCurrentUser();
 
         StudentTarget studentTarget = studentTargetRepository.findByIdAndStateType(targetId, StateType.TRUE)
                 .orElseThrow(() -> new NotFoundException("Student Target not found"));
 
-        if (!studentTarget.getStudentInformation().equals(userInformation)) {
+        if (studentTarget.getStudentInformation().getId()!=userInformation.getId()) {
             throw new BadRequestException("Student Target does not belong to the specified student.");
         }
         studentTarget.setStateType(StateType.FALSE);
