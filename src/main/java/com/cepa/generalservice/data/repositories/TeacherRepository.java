@@ -21,7 +21,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
-            "t.createDate AS createDate, " +
+            "t.information.createDate AS createDate, " +
             "t.information.status AS status, " +
             "s.name AS subject, " +
             "t.information.dateOfBirth AS dateOfBirth, " +
@@ -37,7 +37,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
-            "t.createDate AS createDate, " +
+            "t.information.createDate AS createDate, " +
             "t.information.description AS description, " +
             "t.information.status AS status, " +
             "s.name AS subject, " +
@@ -53,7 +53,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
             "t.information.email AS email, " +
             "t.information.fullName AS fullName, " +
             "t.information.imageURL AS url, " +
-            "t.createDate AS createDate, " +
+            "t.information.createDate AS createDate, " +
             "t.information.description AS description, " +
             "t.information.status AS status, " +
             "s.name AS subject, " +

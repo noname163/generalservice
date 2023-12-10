@@ -8,9 +8,11 @@ import com.cepa.generalservice.data.constants.UserStatus;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Setter;
 
 @Builder
 @Data
+@Setter
 public class TeacherResponseForAdmin {
     private long id;
     private String email;
