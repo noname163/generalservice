@@ -144,6 +144,7 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
         teacher.setCardNumber(Optional.ofNullable(editTeacherRequest.getCardNumber()).orElse(teacher.getCardNumber()));
         teacher.setUpdateDate(LocalDateTime.now());
+        teacher.setIsValidation(false);
         if (editTeacherRequest.getSubjectId() != null && !editTeacherRequest.getSubjectId().isEmpty()) {
             List<Subject> subjects = subjectRepository.findByIdIn(editTeacherRequest.getSubjectId())
                     .orElseThrow(() -> new BadRequestException(
