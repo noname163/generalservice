@@ -2,8 +2,11 @@ package com.cepa.generalservice.services.teacherService.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -88,8 +91,26 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
             listTeacherInterface = teacherRepository.getTeacherResponses(pageable);
         }
 
+        Map<String, TeacherResponse> teacherMapByEmail = new HashMap<>();
+
+        for (TeacherResponseInterface teacherResponse : listTeacherInterface.getContent()) {
+            String email = teacherResponse.getEmail();
+            TeacherResponse existingTeacher = teacherMapByEmail.get(email);
+
+            if (existingTeacher != null) {
+                // Add subjects to the existing TeacherResponseForAdmin
+                List<String> mergedSubjects = new ArrayList<>(existingTeacher.getSubject());
+                mergedSubjects.addAll(teacherResponse.getSubject());
+                existingTeacher.setSubject(mergedSubjects);
+            } else {
+                // Add a new entry to the map
+                teacherMapByEmail.put(email, teacherMapper.mapToTeacherResponse(teacherResponse));
+            }
+        }
+
+        List<TeacherResponse> mergedTeacherResponses = new ArrayList<>(teacherMapByEmail.values());
         return PaginationResponse.<List<TeacherResponse>>builder()
-                .data(teacherMapper.mapToTeacherResponseList(listTeacherInterface.getContent()))
+                .data(mergedTeacherResponses)
                 .totalPage(listTeacherInterface.getTotalPages())
                 .totalRow(listTeacherInterface.getTotalElements())
                 .build();
@@ -97,7 +118,8 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
     @Override
     public TeacherResponse getTeacherInformationByEmail(String email) {
-        UserInformation userInformation = userInformationRepository.findByEmail(email).orElseThrow(()-> new BadRequestException("Not exist user with email "+ email));
+        UserInformation userInformation = userInformationRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Not exist user with email " + email));
         TeacherResponse teacherResponse = teacherMapper.mapEntityToDto(userInformation);
         List<String> subjects = new ArrayList<>();
         Teacher teacher = userInformation.getTeachers();
@@ -122,6 +144,7 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
 
         teacher.setCardNumber(Optional.ofNullable(editTeacherRequest.getCardNumber()).orElse(teacher.getCardNumber()));
         teacher.setUpdateDate(LocalDateTime.now());
+        teacher.setIsValidation(false);
         if (editTeacherRequest.getSubjectId() != null && !editTeacherRequest.getSubjectId().isEmpty()) {
             List<Subject> subjects = subjectRepository.findByIdIn(editTeacherRequest.getSubjectId())
                     .orElseThrow(() -> new BadRequestException(
@@ -139,8 +162,27 @@ public class TeacherInformationServiceImpl implements TeacherInformationService 
         Pageable pageable = pageableUtil.getPageable(page, size, field, sortType);
         Page<TeacherResponseForAdminInterface> teacherResponses = teacherRepository.findTeachersForAdmin(pageable);
 
+        Map<String, TeacherResponseForAdmin> teacherMapByEmail = new HashMap<>();
+
+        for (TeacherResponseForAdminInterface teacherResponse : teacherResponses.getContent()) {
+            String email = teacherResponse.getEmail();
+            TeacherResponseForAdmin existingTeacher = teacherMapByEmail.get(email);
+
+            if (existingTeacher != null) {
+                // Add subjects to the existing TeacherResponseForAdmin
+                List<String> mergedSubjects = new ArrayList<>(existingTeacher.getSubject());
+                mergedSubjects.addAll(teacherResponse.getSubject());
+                existingTeacher.setSubject(mergedSubjects);
+            } else {
+                // Add a new entry to the map
+                teacherMapByEmail.put(email, teacherMapper.mapToTeacherResponseForAdmin(teacherResponse));
+            }
+        }
+
+        List<TeacherResponseForAdmin> mergedTeacherResponses = new ArrayList<>(teacherMapByEmail.values());
+
         return PaginationResponse.<List<TeacherResponseForAdmin>>builder()
-                .data(teacherMapper.mapToTeacherResponseForAdminList(teacherResponses.getContent()))
+                .data(mergedTeacherResponses)
                 .totalPage(teacherResponses.getTotalPages())
                 .totalRow(teacherResponses.getTotalElements())
                 .build();

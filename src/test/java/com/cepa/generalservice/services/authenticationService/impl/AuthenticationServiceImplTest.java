@@ -40,7 +40,6 @@ class AuthenticationServiceImplTest {
 
     @Test
     void testLogin_Success() {
-        // Create a sample LoginRequest and UserInformation
         LoginRequest loginRequest = LoginRequest.builder().build();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password");
@@ -49,7 +48,6 @@ class AuthenticationServiceImplTest {
         userInformation.setEmail("test@example.com");
         userInformation.setPassword("hashed_password");
 
-        // Mock the behavior of the userInformationRepository
         when(userInformationRepository.findByEmailAndStatus("test@example.com", UserStatus.ENABLE))
                 .thenReturn(java.util.Optional.of(userInformation));
 
@@ -65,7 +63,6 @@ class AuthenticationServiceImplTest {
 
     @Test()
     void testLogin_UserNotExist() {
-        // Create a sample LoginRequest
         LoginRequest loginRequest = LoginRequest.builder().build();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password");
